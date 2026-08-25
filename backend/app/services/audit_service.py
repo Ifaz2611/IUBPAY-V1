@@ -1,0 +1,23 @@
+"""Audit-log helper. Call inside the same DB transaction as the audited change."""
+from sqlalchemy.orm import Session
+
+from app.models.audit_log import AuditLog
+
+
+def audit(
+    db: Session,
+    actor_id: str | None,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    metadata: dict | None = None,
+) -> None:
+    db.add(
+        AuditLog(
+            actor_id=actor_id,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            metadata_json=metadata or {},
+        )
+    )

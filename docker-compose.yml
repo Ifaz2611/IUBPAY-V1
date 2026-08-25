@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: iub_cafe
+      POSTGRES_PASSWORD: iub_cafe_dev_pw   # dev only — override in real deployments
+      POSTGRES_DB: iub_cafeteria
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iub_cafe -d iub_cafeteria"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://iub_cafe:iub_cafe_dev_pw@db:5432/iub_cafeteria
+      SECRET_KEY: change-me-in-real-deployments
+      MOCK_PAYMENT_WEBHOOK_TOKEN: mock-webhook-token-dev
+      CORS_ORIGINS: "*"
+      ENV: docker-dev
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             python -m app.seed.seed_data &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  pgdata:

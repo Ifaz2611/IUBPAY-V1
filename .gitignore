@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.db
+.pytest_cache/
+backend/.env
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins*
+.packages
+build/
+*.iml
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Private notes (local only, never commit)
+agent.md
+AGENT.md

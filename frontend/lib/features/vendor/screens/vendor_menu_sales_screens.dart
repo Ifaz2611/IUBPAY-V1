@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../shared/api/api_client.dart';
 import '../../../shared/models/models.dart';
-import 'vendor_screens.dart' show myVendorMenuProvider;
+import 'vendor_screens.dart'
+    show myVendorMenuProvider, myVendorOrdersProvider;
 
 /// Add / edit / disable menu items for the logged-in vendor.
 class MenuManagementScreen extends ConsumerWidget {

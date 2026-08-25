@@ -8,6 +8,7 @@ import '../../../core/widgets/common_widgets.dart';
 import '../../../shared/api/api_client.dart';
 import '../../../shared/models/models.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../student/providers/student_providers.dart' show orderDetailProvider;
 
 // ---------------- providers ----------------
 
@@ -39,7 +40,7 @@ class VendorDashboardScreen extends ConsumerWidget {
 
     final navTiles = [
       (Icons.receipt_long, 'Incoming Orders ($incoming)', '/vendor/orders'),
-      (Icons.edit_menu, 'Manage Menu', '/vendor/menu'),
+      (Icons.edit_note, 'Manage Menu', '/vendor/menu'),
       (Icons.bar_chart, 'Sales Summary', '/vendor/sales'),
     ];
 

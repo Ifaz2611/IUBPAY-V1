@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/common_widgets.dart';
 import '../providers/student_providers.dart';
 
 /// Shows the authoritative backend result after the webhook has been verified.

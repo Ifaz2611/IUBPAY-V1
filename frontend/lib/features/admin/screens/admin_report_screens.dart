@@ -4,11 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../shared/api/api_client.dart';
 import 'admin_screens.dart'
-    show
-        adminSummaryProvider,
-        dailyReportProvider,
-        adminUsersProvider,
-        AdminLogoutTile;
+    show adminSummaryProvider, dailyReportProvider, adminUsersProvider;
 
 /// Reports: summary cards + simple daily bars (last 14 days).
 class ReportsScreen extends ConsumerWidget {

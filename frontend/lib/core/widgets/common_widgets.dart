@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../shared/api/api_client.dart';
 import '../constants/app_constants.dart';
-import 'money_formatter.dart';
+import '../utils/money_formatter.dart';
 
 /// Big status badge used on order tracking / result screens.
 class StatusBadge extends StatelessWidget {

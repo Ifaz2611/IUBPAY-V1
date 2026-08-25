@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/api/api_client.dart';
@@ -45,7 +42,7 @@ class AuthController extends AsyncNotifier<User?> {
 }
 
 final authProvider =
-    AsyncNotifierProvider<AuthController, User?>(AuthController::new);
+    AsyncNotifierProvider<AuthController, User?>(() => AuthController());
 
 /// True while the initial token check is still running.
 final authLoadingProvider = Provider<bool>(

@@ -64,63 +64,62 @@ FastAPI ── routers (auth/vendors/menu/orders/payments/admin)
 PostgreSQL / SQLite          Mock provider ──webhook──▶ /api/payments/webhook
 ```
 
+```mermaid
+graph TD
+    %% Custom Styles
+    classDef subNode fill:#FFFFFF,stroke:#B0BEC5,stroke-width:1px,color:#263238;
+    classDef mockNode fill:#FFF8E1,stroke:#FFE082,stroke-width:1px,color:#E65100,stroke-dasharray: 4 4;
+    classDef dbNode fill:#1E88E5,stroke:#1565C0,stroke-width:2px,color:#FFFFFF;
 
-flowchart TB
-    %% Flutter Application
-    subgraph FLUTTER["Flutter Application"]
-        direction LR
-
-        STUDENT["Student UI<br/>Riverpod<br/>GoRouter"]
-        VENDOR["Vendor UI<br/>Riverpod<br/>GoRouter"]
-        ADMIN["Admin UI<br/>Riverpod<br/>GoRouter"]
-    end
-
-    %% API Communication
-    FLUTTER -->|"HTTPS / JSON<br/>JWT Bearer Token"| BACKEND
-
-    %% FastAPI Backend
-    subgraph BACKEND["FastAPI Backend"]
-        direction TB
-
-        subgraph SERVICES["Backend Services"]
-            direction LR
-
-            AUTH["Auth"]
-            RBAC["RBAC"]
-            ORDERS["Orders"]
-            PAYMENTS["Payments"]
-            REPORTS["Reports"]
-
-            VENDORS["Vendors"]
-            MENUS["Menus"]
-            LEDGER["Ledger"]
-            REFUNDS["Refunds"]
-            AUDIT["Audit"]
+    %% Subgraph: Flutter Frontend
+    subgraph FlutterApp ["📱 Flutter Application"]
+        style FlutterApp fill:#E3F2FD,stroke:#90CAF9,stroke-width:2px,color:#0D47A1
+        
+        subgraph StudentUI ["Student UI"]
+            S1["Riverpod"]:::subNode
+            S2["GoRouter"]:::subNode
         end
-
-        PAYMENT_PROVIDER["Mock Payment Provider<br/>Simulates success / failure / webhook"]
+        
+        subgraph VendorUI ["Vendor UI"]
+            V1["Riverpod"]:::subNode
+            V2["GoRouter"]:::subNode
+        end
+        
+        subgraph AdminUI ["Admin UI"]
+            A1["Riverpod"]:::subNode
+            A2["GoRouter"]:::subNode
+        end
     end
 
-    %% Database Communication
-    BACKEND -->|"SQLAlchemy"| DATABASE
-
-    %% PostgreSQL Database
-    subgraph DATABASE["PostgreSQL"]
-        direction LR
-
-        USERS["users"]
-        DB_VENDORS["vendors"]
-        MENU_ITEMS["menu_items"]
-        DB_ORDERS["orders"]
-        ORDER_ITEMS["order_items"]
-
-        DB_PAYMENTS["payments"]
-        DB_REFUNDS["refunds"]
-        LEDGER_ENTRIES["ledger_entries"]
-        AUDIT_LOGS["audit_logs"]
+    %% Subgraph: FastAPI Backend
+    subgraph FastAPI ["⚙️ FastAPI Backend"]
+        style FastAPI fill:#E0F2F1,stroke:#80CBC4,stroke-width:2px,color:#004D40
+        
+        subgraph Services ["Core Modules"]
+            Auth["Auth / RBAC"]:::subNode
+            Vendors["Vendors / Menus"]:::subNode
+            Orders["Orders / Ledger"]:::subNode
+            Payments["Payments / Refunds"]:::subNode
+            Reports["Reports / Audit"]:::subNode
+        end
+        
+        subgraph MockPayment ["Mock Payment Provider"]
+            MockSim["Simulates: Success / Failure / Webhooks"]:::mockNode
+        end
     end
 
+    %% Subgraph: Database
+    subgraph Postgres ["🗄️ PostgreSQL Database"]
+        style Postgres fill:#E8EAF6,stroke:#9FA8DA,stroke-width:2px,color:#1A237E
+        
+        DB[("<b>Schema Tables</b><hr/>• users<br/>• vendors<br/>• menu_items<br/>• orders<br/>• order_items<br/>• payments<br/>• refunds<br/>• ledger_entries<br/>• audit_logs")]:::dbNode
+    end
 
+    %% Connections
+    FlutterApp -->|"HTTPS / JSON<br/>(JWT Bearer Token)"| FastAPI
+    Services -->|"SQLAlchemy"| DB
+    Payments <-->|"Webhooks"| MockSim
+```
 
 Key guarantees enforced server-side:
 

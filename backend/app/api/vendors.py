@@ -13,7 +13,7 @@ from app.schemas.vendor import VendorCreate, VendorOut, VendorUpdate
 from app.services.audit_service import audit
 from app.services.order_service import transition_order
 from app.services.payment_service import create_and_process_refund
-from app.utils.enums import OrderStatus, Role
+from app.utils.enums import OrderStatus, PaymentStatus, Role, VendorStatus
 
 router = APIRouter(prefix="/api/vendors", tags=["vendors"])
 
@@ -31,7 +31,7 @@ def list_vendors(
             raise HTTPException(status.HTTP_403_FORBIDDEN,
                                 "include_all requires admin role")
     else:
-        q = q.where(Vendor.status == "APPROVED")
+        q = q.where(Vendor.status == VendorStatus.APPROVED)
     return db.scalars(q).all()
 
 
@@ -60,7 +60,7 @@ def _get_vendor_or_404(db: Session, vendor_id: str) -> Vendor:
 
 
 @router.get("/{vendor_id}", response_model=VendorOut)
-def get_vendor(vendor_id: str, db: Session = Depends(get_db)):
+def get_vendor(vendor_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return _get_vendor_or_404(db, vendor_id)
 
 
@@ -72,7 +72,7 @@ def create_vendor(
 ):
     if db.scalar(select(Vendor).where(Vendor.name == body.name)):
         raise HTTPException(status.HTTP_409_CONFLICT, "Vendor name already exists")
-    vendor = Vendor(**body.model_dump(), status="APPROVED")
+    vendor = Vendor(**body.model_dump(), status=VendorStatus.APPROVED)
     db.add(vendor)
     audit(db, admin.id, "vendor.created", "vendor", None, {"name": body.name})
     db.commit()
@@ -104,20 +104,25 @@ def suspend_vendor(
     admin: User = Depends(require_role(Role.ADMIN)),
 ):
     vendor = _get_vendor_or_404(db, vendor_id)
-    vendor.status = "SUSPENDED"
+    vendor.status = VendorStatus.SUSPENDED
     # Auto-reject any paid orders that have not started preparation.
+    # Only PAID is auto-refunded atomically; ACCEPTED/PREPARING require manual vendor action.
     live_orders = db.scalars(
         select(Order).where(Order.vendor_id == vendor_id, Order.status == OrderStatus.PAID)
     ).all()
     refunded = []
-    for order in live_orders:
-        transition_order(db, order, OrderStatus.REJECTED, actor_id=admin.id)
-        payment = next((p for p in order.payments if p.status.value == "SUCCEEDED"), None)
-        if payment:
-            create_and_process_refund(db, payment=payment, reason="Vendor suspended",
-                                      processed_by=admin.id)
-            refunded.append(order.order_number)
-    audit(db, admin.id, "vendor.suspended", "vendor", vendor.id, {"refunded": refunded})
-    db.commit()
+    try:
+        for order in live_orders:
+            transition_order(db, order, OrderStatus.REJECTED, actor_id=admin.id)
+            payment = next((p for p in order.payments if p.status == PaymentStatus.SUCCEEDED), None)
+            if payment:
+                create_and_process_refund(db, payment=payment, reason="Vendor suspended",
+                                          processed_by=admin.id, commit=False)
+                refunded.append(order.order_number)
+        audit(db, admin.id, "vendor.suspended", "vendor", vendor.id, {"refunded": refunded})
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     db.refresh(vendor)
     return vendor

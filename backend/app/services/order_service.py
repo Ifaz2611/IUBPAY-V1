@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.models.menu_item import MenuItem
 from app.models.order import Order, OrderItem
 from app.models.vendor import Vendor
-from app.utils.enums import ALLOWED_TRANSITIONS, PAID_STATUSES, OrderStatus
+from app.utils.enums import ALLOWED_TRANSITIONS, PAID_STATUSES, OrderStatus, VendorStatus
 
 
 def _gen_order_number(db: Session) -> str:
@@ -35,7 +35,7 @@ def create_order(
         return existing
 
     vendor = db.get(Vendor, vendor_id)
-    if vendor is None or vendor.status != "APPROVED":
+    if vendor is None or vendor.status != VendorStatus.APPROVED:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Vendor not found or not approved")
 
     menu_ids = [ri["menu_item_id"] for ri in raw_items]

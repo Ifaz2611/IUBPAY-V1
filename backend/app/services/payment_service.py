@@ -112,7 +112,8 @@ def apply_webhook_event(
 
 
 def create_and_process_refund(
-    db: Session, *, payment: Payment, reason: str, processed_by: str | None
+    db: Session, *, payment: Payment, reason: str, processed_by: str | None,
+    commit: bool = True,
 ) -> Refund:
     """Mock instant refund. Records REFUND_PENDING then REFUNDED in the ledger."""
     existing = [
@@ -142,8 +143,12 @@ def create_and_process_refund(
         order.status = OrderStatus.REFUNDED
         audit(db, processed_by, "order.refunded", "order", order.id, {})
 
-    db.commit()
-    db.refresh(refund)
+    if commit:
+        db.commit()
+        db.refresh(refund)
+    else:
+        db.flush()
+        db.refresh(refund)
     return refund
 
 

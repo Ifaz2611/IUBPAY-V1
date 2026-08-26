@@ -18,7 +18,7 @@ class CartScreen extends ConsumerWidget {
         const MockPaymentBanner(),
         Expanded(
           child: cart.isEmpty
-              ? EmptyView(
+              ? const EmptyView(
                   icon: Icons.shopping_cart_outlined,
                   message: 'Your cart is empty. Add items from a vendor menu.')
               : ListView(

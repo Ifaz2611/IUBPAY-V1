@@ -143,7 +143,7 @@ class VendorManagementScreen extends ConsumerWidget {
                                     data: {'status': 'APPROVED'});
                                 ref.invalidate(adminVendorsProvider);
                               } catch (e) {
-                                _err(context, e);
+                                if (context.mounted) _err(context, e);
                               }
                             },
                           ),
@@ -160,7 +160,7 @@ class VendorManagementScreen extends ConsumerWidget {
                                     .post('/vendors/${v['id']}/suspend');
                                 ref.invalidate(adminVendorsProvider);
                               } catch (e) {
-                                _err(context, e);
+                                if (context.mounted) _err(context, e);
                               }
                             },
                           ),

@@ -70,10 +70,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   : const Text('Login'),
             ),
             const SizedBox(height: 22),
-            Card(
+            const Card(
               child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(children: const [
+                padding: EdgeInsets.all(12),
+                child: Column(children: [
                   Text('Development test accounts',
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   SizedBox(height: 6),

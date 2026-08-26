@@ -121,12 +121,12 @@ class MockPaymentBanner extends StatelessWidget {
         width: double.infinity,
         color: Colors.amber.shade200,
         padding: const EdgeInsets.all(10),
-        child: Row(children: [
-          const Icon(Icons.warning_amber_rounded, size: 20),
-          const SizedBox(width: 8),
+        child: const Row(children: [
+          Icon(Icons.warning_amber_rounded, size: 20),
+          SizedBox(width: 8),
           Expanded(
               child: Text('DEMO MODE — $kDemoNotice',
-                  style: const TextStyle(fontSize: 12.5))),
+                  style: TextStyle(fontSize: 12.5))),
         ]),
       );
 }

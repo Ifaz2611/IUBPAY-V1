@@ -1,5 +1,5 @@
 [project]
-name = "iub-cafeteria-backend"
+name = "iub-pay-v1"
 version = "0.1.0"
 description = "IUB Cafeteria cashless payment and food ordering prototype (MOCK payments only)"
 requires-python = ">=3.11"

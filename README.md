@@ -5,7 +5,7 @@ cashless cafeteria food ordering: students order and pay from their phone,
 vendors manage orders on a dashboard, and admins view reports — all backed by
 a mock payment gateway that behaves like a real provider.
 
-> ⚠️ **DEMO / MOCK ONLY — read before using**
+> **DEMO / MOCK ONLY — read before using**
 >
 > - All payments are **simulated**. No real money moves.
 > - **Not connected to IUB** or any real payment provider (bKash, Nagad, cards, wallets).

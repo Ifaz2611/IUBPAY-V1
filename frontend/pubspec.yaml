@@ -1,4 +1,4 @@
-name: iub_cafeteria
+name: iub_pay
 description: IUB Cafeteria cashless ordering prototype (MOCK payments only).
 publish_to: "none"
 version: 0.1.0

@@ -2,7 +2,7 @@
 // pytest suite (see backend/tests).
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:iub_cafeteria/core/utils/money_formatter.dart';
+import 'package:iub_pay/core/utils/money_formatter.dart';
 
 void main() {
   test('taka formatting', () {

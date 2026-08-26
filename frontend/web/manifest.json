@@ -1,6 +1,6 @@
 {
-    "name": "iub_cafeteria",
-    "short_name": "iub_cafeteria",
+    "name": "iub_pay",
+    "short_name": "iub_pay",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -64,6 +64,64 @@ FastAPI ── routers (auth/vendors/menu/orders/payments/admin)
 PostgreSQL / SQLite          Mock provider ──webhook──▶ /api/payments/webhook
 ```
 
+
+flowchart TB
+    %% Flutter Application
+    subgraph FLUTTER["Flutter Application"]
+        direction LR
+
+        STUDENT["Student UI<br/>Riverpod<br/>GoRouter"]
+        VENDOR["Vendor UI<br/>Riverpod<br/>GoRouter"]
+        ADMIN["Admin UI<br/>Riverpod<br/>GoRouter"]
+    end
+
+    %% API Communication
+    FLUTTER -->|"HTTPS / JSON<br/>JWT Bearer Token"| BACKEND
+
+    %% FastAPI Backend
+    subgraph BACKEND["FastAPI Backend"]
+        direction TB
+
+        subgraph SERVICES["Backend Services"]
+            direction LR
+
+            AUTH["Auth"]
+            RBAC["RBAC"]
+            ORDERS["Orders"]
+            PAYMENTS["Payments"]
+            REPORTS["Reports"]
+
+            VENDORS["Vendors"]
+            MENUS["Menus"]
+            LEDGER["Ledger"]
+            REFUNDS["Refunds"]
+            AUDIT["Audit"]
+        end
+
+        PAYMENT_PROVIDER["Mock Payment Provider<br/>Simulates success / failure / webhook"]
+    end
+
+    %% Database Communication
+    BACKEND -->|"SQLAlchemy"| DATABASE
+
+    %% PostgreSQL Database
+    subgraph DATABASE["PostgreSQL"]
+        direction LR
+
+        USERS["users"]
+        DB_VENDORS["vendors"]
+        MENU_ITEMS["menu_items"]
+        DB_ORDERS["orders"]
+        ORDER_ITEMS["order_items"]
+
+        DB_PAYMENTS["payments"]
+        DB_REFUNDS["refunds"]
+        LEDGER_ENTRIES["ledger_entries"]
+        AUDIT_LOGS["audit_logs"]
+    end
+
+
+
 Key guarantees enforced server-side:
 
 1. **Totals are always recomputed from database prices** — client-sent amounts are ignored.

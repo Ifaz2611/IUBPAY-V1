@@ -1,25 +1,129 @@
-# Python
+# ================================
+# Python / Backend (FastAPI)
+# ================================
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+eggs/
+*.manifest
+*.spec
+
+# Virtual environments
 .venv/
 venv/
-*.db
-.pytest_cache/
+ENV/
+env/
+.env/
+.conda/
+
+# Environment variables / secrets - NEVER commit real secrets
+.env
+*.env
+!.env.example
 backend/.env
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
 
-# Flutter / Dart
+# Databases (local SQLite dev)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+iub_cafeteria.db
+pgdata/
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+coverage/
+.tox/
+.nox/
+nosetests.xml
+test-results/
+.hypothesis/
+
+# Type checkers / linters caches
+.mypy_cache/
+.pytype/
+.ruff_cache/
+.pyre/
+
+# Logs
+*.log
+logs/
+
+# ================================
+# Flutter / Dart / Frontend
+# ================================
 .dart_tool/
-.flutter-plugins*
+.flutter-plugins
+.flutter-plugins-dependencies
 .packages
+.pub-cache/
+.pub/
 build/
+**/build/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+**/coverage/
 *.iml
+frontend/.dart_tool/
+frontend/build/
+frontend/.flutter-plugins-dependencies
+frontend/windows/flutter/ephemeral/
+**/flutter/ephemeral/
+.web_canvaskit/
 
+# Keep pubspec.lock for apps (committed) - DO NOT ignore
+
+# ================================
 # IDE / OS
+# ================================
 .idea/
 .vscode/
-.DS_Store
-Thumbs.db
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
 
-# Private notes (local only, never commit)
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ================================
+# Private / Local only
+# ================================
 agent.md
 AGENT.md
+*.local
+*.bak
+*.tmp
+*.temp
+secrets/
+credentials.json

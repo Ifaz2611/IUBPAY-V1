@@ -37,19 +37,15 @@ Minimal next PR: 1) pin psycopg[binary] + Dockerfile non-root/healthcheck/.docke
 --------------------------------------------------
 
 
-1. Backend is OK: http://localhost:8000/health -> {"status":"ok"} and POST http://localhost:8000/api/auth/login with student@iub.test/Passw0rd!Dev succeeds. But http://10.0.2.2:8000/health -> curl (28) Timed out after 21s. frontend/lib/core/constants/app_constants.dart:3 defaults to http://10.0.2.2:8000/api which only works inside Android emulator (10.0.2.2 = emulator -> host). Your flutter devices shows:
-Windows (desktop) • windows
-Chrome (web)      • chrome
-Edge (web)        • edge
-// NO emulator
-So flutter run defaulted to Windows -> tried 10.0.2.2 -> DioExceptionType.connectionError -> frontend/lib/shared/api/api_client.dart:50 Cannot reach the server. Check your connection.
-2. Backend bound to 127.0.0.1:8000 only (netstat TCP 127.0.0.1:8000 LISTENING PID 10448). You started with uvicorn app.main:app --reload (defaults to 127.0.0.1). Physical phone on 192.168.0.103 (your Wi-Fi IP) can never reach it. Needs --host 0.0.0.0.
-Fix now
+
 A. Restart backend with external bind: Stop current terminal (Ctrl+C) and restart:
 cd backend
 .venv\Scripts\activate
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Verify: curl.exe http://192.168.0.103:8000/health should now return ok (currently fails). Allow Windows Firewall prompt if shown.
+
+
+
 B. Run frontend with correct API_BASE_URL:
 cd frontend
 # Windows desktop

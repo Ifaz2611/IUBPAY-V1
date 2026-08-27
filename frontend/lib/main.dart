@@ -8,9 +8,9 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: AppColors.bgDeep,
-    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.dark,
+    systemNavigationBarColor: AppColors.background,
+    systemNavigationBarIconBrightness: Brightness.dark,
   ));
   runApp(const ProviderScope(child: IubCafeteriaApp()));
 }
@@ -21,9 +21,9 @@ class IubCafeteriaApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
-      title: 'IUB PAY — Futuristic',
+      title: 'IUB PAY',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.futuristicDark(),
+      theme: AppTheme.light(),
       routerConfig: router,
     );
   }

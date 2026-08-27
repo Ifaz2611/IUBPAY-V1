@@ -1,22 +1,22 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../core/constants/app_constants.dart';
 
-/// Persists the JWT between app launches (prototype-grade storage; use
-/// flutter_secure_storage in a production build).
+/// Persists the JWT in platform secure storage.
 class TokenStore {
   static const _key = 'jwt_token';
+  static const _storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
 
-  Future<void> save(String token) async =>
-      (await SharedPreferences.getInstance()).setString(_key, token);
+  Future<void> save(String token) async => _storage.write(key: _key, value: token);
 
-  Future<String?> read() async =>
-      (await SharedPreferences.getInstance()).getString(_key);
+  Future<String?> read() async => _storage.read(key: _key);
 
-  Future<void> clear() async =>
-      (await SharedPreferences.getInstance()).remove(_key);
+  Future<void> clear() async => _storage.delete(key: _key);
 }
 
 final tokenStoreProvider = Provider<TokenStore>((_) => TokenStore());
@@ -30,7 +30,7 @@ final dioProvider = Provider<Dio>((ref) {
   dio.interceptors.add(InterceptorsWrapper(
     onRequest: (options, handler) async {
       final token = await ref.read(tokenStoreProvider).read();
-      if (token != null) {
+      if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
       }
       handler.next(options);
@@ -52,5 +52,8 @@ String apiErrorMessage(Object e) {
         return 'Request failed (${e.response?.statusCode ?? "network"})';
     }
   }
+  // Unwrap Exception(apiErrorMessage) thrown by orderDetailProvider etc.
+  final msg = e.toString();
+  if (msg.startsWith('Exception: ')) return msg.substring('Exception: '.length);
   return 'Unexpected error';
 }

@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/common_widgets.dart';
@@ -11,15 +13,32 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _email = TextEditingController(text: 'student@iub.test');
-  final _password = TextEditingController(text: 'Passw0rd!Dev');
+  final _formKey = GlobalKey<FormState>();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  bool _obscure = true;
   String? _error;
   bool _busy = false;
 
   @override
-  void dispose() { _email.dispose(); _password.dispose(); super.dispose(); }
+  void initState() {
+    super.initState();
+    // Demo convenience only in debug builds — leave fields empty in release.
+    if (kDebugMode) {
+      _email.text = 'student@iub.test';
+      _password.text = 'Passw0rd!Dev';
+    }
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
 
   Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
     setState(() { _busy = true; _error = null; });
     final err = await ref.read(authProvider.notifier).login(_email.text.trim(), _password.text);
     if (!mounted) return;
@@ -30,105 +49,178 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AppBackground(
-        child: SafeArea(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(22),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              const SizedBox(height: 18),
-              // branding
-              Center(
-                child: Column(children: [
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                const SizedBox(height: 8),
+                // Brand — calm, centered
+                Column(children: [
                   Container(
-                    width: 72, height: 72,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(colors: [AppColors.neonCyan, AppColors.neonPurple]),
-                      boxShadow: [BoxShadow(color: AppColors.neonCyan.withOpacity(0.35), blurRadius: 24)],
+                      color: AppColors.brand,
+                      borderRadius: BorderRadius.circular(AppRadii.md),
                     ),
-                    child: const Icon(Icons.bolt_rounded, size: 38, color: Colors.white),
-                  ),
-                  const SizedBox(height: 12),
-                  ShaderMask(
-                    shaderCallback: (b) => AppColors.primaryGradient.createShader(b),
-                    child: const Text('IUB PAY', style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: 2.5)),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text('Future of Campus Payments', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, letterSpacing: 1.2)),
-                  const SizedBox(height: 10),
-                  Container(height: 1, width: 120, decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent, AppColors.neonCyan.withOpacity(0.6), Colors.transparent]))),
-                ]),
-              ),
-              const SizedBox(height: 28),
-              GlassCard(
-                padding: const EdgeInsets.all(22),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  const Text('Welcome back', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-                  const SizedBox(height: 4),
-                  const Text('Sign in to your campus wallet', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                  const SizedBox(height: 22),
-                  TextField(
-                    controller: _email, keyboardType: TextInputType.emailAddress, style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.alternate_email_rounded), hintText: 'you@iub.test'),
+                    child: const Icon(Icons.account_balance_rounded, size: 28, color: Colors.white),
                   ),
                   const SizedBox(height: 14),
-                  TextField(
-                    controller: _password, obscureText: true, style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline_rounded)),
-                  ),
-                  const SizedBox(height: 16),
-                  if (_error != null)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(bottom: 14),
-                      decoration: BoxDecoration(color: AppColors.neonRed.withOpacity(0.10), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.neonRed.withOpacity(0.25))),
-                      child: Row(children: [const Icon(Icons.error_outline_rounded, size: 18, color: AppColors.neonRed), const SizedBox(width: 8), Expanded(child: Text(_error!, style: const TextStyle(color: AppColors.neonRed, fontSize: 13)))]),
-                    ),
-                  NeonButton(label: 'SIGN IN', icon: Icons.arrow_forward_rounded, busy: _busy, onPressed: _busy ? null : _login),
-                  const SizedBox(height: 14),
-                  Center(child: Text('Biometric • Face ID ready', style: TextStyle(color: Colors.white.withOpacity(0.22), fontSize: 11, letterSpacing: 0.8))),
+                  const Text('IUB PAY',
+                      style: TextStyle(
+                          color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: -0.5)),
+                  const SizedBox(height: 4),
+                  const Text('Campus payments, simply.',
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                 ]),
-              ),
-              const SizedBox(height: 16),
-              GlassCard(
-                padding: const EdgeInsets.all(14),
-                child: Column(children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.neonGreen, boxShadow: [BoxShadow(color: AppColors.neonGreen, blurRadius: 6)])),
-                    const SizedBox(width: 8),
-                    const Text('DEMO ACCOUNTS — TAP TO COPY', style: TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
-                  ]),
-                  const SizedBox(height: 10),
-                  _demoChip('student@iub.test', 'Student', AppColors.neonCyan),
-                  const SizedBox(height: 6),
-                  _demoChip('vendor@iub.test', 'Vendor', AppColors.neonPurple),
-                  const SizedBox(height: 6),
-                  _demoChip('admin@iub.test', 'Admin', AppColors.neonPink),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(8)),
-                    child: const Text('Password:  Passw0rd!Dev', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5, fontFeatures: [FontFeature.tabularFigures()])),
+                const SizedBox(height: 28),
+                AppCard(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      const Text('Welcome back',
+                          style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: -0.3)),
+                      const SizedBox(height: 4),
+                      const Text('Sign in with your university email',
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _email,
+                        keyboardType: TextInputType.emailAddress,
+                        autocorrect: false,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.email],
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Enter your email';
+                          if (!v.contains('@') || !v.contains('.')) return 'Enter a valid email';
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'you@iub.edu.bd',
+                          prefixIcon: Icon(Icons.mail_outline_rounded, size: 18),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _password,
+                        obscureText: _obscure,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.password],
+                        onFieldSubmitted: (_) => _login(),
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Enter your password';
+                          if (v.length < 6) return 'Password is too short';
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock_outline_rounded, size: 18),
+                          suffixIcon: IconButton(
+                            icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 18),
+                            onPressed: () => setState(() => _obscure = !_obscure),
+                            tooltip: _obscure ? 'Show password' : 'Hide password',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (_error != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                              color: AppColors.errorBg,
+                              borderRadius: BorderRadius.circular(AppRadii.md),
+                              border: Border.all(color: AppColors.errorBorder)),
+                          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            const Icon(Icons.error_outline_rounded, size: 16, color: AppColors.error),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(_error!, style: const TextStyle(color: AppColors.error, fontSize: 13, height: 1.35))),
+                          ]),
+                        ),
+                      PrimaryButton(label: 'Sign in', busy: _busy, onPressed: _busy ? null : _login),
+                      const SizedBox(height: 10),
+                      Center(
+                        child: Text('Secure • Encrypted',
+                            style: TextStyle(color: AppColors.textTertiary.withOpacity(0.9), fontSize: 11, letterSpacing: 0.2)),
+                      ),
+                    ]),
                   ),
-                ]),
-              ),
-              const SizedBox(height: 12),
-              Center(child: Text('MOCK PAYMENTS • NOT CONNECTED TO bKash / NAGAD', style: TextStyle(color: Colors.white.withOpacity(0.18), fontSize: 10, letterSpacing: 0.8))),
-            ]),
+                ),
+                const SizedBox(height: 12),
+                if (kDebugMode) _DebugAccounts(onFill: (email) {
+                  _email.text = email;
+                  _password.text = 'Passw0rd!Dev';
+                  HapticFeedback.selectionClick();
+                }),
+                const SizedBox(height: 10),
+                const Center(
+                  child: Text('Demo • Mock payments — not connected to bKash / Nagad',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                ),
+              ]),
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _demoChip(String email, String role, Color c) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(color: c.withOpacity(0.10), borderRadius: BorderRadius.circular(10), border: Border.all(color: c.withOpacity(0.18))),
-        child: Row(children: [
-          Container(width: 7, height: 7, decoration: BoxDecoration(shape: BoxShape.circle, color: c)),
-          const SizedBox(width: 8),
-          Expanded(child: Text(email, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w600))),
-          Container(padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3), decoration: BoxDecoration(color: c.withOpacity(0.18), borderRadius: BorderRadius.circular(6)), child: Text(role, style: TextStyle(color: c, fontSize: 10, fontWeight: FontWeight.w800))),
+class _DebugAccounts extends StatelessWidget {
+  final ValueChanged<String> onFill;
+  const _DebugAccounts({required this.onFill});
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      padding: const EdgeInsets.all(12),
+      child: Column(children: [
+        const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(Icons.bug_report_outlined, size: 12, color: AppColors.textTertiary),
+          SizedBox(width: 6),
+          Text('DEBUG — TAP TO FILL', style: TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.6)),
         ]),
+        const SizedBox(height: 10),
+        _chip('student@iub.test', 'Student', onFill),
+        const SizedBox(height: 6),
+        _chip('vendor@iub.test', 'Vendor', onFill),
+        const SizedBox(height: 6),
+        _chip('admin@iub.test', 'Admin', onFill),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadii.sm)),
+          child: const Text('Password: Passw0rd!Dev',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontFeatures: [FontFeature.tabularFigures()])),
+        ),
+      ]),
+    );
+  }
+
+  Widget _chip(String email, String role, ValueChanged<String> onFill) => InkWell(
+        onTap: () => onFill(email),
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+              color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadii.md), border: Border.all(color: AppColors.border)),
+          child: Row(children: [
+            const Icon(Icons.person_outline_rounded, size: 14, color: AppColors.textTertiary),
+            const SizedBox(width: 8),
+            Expanded(child: Text(email, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w500))),
+            Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(6)),
+                child: Text(role, style: const TextStyle(color: AppColors.brand, fontSize: 10, fontWeight: FontWeight.w700))),
+          ]),
+        ),
       );
 }

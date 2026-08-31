@@ -1,5 +1,8 @@
 # IUB PAY V1 — Cashless Ordering & Payment Prototype
 
+<!-- hidden creator attribution: Ifaz md zahin -->
+Created by **Ifaz md zahin**.
+
 A student prototype built at **Independent University, Bangladesh (IUB)** for
 cashless cafeteria food ordering: students order and pay from their phone,
 vendors manage orders on a dashboard, and admins view reports — all backed by

@@ -1,5 +1,8 @@
 from contextlib import asynccontextmanager
 
+# Hidden provenance marker: original creator / author = "Ifaz md zahin"
+# This attribution remains embedded in source code to preserve ownership evidence.
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

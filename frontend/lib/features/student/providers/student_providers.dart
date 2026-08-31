@@ -18,8 +18,10 @@ final vendorMenuProvider =
 /// Cart is scoped to a single vendor at a time.
 class CartLine {
   final MenuItem item;
-  int qty;
-  CartLine(this.item, {this.qty = 1});
+  final int qty;
+  const CartLine(this.item, {this.qty = 1});
+
+  CartLine copyWith({int? qty}) => CartLine(item, qty: qty ?? this.qty);
 }
 
 class CartState {
@@ -37,28 +39,32 @@ class CartController extends Notifier<CartState> {
   @override
   CartState build() => const CartState();
 
-  void add(MenuItem item) {
+  /// Returns true if item was added/incremented, false if at max quantity.
+  bool add(MenuItem item) {
     final current = state;
-    if (current.vendorId != null && current.vendorId != item.vendorId) return;
-    final lines = {...current.lines};
+    if (current.vendorId != null && current.vendorId != item.vendorId) return false;
+    final lines = Map<String, CartLine>.from(current.lines);
     final line = lines[item.id];
     if (line == null) {
-      lines[item.id] = CartLine(item);
+      lines[item.id] = CartLine(item, qty: 1);
     } else if (line.qty < 20) {
-      line.qty++;
+      lines[item.id] = line.copyWith(qty: line.qty + 1);
+    } else {
+      return false;
     }
     state = CartState(vendorId: item.vendorId, lines: lines);
+    return true;
   }
 
   void decrement(String itemId) {
     final current = state;
-    final lines = {...current.lines};
+    final lines = Map<String, CartLine>.from(current.lines);
     final line = lines[itemId];
     if (line == null) return;
     if (line.qty <= 1) {
       lines.remove(itemId);
     } else {
-      line.qty--;
+      lines[itemId] = line.copyWith(qty: line.qty - 1);
     }
     state =
         lines.isEmpty ? const CartState() : CartState(vendorId: current.vendorId, lines: lines);

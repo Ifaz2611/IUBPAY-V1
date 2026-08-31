@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../providers/student_providers.dart';
 
@@ -71,7 +70,7 @@ class _VendorListScreenState extends ConsumerState<VendorListScreen> {
                           Expanded(child: Text(v.location, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))),
                         ]),
                         const SizedBox(height: 6),
-                        const StatusChip(status: 'PAID'), // reuse style for "Open"
+                        const _OpenChip(),
                       ])),
                       const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textTertiary),
                     ]),
@@ -130,7 +129,7 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
               data: (items) {
-                final cats = <String>{'All', ...items.map((e) => e.category)};
+                final cats = <String>{'All', ...items.map((e) => e.category)}.toList();
                 return SizedBox(
                   height: 32,
                   child: ListView.separated(
@@ -138,14 +137,14 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                     itemCount: cats.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (_, i) {
-                      final c = cats.elementAt(i);
+                      final c = cats[i];
                       final selected = c == _category;
                       return ChoiceChip(
                         label: Text(c, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: selected ? AppColors.brand : AppColors.textSecondary)),
                         selected: selected,
                         selectedColor: AppColors.brandSubtle,
                         backgroundColor: AppColors.surface,
-                        side: BorderSide(color: selected ? AppColors.brand.withOpacity(0.3) : AppColors.border),
+                        side: BorderSide(color: selected ? AppColors.brand.withValues(alpha: 0.3) : AppColors.border),
                         showCheckmark: false,
                         onSelected: (_) => setState(() => _category = c),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
@@ -218,7 +217,20 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                             ? const SizedBox.shrink()
                             : OutlinedButton(
                                 onPressed: () {
-                                  ref.read(cartProvider.notifier).add(item);
+                                  final cart = ref.read(cartProvider);
+                                  if (cart.vendorId != null && cart.vendorId != item.vendorId) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Clear your cart to order from a different vendor'), behavior: SnackBarBehavior.floating),
+                                    );
+                                    return;
+                                  }
+                                  final added = ref.read(cartProvider.notifier).add(item);
+                                  if (!added) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Maximum quantity (20) reached'), behavior: SnackBarBehavior.floating),
+                                    );
+                                    return;
+                                  }
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${item.name} added'), duration: const Duration(seconds: 1), behavior: SnackBarBehavior.floating));
                                 },
                                 style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14), minimumSize: const Size(0, 34)),
@@ -249,6 +261,26 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                 ]),
               ),
             ),
+    );
+  }
+}
+
+class _OpenChip extends StatelessWidget {
+  const _OpenChip();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.successBg,
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+        border: Border.all(color: AppColors.successBorder),
+      ),
+      child: const Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.circle, size: 6, color: AppColors.success),
+        SizedBox(width: 6),
+        Text('Open', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+      ]),
     );
   }
 }

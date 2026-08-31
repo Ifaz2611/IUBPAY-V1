@@ -61,3 +61,32 @@ Use http://127.0.0.1:8000/api if localhost gives IPv6 issues on Windows.
 Then login: student@iub.test / Passw0rd!Dev
 Permanent fix (optional) so you don't need dart-define every time
 I can patch frontend/lib/core/constants/app_constants.dart:3 to auto-detect platform (kIsWeb -> localhost, android -> 10.0.2.2, windows/others -> localhost) and only use API_BASE_URL when explicitly passed. Want me to apply it?
+
+
+
+
+-----------------------------------------------------------------
+
+This is frontend/lib/core/constants/app_constants.dart:3 - default API is Android emulator only:
+const String kApiBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.2.2:8000/api');
+10.0.2.2 = Android emulator -> host loopback. Chrome runs on host, it can't reach 10.0.2.2 -> DioExceptionType.connectionError -> frontend/lib/shared/api/api_client.dart:48 Cannot reach the server.
+Fix (no code change) - when running on Chrome:
+Stop current flutter run, then:
+# 1. Verify backend is actually up (should return {"status":"ok"})
+curl http://localhost:8000/health
+# or open in browser: http://localhost:8000/docs
+
+# 2. Run with overridden URL
+flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api
+If backend is Docker docker compose up --build -> same URL http://localhost:8000/api. If backend is uvicorn --port 8000 -> same.
+Permanent fix (so flutter run -d chrome works without --dart-define):
+Want me to patch it? Replace frontend/lib/core/constants/app_constants.dart:1-6 with:
+import 'package:flutter/foundation.dart';
+
+const String kApiBaseUrl = String.fromEnvironment(
+  'API_BASE_URL',
+  defaultValue: kIsWeb ? 'http://localhost:8000/api' : 'http://10.0.2.2:8000/api',
+);
+Then Chrome defaults to localhost, Android emulator still defaults to 10.0.2.2, and --dart-define=API_BASE_URL=http://<your-lan-ip>:8000/api still overrides both for physical device.
+Check: after applying, do flutter run -d chrome again (hot-restart not enough - need full restart for String.fromEnvironment).
+If still Cannot reach after fix, check http://localhost:8000/health in same Chrome - if that fails, backend isn't listening on 8000 (check terminal where uvicorn / docker compose is running).

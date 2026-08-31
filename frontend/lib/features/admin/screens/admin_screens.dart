@@ -28,10 +28,10 @@ final adminUsersProvider = FutureProvider<List<dynamic>>((ref) async {
   return List<dynamic>.from(r.data);
 });
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tiles = [
       (Icons.store_outlined, 'Vendors', 'Approve & manage', '/admin/vendors'),
       (Icons.receipt_long_outlined, 'Transactions', 'Ledger', '/admin/transactions'),
@@ -44,7 +44,13 @@ class AdminDashboardScreen extends StatelessWidget {
         titleSpacing: 16,
         title: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Admin', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.6, color: AppColors.textTertiary)), Text('Control center', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600))]),
         actions: [
-          IconButton(icon: const Icon(Icons.logout_rounded, size: 18), tooltip: 'Sign out', onPressed: () => context.go('/admin/vendors')),
+          IconButton(
+              icon: const Icon(Icons.logout_rounded, size: 18),
+              tooltip: 'Sign out',
+              onPressed: () async {
+                await ref.read(authProvider.notifier).logout();
+                if (context.mounted) context.go('/login');
+              }),
           const SizedBox(width: 4),
         ],
         bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),

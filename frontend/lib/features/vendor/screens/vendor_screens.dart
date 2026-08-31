@@ -180,7 +180,15 @@ class VendorOrderDetailScreen extends ConsumerWidget {
     final order = ref.watch(orderDetailProvider(orderId));
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppTopBar(title: 'Order', onBack: () => context.pop()),
+      appBar: AppTopBar(
+          title: 'Order',
+          onBack: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/vendor/orders');
+            }
+          }),
       body: order.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orderDetailProvider(orderId))),

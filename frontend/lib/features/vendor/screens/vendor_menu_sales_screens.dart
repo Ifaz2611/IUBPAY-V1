@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
@@ -18,7 +19,7 @@ class MenuManagementScreen extends ConsumerWidget {
       appBar: AppTopBar(
         title: 'Menu',
         subtitle: 'Add, edit, and toggle availability',
-        onBack: () => Navigator.maybePop(context),
+        onBack: () => context.go('/vendor'),
         action: FilledButton.icon(
           onPressed: () => _showEditor(context, ref, null),
           icon: const Icon(Icons.add_rounded, size: 16),
@@ -126,7 +127,7 @@ class SalesSummaryScreen extends ConsumerWidget {
     final orders = ref.watch(myVendorOrdersProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppTopBar(title: 'Sales', subtitle: 'Collected and live totals', onBack: () => Navigator.maybePop(context)),
+      appBar: AppTopBar(title: 'Sales', subtitle: 'Collected and live totals', onBack: () => context.go('/vendor')),
       body: orders.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(myVendorOrdersProvider)),

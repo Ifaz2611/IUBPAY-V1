@@ -208,7 +208,16 @@ class ReceiptScreen extends ConsumerWidget {
     final order = ref.watch(orderDetailProvider(orderId));
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppTopBar(title: 'Receipt', subtitle: 'Digital copy', onBack: () => context.pop()),
+      appBar: AppTopBar(
+          title: 'Receipt',
+          subtitle: 'Digital copy',
+          onBack: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/student/orders');
+            }
+          }),
       body: order.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orderDetailProvider(orderId))),

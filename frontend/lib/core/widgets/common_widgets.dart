@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../shared/api/api_client.dart';
 import '../constants/app_constants.dart';
@@ -43,7 +44,10 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       leading: showBack
           ? IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: onBack ?? () => Navigator.maybePop(context),
+              onPressed: onBack ??
+                  () {
+                    if (context.canPop()) context.pop();
+                  },
             )
           : null,
       title: Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
@@ -14,7 +15,7 @@ class ReportsScreen extends ConsumerWidget {
     final daily = ref.watch(dailyReportProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppTopBar(title: 'Reports', subtitle: 'Sales and revenue', onBack: () => Navigator.maybePop(context)),
+      appBar: AppTopBar(title: 'Reports', subtitle: 'Sales and revenue', onBack: () => context.go('/admin')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         summary.when(
           loading: () => const LoadingView(),
@@ -93,7 +94,7 @@ class UserManagementScreen extends ConsumerWidget {
     final users = ref.watch(adminUsersProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppTopBar(title: 'Users', subtitle: 'Directory', onBack: () => Navigator.maybePop(context)),
+      appBar: AppTopBar(title: 'Users', subtitle: 'Directory', onBack: () => context.go('/admin')),
       body: users.when(
         loading: () => const LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(adminUsersProvider)),

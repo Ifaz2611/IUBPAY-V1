@@ -118,7 +118,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final cart = ref.watch(cartProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppTopBar(title: 'Checkout', subtitle: 'Confirm your order', onBack: () => context.pop()),
+      appBar: AppTopBar(
+          title: 'Checkout',
+          subtitle: 'Confirm your order',
+          onBack: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/student/cart');
+            }
+          }),
       body: Column(children: [
         const MockPaymentBanner(),
         Expanded(

@@ -34,10 +34,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
         child: FadeTransition(
           opacity: _fade,
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Container(
-              width: 64, height: 64,
-              decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(14)),
-              child: const Icon(Icons.account_balance_rounded, size: 32, color: Colors.white),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.asset('assets/images/logo.png', width: 64, height: 64, fit: BoxFit.cover),
             ),
             const SizedBox(height: 18),
             Text(kAppName.toUpperCase(), style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 1.2)),

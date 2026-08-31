@@ -60,14 +60,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 8),
                 // Brand — calm, centered
                 Column(children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppColors.brand,
-                      borderRadius: BorderRadius.circular(AppRadii.md),
-                    ),
-                    child: const Icon(Icons.account_balance_rounded, size: 28, color: Colors.white),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadii.md),
+                    child: Image.asset('assets/images/logo.png', width: 56, height: 56, fit: BoxFit.cover),
                   ),
                   const SizedBox(height: 14),
                   const Text('IUB PAY',

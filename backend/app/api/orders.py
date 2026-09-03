@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
@@ -41,49 +41,59 @@ def place_order(
     student: User = Depends(require_role(Role.STUDENT)),
 ):
     """Idempotent order creation: same idempotency_key returns the same order."""
+    from app.models.vendor import Vendor
+    vendor = db.get(Vendor, body.vendor_id)
+    fee = vendor.service_fee_taka if vendor and vendor.service_fee_taka is not None else settings.SERVICE_FEE_TAKA
     return create_order(
         db,
         student_id=student.id,
         vendor_id=body.vendor_id,
         raw_items=[i.model_dump() for i in body.items],
         idempotency_key=body.idempotency_key,
-        service_fee_taka=settings.SERVICE_FEE_TAKA,
+        service_fee_taka=fee,
     )
 
 
-@router.get("/api/students/me/orders", response_model=list[OrderOut])
+@router.get("/api/students/me/orders")
 def my_orders(
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
     student: User = Depends(require_role(Role.STUDENT)),
 ):
-    q = (
-        select(Order)
-        .options(joinedload(Order.items))
-        .where(Order.student_id == student.id)
-        .order_by(Order.created_at.desc())
-    )
+    base = select(Order).where(Order.student_id == student.id)
+    q = base.options(joinedload(Order.items)).order_by(Order.created_at.desc())
+    if limit is not None or offset is not None:
+        lim = limit if limit is not None else 20
+        off = offset if offset is not None else 0
+        total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+        items = db.scalars(q.limit(lim).offset(off)).unique().all()
+        return {"items": items, "total": total, "limit": lim, "offset": off}
     return db.scalars(q).unique().all()
 
 
-@router.get("/api/vendors/me/orders", response_model=list[OrderOut])
+@router.get("/api/vendors/me/orders")
 def vendor_orders(
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
     vendor_user: User = Depends(require_role(Role.VENDOR)),
 ):
     if vendor_user.vendor_id is None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "User is not linked to a vendor")
-    # Paid-and-beyond orders only: an order must never reach a vendor before payment.
     statuses = [
         OrderStatus.PAID, OrderStatus.ACCEPTED, OrderStatus.PREPARING,
         OrderStatus.READY, OrderStatus.COLLECTED, OrderStatus.REJECTED,
         OrderStatus.CANCELLED, OrderStatus.REFUND_PENDING, OrderStatus.REFUNDED,
     ]
-    q = (
-        select(Order)
-        .options(joinedload(Order.items))
-        .where(Order.vendor_id == vendor_user.vendor_id, Order.status.in_(statuses))
-        .order_by(Order.created_at.desc())
-    )
+    base = select(Order).where(Order.vendor_id == vendor_user.vendor_id, Order.status.in_(statuses))
+    q = base.options(joinedload(Order.items)).order_by(Order.created_at.desc())
+    if limit is not None or offset is not None:
+        lim = limit if limit is not None else 20
+        off = offset if offset is not None else 0
+        total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+        items = db.scalars(q.limit(lim).offset(off)).unique().all()
+        return {"items": items, "total": total, "limit": lim, "offset": off}
     return db.scalars(q).unique().all()
 
 
@@ -101,6 +111,28 @@ def get_order(
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your order")
     if user.role == Role.VENDOR and (user.vendor_id is None or order.vendor_id != user.vendor_id):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your vendor's order")
+    return order
+
+
+@router.post("/api/orders/{order_id}/verify-pickup")
+def verify_pickup(
+    order_id: str,
+    body: dict,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role(Role.VENDOR, Role.ADMIN)),
+):
+    order = _get_order(db, order_id)
+    if user.role == Role.VENDOR and (user.vendor_id is None or order.vendor_id != user.vendor_id):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your vendor's order")
+    code = (body.get("pickup_code") or "").strip().upper()
+    import hmac
+    if not hmac.compare_digest(code, order.pickup_code.upper()):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid pickup code")
+    if order.status != OrderStatus.READY:
+        raise HTTPException(status.HTTP_409_CONFLICT, f"Order not ready for pickup (status={order.status.value})")
+    transition_order(db, order, OrderStatus.COLLECTED, actor_id=user.id)
+    db.commit()
+    db.refresh(order)
     return order
 
 
@@ -124,7 +156,8 @@ def update_order_status(
             raise HTTPException(status.HTTP_403_FORBIDDEN,
                                 "Vendors cannot set this status")
 
-    transition_order(db, order, new_status, actor_id=user.id)
+    expected = body.version if hasattr(body, 'version') and body.version else None
+    transition_order(db, order, new_status, actor_id=user.id, expected_version=expected)
 
     # Vendor rejection after payment triggers an automatic refund.
     if new_status in (OrderStatus.REJECTED,):

@@ -4,15 +4,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/api/api_client.dart';
 import '../../../shared/models/models.dart';
 
+List<T> _parsePaginatedList<T>(dynamic data, T Function(Map<String, dynamic>) fromJson) {
+  if (data is List) return data.map((e) => fromJson(Map<String, dynamic>.from(e as Map))).toList();
+  if (data is Map && data['items'] is List) {
+    return (data['items'] as List).map((e) => fromJson(Map<String, dynamic>.from(e as Map))).toList();
+  }
+  return [];
+}
+
 final vendorListProvider = FutureProvider<List<Vendor>>((ref) async {
   final r = await ref.read(dioProvider).get('/vendors');
-  return (r.data as List).map((e) => Vendor.fromJson(e)).toList();
+  return _parsePaginatedList(r.data, Vendor.fromJson);
 });
 
 final vendorMenuProvider =
     FutureProvider.family<List<MenuItem>, String>((ref, vendorId) async {
   final r = await ref.read(dioProvider).get('/vendors/$vendorId/menu');
-  return (r.data as List).map((e) => MenuItem.fromJson(e)).toList();
+  return _parsePaginatedList(r.data, MenuItem.fromJson);
 });
 
 /// Cart is scoped to a single vendor at a time.
@@ -77,7 +85,7 @@ final cartProvider = NotifierProvider<CartController, CartState>(CartController.
 
 final myOrdersProvider = FutureProvider<List<Order>>((ref) async {
   final r = await ref.read(dioProvider).get('/students/me/orders');
-  return (r.data as List).map((e) => Order.fromJson(e)).toList();
+  return _parsePaginatedList(r.data, Order.fromJson);
 });
 
 final orderDetailProvider =

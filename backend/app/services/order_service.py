@@ -1,8 +1,10 @@
+import secrets
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.menu_item import MenuItem
@@ -12,8 +14,28 @@ from app.utils.enums import ALLOWED_TRANSITIONS, PAID_STATUSES, OrderStatus, Ven
 
 
 def _gen_order_number(db: Session) -> str:
-    date_part = datetime.now().strftime("%Y%m%d")
+    date_part = datetime.now(timezone.utc).strftime("%Y%m%d")
+    for _ in range(5):
+        candidate = f"IUB-{date_part}-{secrets.token_hex(3).upper()}"
+        exists = db.scalar(select(Order).where(Order.order_number == candidate))
+        if not exists:
+            return candidate
     return f"IUB-{date_part}-{uuid.uuid4().hex[:6].upper()}"
+
+
+def _gen_pickup_code(db: Session) -> str:
+    """Cryptographically secure 6-char alphanumeric, unique among active orders."""
+    alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O/I/1 confusables
+    for _ in range(10):
+        code = "".join(secrets.choice(alphabet) for _ in range(6))
+        active = db.scalar(select(Order).where(
+            Order.pickup_code == code,
+            Order.status.notin_([OrderStatus.COLLECTED, OrderStatus.CANCELLED, OrderStatus.REFUNDED])
+        ))
+        if not active:
+            return code
+    # fallback
+    return "".join(secrets.choice(alphabet) for _ in range(6))
 
 
 def create_order(
@@ -67,8 +89,9 @@ def create_order(
         service_fee_taka=service_fee_taka,
         total_amount_taka=0,
         status=OrderStatus.PENDING_PAYMENT,
-        pickup_code=f"{uuid.uuid4().int % 10000:04d}",
+        pickup_code=_gen_pickup_code(db),
         idempotency_key=idempotency_key,
+        version=1,
     )
 
     subtotal = 0
@@ -90,15 +113,27 @@ def create_order(
     order.total_amount_taka = subtotal + service_fee_taka
 
     db.add(order)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        # Race on idempotency_key: re-fetch existing
+        existing = db.scalar(select(Order).where(Order.idempotency_key == idempotency_key))
+        if existing is not None:
+            return existing
+        raise
     db.refresh(order)
     return order
 
 
 def transition_order(
-    db: Session, order: Order, new_status: OrderStatus, *, actor_id: str | None = None
+    db: Session, order: Order, new_status: OrderStatus, *, actor_id: str | None = None,
+    expected_version: int | None = None,
 ) -> Order:
-    """Enforce the order state machine. Invalid transitions raise 409."""
+    """Enforce the order state machine. Invalid transitions raise 409.
+    Optimistic locking: if expected_version provided, 409 if stale."""
+    if expected_version is not None and order.version != expected_version:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Order was updated concurrently. Please refresh.")
     allowed = ALLOWED_TRANSITIONS.get(order.status, set())
     if new_status not in allowed:
         raise HTTPException(
@@ -107,6 +142,7 @@ def transition_order(
         )
     old = order.status
     order.status = new_status
+    order.version = (order.version or 1) + 1
     from app.services.audit_service import audit
 
     audit(db, actor_id, "order.transition", "order", order.id,

@@ -36,6 +36,8 @@ app = FastAPI(
 _origins = ["*"] if settings.CORS_ORIGINS.strip() == "*" else [
     o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()
 ]
+if settings.is_prod() and _origins == ["*"]:
+    raise RuntimeError("CORS_ORIGINS='*' not allowed in production")
 if _origins == ["*"]:
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"],
                        allow_headers=["*"])
@@ -45,8 +47,17 @@ else:
         allow_origins=_origins,
         allow_credentials=True,
         allow_methods=["*"],
-        allow_headers=["*"],
+        allow_headers=["Authorization", "Content-Type", "X-Webhook-Token"],
     )
+
+@app.middleware("http")
+async def _security_headers(request, call_next):
+    resp = await call_next(request)
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    resp.headers["X-Frame-Options"] = "DENY"
+    if settings.is_prod():
+        resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return resp
 
 app.include_router(auth.router)
 app.include_router(vendors.router)

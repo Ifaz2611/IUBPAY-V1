@@ -14,6 +14,7 @@ class VendorUpdate(BaseModel):
     contact_phone: str | None = Field(default=None, max_length=32)
     settlement_reference: str | None = Field(default=None, max_length=64)
     status: str | None = Field(default=None, pattern="^(PENDING|APPROVED|SUSPENDED)$")
+    service_fee_taka: int | None = Field(default=None, ge=0, le=100)
 
 
 class VendorOut(BaseModel):
@@ -23,6 +24,7 @@ class VendorOut(BaseModel):
     location: str
     contact_phone: str | None = None
     status: str
+    service_fee_taka: int | None = None
 
     class Config:
         from_attributes = True

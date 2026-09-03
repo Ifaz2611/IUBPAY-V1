@@ -89,12 +89,22 @@ def export_csv(
 @router.get("/users")
 def list_users(
     role: str | None = None,
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
     _: User = Depends(require_role(Role.ADMIN)),
 ):
+    from sqlalchemy import func
     from app.schemas.auth import UserOut
 
-    q = select(User).order_by(User.created_at.desc())
+    base = select(User).order_by(User.created_at.desc())
     if role:
-        q = q.where(User.role == role)
-    return [UserOut.model_validate(u) for u in db.scalars(q).all()]
+        base = base.where(User.role == role)
+    if limit is not None or offset is not None:
+        lim = limit if limit is not None else 50
+        off = offset if offset is not None else 0
+        total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+        q = base.limit(lim).offset(off)
+        items = [UserOut.model_validate(u) for u in db.scalars(q).all()]
+        return {"items": items, "total": total, "limit": lim, "offset": off}
+    return [UserOut.model_validate(u) for u in db.scalars(base).all()]

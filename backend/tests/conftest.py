@@ -1,9 +1,9 @@
 import os
 
 # Must be set before app modules are imported.
-os.environ["SECRET_KEY"] = "test-secret"
+os.environ["SECRET_KEY"] = "test-secret-key-16-chars-min"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["MOCK_PAYMENT_WEBHOOK_TOKEN"] = "test-webhook-token"
+os.environ["MOCK_PAYMENT_WEBHOOK_TOKEN"] = "test-webhook-token-16chars"
 os.environ["SERVICE_FEE_TAKA"] = "5"
 
 import pytest  # noqa: E402
@@ -21,7 +21,7 @@ from app.models.user import User  # noqa: E402
 from app.models.vendor import Vendor  # noqa: E402
 
 TEST_PASSWORD = "Passw0rd!Test"
-WEBHOOK_HEADERS = {"X-Webhook-Token": "test-webhook-token"}
+WEBHOOK_HEADERS = {"X-Webhook-Token": "test-webhook-token-16chars"}
 
 engine = create_engine(
     "sqlite://",

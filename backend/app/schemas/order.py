@@ -24,6 +24,7 @@ class OrderCreate(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: str
+    version: int | None = None
 
 
 class OrderItemOut(BaseModel):
@@ -59,6 +60,7 @@ class OrderOut(BaseModel):
     total_amount_taka: int
     status: str
     pickup_code: str
+    version: int = 1
     created_at: datetime | None = None
     items: list[OrderItemOut] = []
     payments: list[PaymentOut] = []

@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user, require_role
@@ -18,32 +18,59 @@ from app.utils.enums import OrderStatus, PaymentStatus, Role, VendorStatus
 router = APIRouter(prefix="/api/vendors", tags=["vendors"])
 
 
+@router.get("/me/sales")
+def my_vendor_sales(
+    days: int | None = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role(Role.VENDOR)),
+):
+    from datetime import date, timedelta
+    from app.services.report_service import vendor_sales
+    if user.vendor_id is None:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User is not linked to a vendor")
+    since = (date.today() - timedelta(days=days - 1)) if days else None
+    return vendor_sales(db, user.vendor_id, since)
+
+
 @router.get("", response_model=list[VendorOut])
 def list_vendors(
     include_all: bool = False,
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """Approved vendors for everyone; admins may pass include_all=true."""
+    """Approved vendors for everyone; admins may pass include_all=true.
+
+    Supports pagination via `limit`/`offset`. When pagination params are
+    provided, returns `{"items": [...], "total": N, "limit": ..., "offset": ...}`.
+    Otherwise returns a plain list for backward compatibility.
+    """
     q = select(Vendor).order_by(Vendor.name)
+    count_q = select(func.count(Vendor.id))
     if include_all:
         if user.role != Role.ADMIN:
             raise HTTPException(status.HTTP_403_FORBIDDEN,
                                 "include_all requires admin role")
     else:
         q = q.where(Vendor.status == VendorStatus.APPROVED)
+        count_q = count_q.where(Vendor.status == VendorStatus.APPROVED)
+    if limit is not None or offset is not None:
+        lim = limit if limit is not None else 50
+        off = offset if offset is not None else 0
+        total = db.scalar(count_q) or 0
+        items = db.scalars(q.limit(lim).offset(off)).all()
+        return {"items": items, "total": total, "limit": lim, "offset": off}
     return db.scalars(q).all()
 
 
-@router.get("/me/menu", response_model=list["MenuItemOut"])
+@router.get("/me/menu", response_model=list[MenuItemOut])
 def my_vendor_menu(
     include_unavailable: bool = True,
     db: Session = Depends(get_db),
     user: User = Depends(require_role(Role.VENDOR)),
 ):
     """Menu of the logged-in vendor staff's own vendor."""
-    from app.schemas.menu_item import MenuItemOut
-
     if user.vendor_id is None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "User is not linked to a vendor")
     q = select(MenuItem).where(MenuItem.vendor_id == user.vendor_id).order_by(MenuItem.name)

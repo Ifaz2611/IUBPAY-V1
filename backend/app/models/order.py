@@ -27,6 +27,7 @@ class Order(Base):
     )
     pickup_code: Mapped[str] = mapped_column(String(8))
     idempotency_key: Mapped[str] = mapped_column(String(64), unique=True)
+    version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
 
     created_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

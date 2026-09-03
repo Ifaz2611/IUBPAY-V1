@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import require_role
@@ -22,19 +22,28 @@ def _require_vendor_access(db: Session, user: User, vendor_id: str) -> None:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your vendor")
 
 
-@router.get("/api/vendors/{vendor_id}/menu", response_model=list[MenuItemOut])
+@router.get("/api/vendors/{vendor_id}/menu")
 def get_menu(
     vendor_id: str,
     include_unavailable: bool = False,
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
     viewer: User | None = Depends(require_role(Role.STUDENT, Role.VENDOR, Role.ADMIN)),
 ):
     vendor = db.get(Vendor, vendor_id)
     if vendor is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Vendor not found")
-    q = select(MenuItem).where(MenuItem.vendor_id == vendor_id).order_by(MenuItem.name)
+    base = select(MenuItem).where(MenuItem.vendor_id == vendor_id)
     if not include_unavailable:
-        q = q.where(MenuItem.is_available.is_(True))
+        base = base.where(MenuItem.is_available.is_(True))
+    q = base.order_by(MenuItem.name)
+    if limit is not None or offset is not None:
+        lim = limit if limit is not None else 50
+        off = offset if offset is not None else 0
+        total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
+        items = db.scalars(q.limit(lim).offset(off)).all()
+        return {"items": items, "total": total, "limit": lim, "offset": off}
     return db.scalars(q).all()
 
 

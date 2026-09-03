@@ -1,5 +1,6 @@
 """Payment + refund logic. Every money movement writes a LedgerEntry and an
 AuditLog row inside the same DB transaction as the state change."""
+import asyncio
 import time
 
 from fastapi import HTTPException, status
@@ -156,3 +157,8 @@ def simulate_provider_latency(seconds: int) -> None:
     """Imitate network latency of a real payment provider (capped)."""
     if seconds > 0:
         time.sleep(min(seconds, 5))
+
+
+async def simulate_provider_latency_async(seconds: int) -> None:
+    if seconds > 0:
+        await asyncio.sleep(min(seconds, 5))

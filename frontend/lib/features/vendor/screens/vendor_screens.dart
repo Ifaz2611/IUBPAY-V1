@@ -9,13 +9,19 @@ import '../../../shared/models/models.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../student/providers/student_providers.dart' show orderDetailProvider;
 
+List<T> _parsePaginated<T>(dynamic data, T Function(Map<String, dynamic>) f) {
+  if (data is List) return data.map((e) => f(Map<String, dynamic>.from(e as Map))).toList();
+  if (data is Map && data['items'] is List) return (data['items'] as List).map((e) => f(Map<String, dynamic>.from(e as Map))).toList();
+  return [];
+}
+
 final myVendorOrdersProvider = FutureProvider<List<Order>>((ref) async {
   final r = await ref.read(dioProvider).get('/vendors/me/orders');
-  return (r.data as List).map((e) => Order.fromJson(e)).toList();
+  return _parsePaginated(r.data, Order.fromJson);
 });
 final myVendorMenuProvider = FutureProvider<List<MenuItem>>((ref) async {
   final r = await ref.read(dioProvider).get('/vendors/me/menu');
-  return (r.data as List).map((e) => MenuItem.fromJson(e)).toList();
+  return _parsePaginated(r.data, MenuItem.fromJson);
 });
 
 class VendorDashboardScreen extends ConsumerWidget {

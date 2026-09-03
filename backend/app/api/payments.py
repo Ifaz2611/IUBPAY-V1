@@ -1,3 +1,5 @@
+import asyncio
+import hmac
 import time
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
@@ -112,16 +114,46 @@ def failure_reason_for(code: int) -> str:
     return reasons.get(code, "MOCK_PROVIDER_ERROR")
 
 
+@router.get("/{order_id}/stream")
+async def order_stream(order_id: str):
+    """SSE endpoint for real-time order tracking. Fallback to polling if SSE unsupported."""
+    from fastapi.responses import StreamingResponse
+    from sqlalchemy.orm import Session as _Session
+    from app.db.session import SessionLocal
+    import json as _json
+    import asyncio as _asyncio
+
+    async def event_gen():
+        for _ in range(120):  # up to 10 minutes
+            db: _Session = SessionLocal()
+            try:
+                order = db.get(Order, order_id)
+                if order is None:
+                    yield f"data: {_json.dumps({'error': 'not found'})}\n\n"
+                    break
+                payload = _json.dumps({"id": order.id, "status": order.status.value if hasattr(order.status, 'value') else str(order.status), "pickup_code": order.pickup_code, "updated_at": order.updated_at.isoformat() if order.updated_at else None})
+                yield f"data: {payload}\n\n"
+                if order.status.value in ("COLLECTED", "CANCELLED", "REFUNDED", "REJECTED"):
+                    break
+            finally:
+                db.close()
+            await _asyncio.sleep(2)
+    return StreamingResponse(event_gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
 @router.post("/webhook")
 def webhook(
     payload: WebhookPayload,
-    x_webhook_token: str = Header(...),
+    x_webhook_token: str | None = Header(default=None),
     db: Session = Depends(get_db),
 ):
     """Provider webhook endpoint. Protected by shared-secret header.
 
     Idempotent: repeated callbacks for the same transaction are safe."""
-    if x_webhook_token != settings.MOCK_PAYMENT_WEBHOOK_TOKEN:
+    if x_webhook_token is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Missing webhook token")
+    if not hmac.compare_digest(x_webhook_token, settings.MOCK_PAYMENT_WEBHOOK_TOKEN):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid webhook token")
 
     payment = db.get(Payment, payload.payment_id)

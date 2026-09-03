@@ -56,32 +56,49 @@ def summary(db: Session) -> dict:
 
 def daily(db: Session, days: int = 30) -> list[dict]:
     since = date.today() - timedelta(days=days - 1)
-    entries = db.scalars(
-        select(LedgerEntry).where(LedgerEntry.created_at >= since)
-    ).all()
+    # Try SQL aggregation; fallback to Python for SQLite compat
+    try:
+        from sqlalchemy import String as SAString, cast
+        # Use func.date for SQLite/Postgres agnostic
+        rows_q = db.execute(
+            select(
+                func.date(LedgerEntry.created_at).label("day"),
+                func.count(func.distinct(LedgerEntry.order_id)).filter(LedgerEntry.entry_type == LedgerEntryType.PAYMENT).label("orders"),
+                func.coalesce(func.sum(LedgerEntry.amount_taka).filter(LedgerEntry.entry_type == LedgerEntryType.PAYMENT), 0).label("sales"),
+                func.coalesce(func.sum(-LedgerEntry.amount_taka).filter(LedgerEntry.entry_type == LedgerEntryType.REFUND), 0).label("refunds"),
+            ).where(LedgerEntry.created_at >= since).group_by(func.date(LedgerEntry.created_at))
+        ).all()
+        by_day = {str(r.day): {"orders": r.orders, "sales_taka": int(r.sales), "refunds_taka": int(r.refunds)} for r in rows_q}
+        return [{"date": (since + timedelta(days=i)).isoformat(), "orders": by_day.get((since + timedelta(days=i)).isoformat(), {}).get("orders", 0), "sales_taka": by_day.get((since + timedelta(days=i)).isoformat(), {}).get("sales_taka", 0), "refunds_taka": by_day.get((since + timedelta(days=i)).isoformat(), {}).get("refunds_taka", 0)} for i in range(days)]
+    except Exception:
+        entries = db.scalars(select(LedgerEntry).where(LedgerEntry.created_at >= since)).all()
+        buckets: dict[str, dict] = defaultdict(lambda: {"orders": set(), "sales_taka": 0, "refunds_taka": 0})
+        for e in entries:
+            day = e.created_at.date().isoformat() if e.created_at else date.today().isoformat()
+            b = buckets[day]
+            if e.entry_type == LedgerEntryType.PAYMENT:
+                b["sales_taka"] += e.amount_taka
+                if e.order_id:
+                    b["orders"].add(e.order_id)
+            elif e.entry_type == LedgerEntryType.REFUND:
+                b["refunds_taka"] += -e.amount_taka
+        rows = []
+        for i in range(days):
+            d = (since + timedelta(days=i)).isoformat()
+            b = buckets.get(d)
+            rows.append({"date": d, "orders": len(b["orders"]) if b else 0, "sales_taka": b["sales_taka"] if b else 0, "refunds_taka": b["refunds_taka"] if b else 0})
+        return rows
 
-    buckets: dict[str, dict] = defaultdict(lambda: {"orders": set(), "sales_taka": 0, "refunds_taka": 0})
-    for e in entries:
-        day = e.created_at.date().isoformat() if e.created_at else date.today().isoformat()
-        b = buckets[day]
-        if e.entry_type == LedgerEntryType.PAYMENT:
-            b["sales_taka"] += e.amount_taka
-            if e.order_id:
-                b["orders"].add(e.order_id)
-        elif e.entry_type == LedgerEntryType.REFUND:
-            b["refunds_taka"] += -e.amount_taka
 
-    rows = []
-    for i in range(days):
-        d = (since + timedelta(days=i)).isoformat()
-        b = buckets.get(d)
-        rows.append({
-            "date": d,
-            "orders": len(b["orders"]) if b else 0,
-            "sales_taka": b["sales_taka"] if b else 0,
-            "refunds_taka": b["refunds_taka"] if b else 0,
-        })
-    return rows
+def vendor_sales(db: Session, vendor_id: str, since: date | None = None) -> dict:
+    from app.models.order import Order, OrderItem
+    q = select(func.coalesce(func.sum(OrderItem.subtotal_taka), 0)).join(Order, OrderItem.order_id == Order.id).where(Order.vendor_id == vendor_id, Order.status.in_([OrderStatus.PAID, OrderStatus.ACCEPTED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.COLLECTED]))
+    if since:
+        q = q.where(Order.created_at >= since)
+    total = db.scalar(q) or 0
+    # also count
+    cnt = db.scalar(select(func.count(Order.id)).where(Order.vendor_id == vendor_id, Order.status.in_([OrderStatus.PAID, OrderStatus.ACCEPTED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.COLLECTED]))) or 0
+    return {"vendor_id": vendor_id, "total_sales_taka": int(total), "paid_orders": int(cnt)}
 
 
 def transactions_csv(db: Session) -> str:

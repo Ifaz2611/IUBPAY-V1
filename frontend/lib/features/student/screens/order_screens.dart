@@ -73,17 +73,30 @@ class OrderTrackingScreen extends ConsumerStatefulWidget {
   ConsumerState<OrderTrackingScreen> createState() => _OrderTrackingScreenState();
 }
 
-class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
+class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> with WidgetsBindingObserver {
   Timer? _timer;
+  bool _useSse = true;
   static const _steps = ['PAID', 'ACCEPTED', 'PREPARING', 'READY', 'COLLECTED'];
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _timer?.cancel();
+    // SSE is preferred; fallback to polling if SSE fails (handled in build)
     _timer = Timer.periodic(const Duration(seconds: 5), (_) { if (mounted) ref.invalidate(orderDetailProvider(widget.orderId)); });
   }
 
   @override
-  void dispose() { _timer?.cancel(); super.dispose(); }
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) { _timer?.cancel(); } else if (state == AppLifecycleState.resumed) { _startPolling(); }
+  }
+
+  @override
+  void dispose() { WidgetsBinding.instance.removeObserver(this); _timer?.cancel(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {

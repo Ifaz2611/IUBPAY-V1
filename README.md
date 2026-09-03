@@ -374,28 +374,30 @@ cd frontend && flutter test
 ## Security model
 
 - Passwords hashed with bcrypt; raw credentials never logged or returned.
-- JWT carries `sub` + `role`; every router enforces roles via dependencies.
-- Webhook endpoint requires the `X-Webhook-Token` header matching
-  `MOCK_PAYMENT_WEBHOOK_TOKEN`, verifies the amount against the DB record,
-  and is fully idempotent.
-- No payment credentials of any kind are stored — there are none to store.
-- Secrets come exclusively from environment variables.
-- CORS restricted via config; `allow_origins=["*"]` must be removed for production.
+- JWT carries `sub` + `role` + `jti`/`iss`/`aud`; short-lived access (15m) + refresh rotation (7d) with revocation/blacklist (`POST /api/auth/refresh`, `POST /api/auth/logout`).
+- Login rate-limited (5/min) with account lockout after 5 failures (15m); webhook uses `hmac.compare_digest` constant-time compare.
+- Webhook endpoint requires `X-Webhook-Token` matching `MOCK_PAYMENT_WEBHOOK_TOKEN`, verifies amount, fully idempotent; missing header now returns 401 (not 422).
+- No payment credentials stored — there are none to store.
+- Secrets validated: `SECRET_KEY`/`MOCK_PAYMENT_WEBHOOK_TOKEN` min 16 chars, rejected if weak defaults in `ENV=prod`; `CORS_ORIGINS=*` forbidden in prod.
+- Security headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `HSTS` in prod.
+- Storage: JWT/refresh stored via `flutter_secure_storage` (encrypted), not `shared_preferences`.
 
 ---
 
 ## Known limitations
 
 1. Mock payments only; no real bKash/Nagad/card integration.
-2. JWTs can't be revoked early; no refresh-token rotation.
-3. Vendor sales summary is computed client-side from the orders list.
-4. CSV "export" surfaces text in-app rather than a native download.
-5. JWT stored in `shared_preferences`, not encrypted storage.
-6. Most list endpoints lack pagination (transactions API has it).
-7. Pickup codes aren't cryptographically unique across history.
-8. Flat service fee only — no discounts, vouchers, or tax.
-9. Status updates poll every 5 s; no push/WebSocket yet.
-10. Seeded passwords are intentionally weak and documented.
+2. ~~JWTs can't be revoked~~ — now revoked via blacklist + refresh rotation (in-memory; use Redis in prod).
+3. ~~Vendor sales client-side~~ — now SQL `SUM(order_items.subtotal)` via `GET /api/vendors/me/sales`.
+4. CSV export now streams with `Content-Disposition: attachment`; frontend download via `file_saver`/`share_plus` recommended.
+5. ~~JWT in shared_preferences~~ — now `flutter_secure_storage` (`lib/shared/api/api_client.dart:8`).
+6. ~~Most lists lack pagination~~ — now paginated: `GET /api/vendors?limit=&offset=`, `?include_all`, `GET /api/vendors/{id}/menu`, `GET /api/students/me/orders`, `GET /api/vendors/me/orders`, `GET /api/admin/users` (all backward-compat; paginated when `limit`/`offset` present) + `GET /api/admin/reports/transactions`.
+7. ~~Pickup codes weak (uuid % 10000)~~ — now 6-char cryptographically secure (`secrets.choice`, unique among active orders) + QR-ready; verify via `POST /api/orders/{id}/verify-pickup`.
+8. ~~Flat fee only~~ — now per-vendor `service_fee_taka` (`vendors.service_fee_taka`) with fallback to `SERVICE_FEE_TAKA`.
+9. ~~Poll every 5s~~ — now `GET /api/payments/{order_id}/stream` SSE (2s) + polling fallback with `WidgetsBindingObserver` pause when backgrounded.
+10. Seeded passwords intentionally weak and documented.
+11. No Bangla/English i18n yet (planned via `flutter_localizations` + ARB).
+
 
 ## Roadmap — suggested for version 2
 

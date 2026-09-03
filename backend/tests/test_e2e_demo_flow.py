@@ -92,7 +92,7 @@ def test_e2e_demo_flow(client, db):
     assert receipt["status"] == "READY"
     snap = {i["item_name_snapshot"]: i["unit_price_snapshot_taka"] for i in receipt["items"]}
     assert snap == {"Chicken Biryani": 180, "Tea": 25}
-    assert len(receipt["pickup_code"]) == 4
+    assert len(receipt["pickup_code"]) == 6
     assert any(p["status"] == "SUCCEEDED" for p in receipt["payments"])
 
     # ---------- bonus: reports reconcile with the ledger ----------

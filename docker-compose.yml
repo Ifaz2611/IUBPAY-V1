@@ -20,14 +20,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - ./backend/.env
     environment:
       DATABASE_URL: postgresql+psycopg://iub_cafe:iub_cafe_dev_pw@db:5432/iub_cafeteria
-      SECRET_KEY: change-me-in-real-deployments
-      MOCK_PAYMENT_WEBHOOK_TOKEN: mock-webhook-token-dev
-      CORS_ORIGINS: "*"
-      ENV: docker-dev
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-real-deployments-generate-32-chars-min}
+      MOCK_PAYMENT_WEBHOOK_TOKEN: ${MOCK_PAYMENT_WEBHOOK_TOKEN:-mock-webhook-token-dev-change-me}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      ENV: ${ENV:-docker-dev}
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
     command: >
       sh -c "alembic upgrade head &&
              python -m app.seed.seed_data &&

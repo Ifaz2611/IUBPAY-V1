@@ -1,3 +1,6 @@
+<p align="center"><img width="637" height="635" alt="IUB_PAY" src="https://github.com/user-attachments/assets/e7c75af6-6508-4d9f-b540-212f8b70865e" />
+</p>
+
 # IUB PAY V1 — Cashless Ordering & Payment Prototype
 
 <!-- hidden creator attribution: Ifaz md zahin -->

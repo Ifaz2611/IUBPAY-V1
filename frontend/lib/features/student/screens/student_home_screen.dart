@@ -1,16 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/student_providers.dart';
 
-class StudentHomeScreen extends ConsumerWidget {
+class StudentHomeScreen extends ConsumerStatefulWidget {
   const StudentHomeScreen({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StudentHomeScreen> createState() => _StudentHomeScreenState();
+}
+
+class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
+  bool _showPromo = true;
+
+  String get _greeting {
+    final h = DateTime.now().hour;
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  String get _greetingEmoji {
+    final h = DateTime.now().hour;
+    if (h < 12) return '☀️';
+    if (h < 17) return '🌤️';
+    return '🌙';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authProvider).valueOrNull;
     final first = user?.name.split(' ').first ?? 'there';
+    final vendorsAsync = ref.watch(vendorListProvider);
+    final ordersAsync = ref.watch(myOrdersProvider);
+    final cart = ref.watch(cartProvider);
+
+    final vendorCount = vendorsAsync.valueOrNull?.length;
+    final orders = ordersAsync.valueOrNull ?? [];
+    final activeOrder = orders.where((o) => ['PAID', 'ACCEPTED', 'PREPARING', 'READY'].contains(o.status)).isNotEmpty
+        ? orders.firstWhere((o) => ['PAID', 'ACCEPTED', 'PREPARING', 'READY'].contains(o.status))
+        : null;
+    final recentOrders = orders.take(3).toList();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -24,11 +59,35 @@ class StudentHomeScreen extends ConsumerWidget {
           ),
           const SizedBox(width: 10),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Hi, $first', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Row(children: [
+              Text('$_greeting, $first ', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+              Text(_greetingEmoji, style: const TextStyle(fontSize: 13)),
+            ]),
             const Text('What would you like to eat today?', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w400)),
           ]),
         ]),
         actions: [
+          // Cart badge
+          Stack(children: [
+            IconButton(
+              icon: const Icon(Icons.shopping_bag_outlined, size: 20),
+              tooltip: 'Cart',
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                context.go('/student/cart');
+              },
+            ),
+            if (!cart.isEmpty)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(color: AppColors.error, borderRadius: BorderRadius.circular(10)),
+                  child: Text('${cart.lines.length}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                ),
+              ),
+          ]),
           IconButton(
             icon: const Icon(Icons.logout_rounded, size: 20),
             tooltip: 'Sign out',
@@ -41,11 +100,56 @@ class StudentHomeScreen extends ConsumerWidget {
         ],
         bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),
       ),
-      body: SafeArea(
+      drawer: _StudentDrawer(userName: user?.name, email: user?.email, cartCount: cart.lines.length, orderCount: orders.length),
+      body: RefreshIndicator(
+        color: AppColors.brand,
+        backgroundColor: AppColors.surface,
+        onRefresh: () async {
+          ref.invalidate(vendorListProvider);
+          ref.invalidate(myOrdersProvider);
+          await Future.delayed(const Duration(milliseconds: 400));
+        },
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            // Account summary — calm, not neon
+            // ── Search bar ──
+            GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                context.go('/student/vendors');
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadii.md),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: AppShadows.card,
+                ),
+                child: Row(children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(8)),
+                    child: const Icon(Icons.search_rounded, size: 16, color: AppColors.brand),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('Search vendors or dishes', style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                      Text('Try “biryani”, “burger”, “F-Block”', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                    ]),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)),
+                    child: const Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.textTertiary),
+                  ),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // ── Account summary — now with live stats ──
             AppCard(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -66,40 +170,117 @@ class StudentHomeScreen extends ConsumerWidget {
                 Text(user?.email ?? '', style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
                 if (user?.studentId != null) ...[
                   const SizedBox(height: 2),
-                  Text('ID ${user!.studentId}', style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                  Row(children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)),
+                      child: Row(children: [
+                        const Icon(Icons.badge_outlined, size: 11, color: AppColors.textTertiary),
+                        const SizedBox(width: 4),
+                        Text('ID ${user!.studentId}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
+                      ]),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.verified_rounded, size: 14, color: AppColors.success),
+                    const SizedBox(width: 3),
+                    const Text('Verified', style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w600)),
+                  ]),
                 ],
                 const SizedBox(height: 14),
                 Container(height: 1, color: AppColors.border),
                 const SizedBox(height: 14),
                 Row(children: [
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      const Text('Balance', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 2),
-                      const Text('Unlimited', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
-                      Text('Mock wallet', style: TextStyle(color: AppColors.textTertiary.withOpacity(0.9), fontSize: 11)),
-                    ]),
+                  _MiniStat(
+                    label: 'Vendors',
+                    value: vendorCount == null ? '…' : '$vendorCount',
+                    sub: 'open now',
+                    icon: Icons.storefront_rounded,
                   ),
-                  Container(width: 1, height: 40, color: AppColors.border),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      const Text('Status', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 2),
-                      Row(children: [
-                        Container(width: 7, height: 7, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.success)),
-                        const SizedBox(width: 6),
-                        const Text('Ready to order', style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
-                      ]),
-                      Text('All systems normal', style: TextStyle(color: AppColors.textTertiary.withOpacity(0.9), fontSize: 11)),
-                    ]),
+                  Container(width: 1, height: 42, color: AppColors.border),
+                  const SizedBox(width: 12),
+                  _MiniStat(
+                    label: 'Orders',
+                    value: ordersAsync.isLoading ? '…' : '${orders.length}',
+                    sub: activeOrder != null ? '1 active' : 'all time',
+                    icon: Icons.receipt_long_rounded,
+                    highlight: activeOrder != null,
+                  ),
+                  Container(width: 1, height: 42, color: AppColors.border),
+                  const SizedBox(width: 12),
+                  _MiniStat(
+                    label: 'Cart',
+                    value: '${cart.lines.length}',
+                    sub: cart.isEmpty ? 'empty' : taka(cart.subtotal),
+                    icon: Icons.shopping_bag_outlined,
+                    highlight: !cart.isEmpty,
                   ),
                 ]),
               ]),
             ),
+
+            // ── Active order banner ──
+            if (activeOrder != null) ...[
+              const SizedBox(height: 14),
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  context.go('/student/orders/${activeOrder.id}');
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFF0F5B4A), Color(0xFF147A63)]),
+                    borderRadius: BorderRadius.circular(AppRadii.md),
+                    boxShadow: [BoxShadow(color: AppColors.brand.withOpacity(0.25), blurRadius: 12, offset: const Offset(0, 4))],
+                  ),
+                  child: Row(children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+                      child: const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(children: [
+                          const Text('Active order', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
+                            child: Text(activeOrder.status.replaceAll('_', ' '), style: const TextStyle(color: AppColors.brand, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
+                          ),
+                        ]),
+                        const SizedBox(height: 3),
+                        Text('${activeOrder.orderNumber} • ${taka(activeOrder.totalAmount)} • ${activeOrder.pickupCode}',
+                            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                        const Text('Tap to track live', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                      ]),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                      child: const Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.brand),
+                    ),
+                  ]),
+                ),
+              ),
+            ],
+
+            // ── Quick actions ──
             const SizedBox(height: 20),
-            const SectionHeader(title: 'Quick actions'),
-            const SizedBox(height: 12),
+            SectionHeader(
+              title: 'Quick actions',
+              action: TextButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  context.go('/student/vendors');
+                },
+                child: const Text('See all', style: TextStyle(fontSize: 12)),
+              ),
+            ),
+            const SizedBox(height: 10),
             LayoutBuilder(builder: (context, c) {
               final wide = c.maxWidth > 520;
               return GridView.count(
@@ -108,22 +289,219 @@ class StudentHomeScreen extends ConsumerWidget {
                 crossAxisCount: wide ? 4 : 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: wide ? 1.15 : 1.05,
+                childAspectRatio: wide ? 1.1 : 1.0,
                 children: [
                   _ActionTile(
                     icon: Icons.storefront_rounded,
                     label: 'Browse vendors',
-                    hint: 'See what’s open',
+                    hint: vendorCount == null ? 'See what’s open' : '$vendorCount open now',
                     primary: true,
-                    onTap: () => context.go('/student/vendors'),
+                    badge: vendorCount == null ? null : '$vendorCount',
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      context.go('/student/vendors');
+                    },
                   ),
-                  _ActionTile(icon: Icons.receipt_long_rounded, label: 'My orders', hint: 'Track & receipts', onTap: () => context.go('/student/orders')),
-                  _ActionTile(icon: Icons.shopping_bag_outlined, label: 'Cart', hint: 'Review items', onTap: () => context.go('/student/cart')),
-                  _ActionTile(icon: Icons.person_outline_rounded, label: 'Profile', hint: 'Account details', onTap: () => context.go('/student/profile')),
+                  _ActionTile(
+                    icon: Icons.receipt_long_rounded,
+                    label: 'My orders',
+                    hint: orders.isEmpty ? 'Track & receipts' : '${orders.length} orders',
+                    badge: activeOrder != null ? 'LIVE' : null,
+                    badgeColor: AppColors.success,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      context.go('/student/orders');
+                    },
+                  ),
+                  _ActionTile(
+                    icon: Icons.shopping_bag_outlined,
+                    label: 'Cart',
+                    hint: cart.isEmpty ? 'Review items' : '${taka(cart.subtotal)} • ${cart.lines.length} items',
+                    badge: cart.isEmpty ? null : '${cart.lines.length}',
+                    badgeColor: AppColors.brand,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      context.go('/student/cart');
+                    },
+                  ),
+                  _ActionTile(
+                    icon: Icons.person_outline_rounded,
+                    label: 'Profile',
+                    hint: 'Account details',
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      context.go('/student/profile');
+                    },
+                  ),
                 ],
               );
             }),
-            const SizedBox(height: 16),
+
+            // ── Featured vendors carousel ──
+            const SizedBox(height: 20),
+            vendorsAsync.when(
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+              data: (list) {
+                if (list.isEmpty) return const SizedBox.shrink();
+                final featured = list.take(5).toList();
+                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  SectionHeader(
+                    title: 'Popular on campus',
+                    subtitle: 'Tap a vendor to see menu',
+                    action: TextButton(onPressed: () => context.go('/student/vendors'), child: const Text('View all', style: TextStyle(fontSize: 12))),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 150,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: featured.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (_, i) {
+                        final v = featured[i];
+                        return GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            context.go('/student/vendor/${v.id}');
+                          },
+                          child: Container(
+                            width: 160,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(AppRadii.lg),
+                              border: Border.all(color: AppColors.border),
+                              boxShadow: AppShadows.card,
+                            ),
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Row(children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
+                                  child: const Icon(Icons.restaurant_rounded, color: AppColors.brand, size: 18),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                  decoration: BoxDecoration(color: AppColors.successBg, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.successBorder)),
+                                  child: Row(children: [
+                                    Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.success)),
+                                    const SizedBox(width: 4),
+                                    const Text('Open', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700)),
+                                  ]),
+                                ),
+                              ]),
+                              const SizedBox(height: 12),
+                              Text(v.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
+                              const SizedBox(height: 2),
+                              Row(children: [
+                                const Icon(Icons.place_outlined, size: 11, color: AppColors.textTertiary),
+                                const SizedBox(width: 3),
+                                Expanded(child: Text(v.location, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11))),
+                              ]),
+                              const Spacer(),
+                              Row(children: [
+                                const Icon(Icons.star_rounded, size: 13, color: Color(0xFFF59E0B)),
+                                const SizedBox(width: 3),
+                                Text('${(4.2 + (i * 0.3) % 0.7).toStringAsFixed(1)}', style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700)),
+                                const Text(' • 15–20 min', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                              ]),
+                            ]),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ]);
+              },
+            ),
+
+            // ── Recent orders ──
+            if (recentOrders.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              SectionHeader(
+                title: 'Recent orders',
+                subtitle: 'Your last ${recentOrders.length} orders',
+                action: TextButton(onPressed: () => context.go('/student/orders'), child: const Text('History', style: TextStyle(fontSize: 12))),
+              ),
+              const SizedBox(height: 10),
+              ...recentOrders.map((o) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: AppCard(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        context.go('/student/orders/${o.id}');
+                      },
+                      padding: const EdgeInsets.all(12),
+                      child: Row(children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
+                          child: Icon(
+                            switch (o.status) {
+                              'PAID' => Icons.payments_outlined,
+                              'PREPARING' => Icons.soup_kitchen_rounded,
+                              'READY' => Icons.takeout_dining_rounded,
+                              'COLLECTED' => Icons.check_circle_outline_rounded,
+                              _ => Icons.receipt_outlined,
+                            },
+                            size: 18,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Row(children: [
+                              Expanded(child: Text(o.orderNumber, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13))),
+                              StatusChip(status: o.status),
+                            ]),
+                            const SizedBox(height: 3),
+                            Text('${o.items.length} items • ${taka(o.totalAmount)} • ${o.createdAt != null ? formatDate(o.createdAt!) : ''}',
+                                style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                          ]),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textTertiary),
+                      ]),
+                    ),
+                  )),
+            ],
+
+            // ── Promo / tip banner ──
+            if (_showPromo) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.infoBg,
+                  borderRadius: BorderRadius.circular(AppRadii.md),
+                  border: Border.all(color: AppColors.info.withOpacity(0.15)),
+                ),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(padding: const EdgeInsets.all(7), decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.lightbulb_outline_rounded, size: 16, color: AppColors.info)),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('Pro tip', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
+                      SizedBox(height: 2),
+                      Text('Order before 12:30 PM and skip the lunch rush — pickup is usually under 10 min.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.35)),
+                    ]),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 16, color: AppColors.textTertiary),
+                    onPressed: () => setState(() => _showPromo = false),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(width: 24, height: 24),
+                  ),
+                ]),
+              ),
+            ],
+
+            const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadii.md), border: Border.all(color: AppColors.border)),
@@ -133,10 +511,45 @@ class StudentHomeScreen extends ConsumerWidget {
                 Expanded(child: Text('All payments are simulated. No real money moves.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.3))),
               ]),
             ),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton.icon(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  ref.invalidate(vendorListProvider);
+                  ref.invalidate(myOrdersProvider);
+                },
+                icon: const Icon(Icons.refresh_rounded, size: 14),
+                label: const Text('Refresh', style: TextStyle(fontSize: 12)),
+              ),
+            ),
           ],
         ),
       ),
-      drawer: _StudentDrawer(userName: user?.name, email: user?.email),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final String sub;
+  final IconData icon;
+  final bool highlight;
+  const _MiniStat({required this.label, required this.value, required this.sub, required this.icon, this.highlight = false});
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(icon, size: 11, color: highlight ? AppColors.brand : AppColors.textTertiary),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500)),
+        ]),
+        const SizedBox(height: 4),
+        Text(value, style: TextStyle(color: highlight ? AppColors.brand : AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
+        Text(sub, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+      ]),
     );
   }
 }
@@ -146,28 +559,39 @@ class _ActionTile extends StatelessWidget {
   final String label;
   final String hint;
   final bool primary;
+  final String? badge;
+  final Color? badgeColor;
   final VoidCallback onTap;
-  const _ActionTile({required this.icon, required this.label, required this.hint, this.primary = false, required this.onTap});
+  const _ActionTile({required this.icon, required this.label, required this.hint, this.primary = false, this.badge, this.badgeColor, required this.onTap});
   @override
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
       padding: const EdgeInsets.all(14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: primary ? AppColors.brand : AppColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: primary ? AppColors.brand : AppColors.border),
+        Row(children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: primary ? AppColors.brand : AppColors.surfaceMuted,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: primary ? AppColors.brand : AppColors.border),
+            ),
+            child: Icon(icon, color: primary ? Colors.white : AppColors.textSecondary, size: 20),
           ),
-          child: Icon(icon, color: primary ? Colors.white : AppColors.textSecondary, size: 20),
-        ),
+          const Spacer(),
+          if (badge != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(color: (badgeColor ?? AppColors.brand).withOpacity(0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: (badgeColor ?? AppColors.brand).withOpacity(0.2))),
+              child: Text(badge!, style: TextStyle(color: badgeColor ?? AppColors.brand, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
+            ),
+        ]),
         const Spacer(),
         Text(label, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: -0.1)),
         const SizedBox(height: 2),
-        Text(hint, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+        Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
         const SizedBox(height: 8),
         Row(children: [
           Text(primary ? 'Browse' : 'Open',
@@ -183,7 +607,9 @@ class _ActionTile extends StatelessWidget {
 class _StudentDrawer extends ConsumerWidget {
   final String? userName;
   final String? email;
-  const _StudentDrawer({this.userName, this.email});
+  final int cartCount;
+  final int orderCount;
+  const _StudentDrawer({this.userName, this.email, this.cartCount = 0, this.orderCount = 0});
   @override
   Widget build(BuildContext context, WidgetRef ref) => Drawer(
         backgroundColor: AppColors.surface,
@@ -197,12 +623,18 @@ class _StudentDrawer extends ConsumerWidget {
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(userName ?? '', style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
                 Text(email ?? '', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                const SizedBox(height: 4),
+                Row(children: [
+                  _DrawerPill(icon: Icons.shopping_bag_outlined, label: '$cartCount in cart'),
+                  const SizedBox(width: 6),
+                  _DrawerPill(icon: Icons.receipt_long_rounded, label: '$orderCount orders'),
+                ]),
               ])),
             ]),
           ),
           _dTile(Icons.storefront_rounded, 'Browse food', () => context.go('/student/vendors')),
-          _dTile(Icons.receipt_long_rounded, 'My orders', () => context.go('/student/orders')),
-          _dTile(Icons.shopping_bag_outlined, 'Cart', () => context.go('/student/cart')),
+          _dTile(Icons.receipt_long_rounded, 'My orders', () => context.go('/student/orders'), trailing: orderCount > 0 ? '$orderCount' : null),
+          _dTile(Icons.shopping_bag_outlined, 'Cart', () => context.go('/student/cart'), trailing: cartCount > 0 ? '$cartCount' : null),
           _dTile(Icons.person_outline_rounded, 'Profile', () => context.go('/student/profile')),
           const Divider(color: AppColors.border, height: 1),
           _dTile(Icons.logout_rounded, 'Sign out', () async {
@@ -212,6 +644,23 @@ class _StudentDrawer extends ConsumerWidget {
           const Padding(padding: EdgeInsets.all(16), child: Text('Demo • Mock payments', style: TextStyle(fontSize: 11, color: AppColors.textTertiary))),
         ]),
       );
-  Widget _dTile(IconData ic, String t, VoidCallback onTap, {Color color = AppColors.textPrimary}) =>
-      ListTile(leading: Icon(ic, color: color, size: 20), title: Text(t, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w500)), onTap: onTap);
+  Widget _dTile(IconData ic, String t, VoidCallback onTap, {Color color = AppColors.textPrimary, String? trailing}) =>
+      ListTile(
+        leading: Icon(ic, color: color, size: 20),
+        title: Text(t, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w500)),
+        trailing: trailing == null ? null : Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(20)), child: Text(trailing, style: const TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w700))),
+        onTap: onTap,
+      );
+}
+
+class _DrawerPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _DrawerPill({required this.icon, required this.label});
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
+        child: Row(children: [Icon(icon, size: 10, color: AppColors.textTertiary), const SizedBox(width: 4), Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w600))]),
+      );
 }

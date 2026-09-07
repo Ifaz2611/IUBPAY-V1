@@ -20,6 +20,8 @@ DateTime? tryParseDate(String? raw) {
 
 /// Compact amount for tables: e.g. "৳180" or "৳1,250" with grouping if desired.
 /// Keep whole-taka integer formatting for now; no decimals.
+///
+///
 String takaCompact(int amount) {
   final f = NumberFormat.decimalPattern();
   return '\u09f3${f.format(amount)}';

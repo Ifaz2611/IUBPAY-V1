@@ -50,7 +50,7 @@ B. Run frontend with correct API_BASE_URL:
 cd frontend
 # Windows desktop
 flutter run -d windows --dart-define=API_BASE_URL=http://localhost:8000/api
-# Chrome / Edge
+# Chrome
 flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api
 # Physical Android phone (same Wi-Fi, USB debugging)
 flutter run --dart-define=API_BASE_URL=http://192.168.0.103:8000/api

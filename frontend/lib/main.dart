@@ -21,7 +21,7 @@ class IubCafeteriaApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
-      title: 'IUB PAY',
+      title: 'IUB PAY v1',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routerConfig: router,

@@ -371,15 +371,19 @@ class SectionHeader extends StatelessWidget {
   const SectionHeader({super.key, required this.title, this.subtitle, this.action});
   @override
   Widget build(BuildContext context) => Row(children: [
-        Expanded(
+        Flexible(
+            fit: FlexFit.loose,
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
-          if (subtitle != null) ...[
-            const SizedBox(height: 2),
-            Text(subtitle!, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
-          ]
-        ])),
-        if (action != null) action!,
+              Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(subtitle!, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+              ]
+            ])),
+        if (action != null) ...[
+          const SizedBox(width: 12),
+          action!,
+        ],
       ]);
 }
 

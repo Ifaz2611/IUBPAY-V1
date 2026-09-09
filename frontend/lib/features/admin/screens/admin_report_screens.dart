@@ -14,7 +14,7 @@ class ReportsScreen extends ConsumerWidget {
     final summary = ref.watch(adminSummaryProvider);
     final daily = ref.watch(dailyReportProvider);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(title: 'Reports', subtitle: 'Sales and revenue', onBack: () => context.go('/admin')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         summary.when(
@@ -41,17 +41,17 @@ class ReportsScreen extends ConsumerWidget {
                     if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('CSV exported (${r.data.toString().length} bytes)')));
                   } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(apiErrorMessage(e)))); }
                 },
-                icon: const Icon(Icons.download_outlined, size: 16),
+                icon: Icon(Icons.download_outlined, size: 16),
                 label: const Text('Export CSV', style: TextStyle(fontSize: 13)),
               ),
             ),
           ]),
         ),
         const SizedBox(height: 20),
-        const SectionHeader(title: 'Daily sales', subtitle: 'Last 14 days'),
-        const SizedBox(height: 10),
+        SectionHeader(title: 'Daily sales', subtitle: 'Last 14 days'),
+        SizedBox(height: 10),
         daily.when(
-          loading: () => const LoadingView(),
+          loading: () => LoadingView(),
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(dailyReportProvider)),
           data: (rows) {
             final maxSales = rows.fold<int>(1, (m, r) => m > (r['sales_taka'] as int) ? m : r['sales_taka'] as int);
@@ -59,12 +59,12 @@ class ReportsScreen extends ConsumerWidget {
               child: Column(children: [
                 for (final r in rows.reversed)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    padding: EdgeInsets.symmetric(vertical: 5),
                     child: Row(children: [
-                      SizedBox(width: 56, child: Text((r['date'] as String).substring(5), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500))),
-                      Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(6), child: LinearProgressIndicator(value: maxSales == 0 ? 0 : (r['sales_taka'] as int) / maxSales, minHeight: 10, backgroundColor: AppColors.surfaceMuted, valueColor: const AlwaysStoppedAnimation(AppColors.brand)))),
-                      const SizedBox(width: 8),
-                      SizedBox(width: 64, child: Text(taka(r['sales_taka'] as int), textAlign: TextAlign.right, style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w600))),
+                      SizedBox(width: 56, child: Text((r['date'] as String).substring(5), style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500))),
+                      Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(6), child: LinearProgressIndicator(value: maxSales == 0 ? 0 : (r['sales_taka'] as int) / maxSales, minHeight: 10, backgroundColor: AppColors.surfaceMuted, valueColor: AlwaysStoppedAnimation(AppColors.brand)))),
+                      SizedBox(width: 8),
+                      SizedBox(width: 64, child: Text(taka(r['sales_taka'] as int), textAlign: TextAlign.right, style: TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w600))),
                     ]),
                   ),
               ]),
@@ -77,11 +77,11 @@ class ReportsScreen extends ConsumerWidget {
 
   Widget _card(String label, String value, {bool highlight = false, bool big = false}) => Container(
         width: 160,
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14),
         decoration: BoxDecoration(color: highlight ? AppColors.errorBg : AppColors.surface, borderRadius: BorderRadius.circular(AppRadii.md), border: Border.all(color: highlight ? AppColors.errorBorder : AppColors.border)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500)),
-          const SizedBox(height: 6),
+          Text(label, style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500)),
+          SizedBox(height: 6),
           Text(value, style: TextStyle(color: highlight ? AppColors.error : AppColors.textPrimary, fontSize: big ? 18 : 16, fontWeight: FontWeight.w700, letterSpacing: -0.3)),
         ]),
       );
@@ -93,27 +93,27 @@ class UserManagementScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final users = ref.watch(adminUsersProvider);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(title: 'Users', subtitle: 'Directory', onBack: () => context.go('/admin')),
       body: users.when(
-        loading: () => const LoadingView(),
+        loading: () => LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(adminUsersProvider)),
         data: (list) => list.isEmpty
-            ? const EmptyView(message: 'No users.')
+            ? EmptyView(message: 'No users.')
             : ListView.separated(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 itemCount: list.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, __) => SizedBox(height: 8),
                 itemBuilder: (_, i) {
                   final u = list[i];
                   final isActive = u['status'] == 'ACTIVE';
                   return AppCard(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(12),
                     child: Row(children: [
-                      Container(width: 36, height: 36, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surfaceMuted, border: Border.all(color: AppColors.border)), child: Center(child: Text((u['role'] as String)[0].toUpperCase(), style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w700, fontSize: 12)))),
-                      const SizedBox(width: 12),
-                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(u['name'], style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)), Text('${u['email']} • ${u['role']}', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: isActive ? AppColors.successBg : AppColors.errorBg, borderRadius: BorderRadius.circular(6), border: Border.all(color: isActive ? AppColors.successBorder : AppColors.errorBorder)), child: Text(u['status'], style: TextStyle(color: isActive ? AppColors.success : AppColors.error, fontSize: 10, fontWeight: FontWeight.w700))),
+                      Container(width: 36, height: 36, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surfaceMuted, border: Border.all(color: AppColors.border)), child: Center(child: Text((u['role'] as String)[0].toUpperCase(), style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w700, fontSize: 12)))),
+                      SizedBox(width: 12),
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(u['name'], style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)), Text('${u['email']} • ${u['role']}', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+                      Container(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: isActive ? AppColors.successBg : AppColors.errorBg, borderRadius: BorderRadius.circular(6), border: Border.all(color: isActive ? AppColors.successBorder : AppColors.errorBorder)), child: Text(u['status'], style: TextStyle(color: isActive ? AppColors.success : AppColors.error, fontSize: 10, fontWeight: FontWeight.w700))),
                     ]),
                   );
                 },

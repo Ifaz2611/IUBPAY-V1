@@ -80,18 +80,18 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         titleSpacing: 16,
-        backgroundColor: AppColors.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Vendor', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.6, color: AppColors.textTertiary)),
-          Text(user?.name ?? 'My stall', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: -0.2), overflow: TextOverflow.ellipsis),
+          Text('Vendor', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.6, color: AppColors.textTertiary)),
+          Text(user?.name ?? 'My stall', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: -0.2), overflow: TextOverflow.ellipsis),
         ]),
         actions: [
           // live pill
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: incomingCount > 0 ? AppColors.warningBg : AppColors.successBg,
               borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -99,85 +99,87 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
             ),
             child: Row(children: [
               Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: incomingCount > 0 ? AppColors.warning : AppColors.success)),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               Text(incomingCount > 0 ? '$incomingCount live' : 'All caught up', style: TextStyle(color: incomingCount > 0 ? AppColors.warning : AppColors.success, fontSize: 11, fontWeight: FontWeight.w700)),
             ]),
           ),
-          const SizedBox(width: 8),
-          IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh_rounded, size: 20), onPressed: _refreshAll),
-          const SizedBox(width: 2),
+          ThemeToggleButton(),
+          SizedBox(width: 4),
+          IconButton(tooltip: 'Refresh', icon: Icon(Icons.refresh_rounded, size: 20), onPressed: _refreshAll),
+          SizedBox(width: 2),
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(right: 8),
             child: InkWell(
               borderRadius: BorderRadius.circular(20),
               onTap: () => context.go('/student/profile'),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
                 child: Row(children: [
-                  Container(width: 26, height: 26, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.brand), child: Center(child: Text((user?.name ?? 'V')[0].toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)))),
-                  const SizedBox(width: 6),
-                  Text(user?.name.split(' ').first ?? 'Vendor', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                  Container(width: 26, height: 26, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.brand), child: Center(child: Text((user?.name ?? 'V')[0].toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)))),
+                  SizedBox(width: 6),
+                  Text(user?.name.split(' ').first ?? 'Vendor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                 ]),
               ),
             ),
           ),
-          IconButton(icon: const Icon(Icons.logout_rounded, size: 18), tooltip: 'Sign out', onPressed: () async { await ref.read(authProvider.notifier).logout(); if (context.mounted) context.go('/login'); }),
-          const SizedBox(width: 4),
+          IconButton(icon: Icon(Icons.logout_rounded, size: 18), tooltip: 'Sign out', onPressed: () async { await ref.read(authProvider.notifier).logout(); if (context.mounted) context.go('/login'); }),
+          SizedBox(width: 4),
         ],
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),
+        bottom: PreferredSize(preferredSize: Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),
       ),
       drawer: wide
           ? null
           : Drawer(
-              backgroundColor: AppColors.surface,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               child: ListView(padding: EdgeInsets.zero, children: [
                 Container(
-                  padding: const EdgeInsets.fromLTRB(20, 48, 20, 20),
-                  decoration: const BoxDecoration(color: AppColors.surfaceMuted, border: Border(bottom: BorderSide(color: AppColors.border))),
+                  padding: EdgeInsets.fromLTRB(20, 48, 20, 20),
+                  decoration: BoxDecoration(color: AppColors.surfaceMuted, border: Border(bottom: BorderSide(color: AppColors.border))),
                   child: Row(children: [
-                    Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.storefront_rounded, color: Colors.white, size: 20)),
-                    const SizedBox(width: 12),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(user?.name ?? 'Vendor', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)), const Text('Vendor workspace', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+                    Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(10)), child: Icon(Icons.storefront_rounded, color: Colors.white, size: 20)),
+                    SizedBox(width: 12),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(user?.name ?? 'Vendor', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)), Text('Vendor workspace', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
                   ]),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 for (final t in navTiles)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     child: ListTile(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: (t.$5).withOpacity(0.1), borderRadius: BorderRadius.circular(8)), child: Icon(t.$1, color: t.$5, size: 18)),
-                      title: Text(t.$2, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                      subtitle: Text(t.$3, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
-                      trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textTertiary),
+                      title: Text(t.$2, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      subtitle: Text(t.$3, style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                      trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textTertiary),
                       onTap: () => context.go(t.$4),
                     ),
                   ),
-                const Divider(height: 16),
-                ListTile(leading: const Icon(Icons.logout_rounded, color: AppColors.error, size: 20), title: const Text('Sign out', style: TextStyle(color: AppColors.error, fontSize: 14)), onTap: () async { await ref.read(authProvider.notifier).logout(); if (context.mounted) context.go('/login'); }),
+                Divider(height: 16),
+                ThemeToggleTile(),
+                ListTile(leading: Icon(Icons.logout_rounded, color: AppColors.error, size: 20), title: Text('Sign out', style: TextStyle(color: AppColors.error, fontSize: 14)), onTap: () async { await ref.read(authProvider.notifier).logout(); if (context.mounted) context.go('/login'); }),
               ]),
             ),
       body: RefreshIndicator(
         color: AppColors.brand,
-        backgroundColor: AppColors.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         onRefresh: _refreshAll,
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+          physics: AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 32),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
+              constraints: BoxConstraints(maxWidth: 1200),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 // ── Greeting + date strip ──
                 AppCard(
-                  padding: const EdgeInsets.all(14),
+                  padding: EdgeInsets.all(14),
                   child: Row(children: [
-                    Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)), child: const Icon(Icons.waving_hand_rounded, size: 20, color: AppColors.brand)),
-                    const SizedBox(width: 12),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_greeting(user?.name.split(' ').first ?? 'there'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -0.2)), const SizedBox(height: 2), Text(formatDate(DateTime.now()) + ' • Tap any card to act', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+                    Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)), child: Icon(Icons.waving_hand_rounded, size: 20, color: AppColors.brand)),
+                    SizedBox(width: 12),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_greeting(user?.name.split(' ').first ?? 'there'), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -0.2)), SizedBox(height: 2), Text(formatDate(DateTime.now()) + ' • Tap any card to act', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
                     if (wide)
-                      FilledButton.icon(onPressed: () => context.go('/vendor/orders'), icon: const Icon(Icons.play_arrow_rounded, size: 18), label: Text(incomingCount > 0 ? 'Process $incomingCount' : 'View orders'), style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), minimumSize: const Size(0, 36))),
+                      FilledButton.icon(onPressed: () => context.go('/vendor/orders'), icon: Icon(Icons.play_arrow_rounded, size: 18), label: Text(incomingCount > 0 ? 'Process $incomingCount' : 'View orders'), style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), minimumSize: const Size(0, 36))),
                   ]),
                 ),
                 const SizedBox(height: 16),
@@ -218,10 +220,10 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
 
                 // ── Manage tiles ──
                 const SectionHeader(title: 'Manage', subtitle: 'Quick navigation'),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 GridView.count(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: NeverScrollableScrollPhysics(),
                   crossAxisCount: isTablet ? 3 : 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
@@ -242,22 +244,22 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
                   ])
                 else ...[
                   _LiveQueueCard(ordersAsync: ordersAsync, statusFilter: _statusFilter, search: _search, onFilterChanged: (v) => setState(() => _statusFilter = v), onSearchChanged: (v) => setState(() => _search = v)),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _MenuHealthCard(menuAsync: menuAsync),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _TopItemsCard(orders: orders),
                 ],
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // ── Recent activity ──
                 _RecentActivityCard(orders: orders),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 AppCard(
-                  padding: const EdgeInsets.all(14),
+                  padding: EdgeInsets.all(14),
                   child: Row(children: [
-                    Container(width: 36, height: 36, decoration: BoxDecoration(color: AppColors.infoBg, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.border)), child: const Icon(Icons.tips_and_updates_outlined, size: 18, color: AppColors.info)),
-                    const SizedBox(width: 12),
-                    const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Pro tip', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)), SizedBox(height: 2), Text('Accept orders quickly — students are notified instantly. Use pull-to-refresh to catch new PAID orders.', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, height: 1.3))])),
+                    Container(width: 36, height: 36, decoration: BoxDecoration(color: AppColors.infoBg, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.border)), child: Icon(Icons.tips_and_updates_outlined, size: 18, color: AppColors.info)),
+                    SizedBox(width: 12),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Pro tip', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)), SizedBox(height: 2), Text('Accept orders quickly — students are notified instantly. Use pull-to-refresh to catch new PAID orders.', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, height: 1.3))])),
                   ]),
                 ),
               ]),
@@ -289,7 +291,7 @@ class _VendorKpiGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: isTablet ? 4 : 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: isTablet ? 1.65 : 1.45),
       children: [
         _VKpi(icon: Icons.local_fire_department_rounded, label: 'Live queue', value: '$live', sub: live > 0 ? '${taka(liveRevenue)} pending' : 'All clear', accent: live > 0 ? AppColors.warning : AppColors.success, highlight: live > 0, onTap: () => context.go('/vendor/orders')),
@@ -311,7 +313,7 @@ class _VKpi extends StatefulWidget {
   final Color accent;
   final bool highlight, isAction;
   final VoidCallback onTap;
-  const _VKpi({required this.icon, required this.label, required this.value, required this.sub, required this.accent, this.highlight = false, this.isAction = false, required this.onTap});
+  _VKpi({required this.icon, required this.label, required this.value, required this.sub, required this.accent, this.highlight = false, this.isAction = false, required this.onTap});
   @override
   State<_VKpi> createState() => _VKpiState();
 }
@@ -324,7 +326,7 @@ class _VKpiState extends State<_VKpi> {
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
+        duration: Duration(milliseconds: 160),
         decoration: BoxDecoration(color: widget.highlight ? AppColors.warningBg : AppColors.surface, borderRadius: BorderRadius.circular(AppRadii.lg), border: Border.all(color: widget.highlight ? AppColors.border : (_hover ? AppColors.borderStrong : AppColors.border)), boxShadow: _hover ? AppShadows.cardHover : AppShadows.card),
         child: Material(
           color: Colors.transparent,
@@ -332,18 +334,18 @@ class _VKpiState extends State<_VKpi> {
             borderRadius: BorderRadius.circular(AppRadii.lg),
             onTap: widget.onTap,
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
                   Container(width: 32, height: 32, decoration: BoxDecoration(color: widget.accent.withOpacity(0.1), borderRadius: BorderRadius.circular(8), border: Border.all(color: widget.accent.withOpacity(0.15))), child: Icon(widget.icon, size: 16, color: widget.accent)),
-                  const Spacer(),
+                  Spacer(),
                   Icon(widget.isAction ? Icons.open_in_new_rounded : Icons.chevron_right_rounded, size: 14, color: AppColors.textTertiary),
                 ]),
-                const Spacer(),
-                Text(widget.label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.2)),
-                const SizedBox(height: 4),
+                Spacer(),
+                Text(widget.label, style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.2)),
+                SizedBox(height: 4),
                 Text(widget.value, style: TextStyle(color: widget.highlight ? AppColors.warning : AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(widget.sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: widget.highlight ? AppColors.warning : AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500)),
               ]),
             ),
@@ -356,17 +358,17 @@ class _VKpiState extends State<_VKpi> {
 
 class _VendorKpiSkeleton extends StatelessWidget {
   final bool isTablet;
-  const _VendorKpiSkeleton({required this.isTablet});
+  _VendorKpiSkeleton({required this.isTablet});
   @override
-  Widget build(BuildContext context) => GridView.count(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: isTablet ? 4 : 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: isTablet ? 1.65 : 1.45, children: List.generate(8, (_) => AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(height: 32, width: 32, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8))), const Spacer(), Container(height: 10, width: 60, color: AppColors.surfaceMuted), const SizedBox(height: 8), Container(height: 18, width: 70, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)))]))));
+  Widget build(BuildContext context) => GridView.count(shrinkWrap: true, physics: NeverScrollableScrollPhysics(), crossAxisCount: isTablet ? 4 : 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: isTablet ? 1.65 : 1.45, children: List.generate(8, (_) => AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(height: 32, width: 32, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8))), Spacer(), Container(height: 10, width: 60, color: AppColors.surfaceMuted), SizedBox(height: 8), Container(height: 18, width: 70, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)))]))));
 }
 
 class _VendorErrorCard extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
-  const _VendorErrorCard({required this.message, required this.onRetry});
+  _VendorErrorCard({required this.message, required this.onRetry});
   @override
-  Widget build(BuildContext context) => AppCard(child: Row(children: [Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: AppColors.errorBg, shape: BoxShape.circle, border: Border.all(color: AppColors.errorBorder)), child: const Icon(Icons.wifi_off_rounded, color: AppColors.error, size: 18)), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Couldn’t load orders', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)), const SizedBox(height: 2), Text(message, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11))])), TextButton(onPressed: onRetry, child: const Text('Retry'))]));
+  Widget build(BuildContext context) => AppCard(child: Row(children: [Container(padding: EdgeInsets.all(10), decoration: BoxDecoration(color: AppColors.errorBg, shape: BoxShape.circle, border: Border.all(color: AppColors.errorBorder)), child: Icon(Icons.wifi_off_rounded, color: AppColors.error, size: 18)), SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Couldn’t load orders', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)), SizedBox(height: 2), Text(message, style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])), TextButton(onPressed: onRetry, child: Text('Retry'))]));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -404,22 +406,22 @@ class _VendorSalesChart extends StatelessWidget {
     final totalWeek = salesPerDay.fold<int>(0, (a, b) => a + b);
 
     return AppCard(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      padding: EdgeInsets.fromLTRB(16, 14, 16, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Weekly sales', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -0.2)), SizedBox(height: 2), Text('Tap a bar • last 7 days', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
-          Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)), child: Text(taka(totalWeek) + ' this week', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.brand))),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Weekly sales', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -0.2)), SizedBox(height: 2), Text('Tap a bar • last 7 days', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+          Container(padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)), child: Text(taka(totalWeek) + ' this week', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.brand))),
         ]),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         SizedBox(
           height: 150,
           child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text(takaCompact(maxSales), style: const TextStyle(fontSize: 9, color: AppColors.textTertiary, fontWeight: FontWeight.w600)),
-              Text(takaCompact((maxSales / 2).round()), style: const TextStyle(fontSize: 9, color: AppColors.textTertiary)),
-              const Text('৳0', style: TextStyle(fontSize: 9, color: AppColors.textTertiary)),
+              Text(takaCompact(maxSales), style: TextStyle(fontSize: 9, color: AppColors.textTertiary, fontWeight: FontWeight.w600)),
+              Text(takaCompact((maxSales / 2).round()), style: TextStyle(fontSize: 9, color: AppColors.textTertiary)),
+              Text('৳0', style: TextStyle(fontSize: 9, color: AppColors.textTertiary)),
             ]),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 for (int i = 0; i < 7; i++) ...[
@@ -428,7 +430,7 @@ class _VendorSalesChart extends StatelessWidget {
                       onTap: () => onBarTap(i),
                       child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
                         AnimatedContainer(
-                          duration: const Duration(milliseconds: 350),
+                          duration: Duration(milliseconds: 350),
                           curve: Curves.easeOutCubic,
                           height: math.max(4, 110 * (salesPerDay[i] / maxSales)),
                           decoration: BoxDecoration(
@@ -437,39 +439,39 @@ class _VendorSalesChart extends StatelessWidget {
                             border: Border.all(color: selectedBar == i ? AppColors.brandPressed : Colors.transparent, width: 1.4),
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: 6),
                         Text(_weekday(days[i]), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: selectedBar == i ? AppColors.textPrimary : AppColors.textTertiary)),
-                        Text('${days[i].month}/${days[i].day}', style: const TextStyle(fontSize: 8, color: AppColors.textTertiary)),
+                        Text('${days[i].month}/${days[i].day}', style: TextStyle(fontSize: 8, color: AppColors.textTertiary)),
                       ]),
                     ),
                   ),
-                  if (i != 6) const SizedBox(width: 6),
+                  if (i != 6) SizedBox(width: 6),
                 ],
               ]),
             ),
           ]),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         if (selectedBar != null)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
             child: Row(children: [
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(formatDate(days[selectedBar!]), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)), const SizedBox(height: 2), Text('${byDay[days[selectedBar!].toIso8601String().substring(0, 10)]!.length} orders • ${taka(salesPerDay[selectedBar!])}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11))])),
-              IconButton(onPressed: () => onBarTap(selectedBar!), icon: const Icon(Icons.close_rounded, size: 16), style: IconButton.styleFrom(backgroundColor: AppColors.surface, side: const BorderSide(color: AppColors.border))),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(formatDate(days[selectedBar!]), style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)), SizedBox(height: 2), Text('${byDay[days[selectedBar!].toIso8601String().substring(0, 10)]!.length} orders • ${taka(salesPerDay[selectedBar!])}', style: TextStyle(color: AppColors.textSecondary, fontSize: 11))])),
+              IconButton(onPressed: () => onBarTap(selectedBar!), icon: Icon(Icons.close_rounded, size: 16), style: IconButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, side: BorderSide(color: AppColors.border))),
             ]),
           )
         else
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
             child: Row(children: [
-              Container(width: 28, height: 28, decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(7), border: Border.all(color: AppColors.border)), child: const Icon(Icons.insights_outlined, size: 14, color: AppColors.textSecondary)),
-              const SizedBox(width: 10),
-              Expanded(child: Text('${orders.length} total orders • avg ${orders.isEmpty ? taka(0) : taka((orders.fold<int>(0, (s, o) => s + o.totalAmount) / orders.length).round())} / order', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w500))),
-              InkWell(onTap: () => context.go('/vendor/sales'), child: const Text('Details →', style: TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w700))),
+              Container(width: 28, height: 28, decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(7), border: Border.all(color: AppColors.border)), child: Icon(Icons.insights_outlined, size: 14, color: AppColors.textSecondary)),
+              SizedBox(width: 10),
+              Expanded(child: Text('${orders.length} total orders • avg ${orders.isEmpty ? taka(0) : taka((orders.fold<int>(0, (s, o) => s + o.totalAmount) / orders.length).round())} / order', style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w500))),
+              InkWell(onTap: () => context.go('/vendor/sales'), child: Text('Details →', style: TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w700))),
             ]),
           ),
       ]),
@@ -498,12 +500,12 @@ class _PipelineCard extends StatelessWidget {
     final steps = ['PAID', 'ACCEPTED', 'PREPARING', 'READY', 'COLLECTED'];
     final icons = [Icons.payments_outlined, Icons.check_circle_outline_rounded, Icons.soup_kitchen_rounded, Icons.done_all_rounded, Icons.takeout_dining_rounded];
     return AppCard(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Order pipeline', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -0.2)),
-        const SizedBox(height: 2),
-        const Text('Where every order sits', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
-        const SizedBox(height: 14),
+        Text('Order pipeline', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -0.2)),
+        SizedBox(height: 2),
+        Text('Where every order sits', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+        SizedBox(height: 14),
         Row(children: [
           for (int i = 0; i < steps.length; i++) ...[
             Expanded(
@@ -517,16 +519,16 @@ class _PipelineCard extends StatelessWidget {
                   ),
                   child: Icon(icons[i], size: 16, color: counts[steps[i]]! > 0 ? Colors.white : AppColors.textTertiary),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 Text(steps[i], style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: counts[steps[i]]! > 0 ? AppColors.textPrimary : AppColors.textTertiary)),
-                const SizedBox(height: 2),
-                Container(padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2), decoration: BoxDecoration(color: counts[steps[i]]! > 0 ? AppColors.brandSubtle : AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)), child: Text('${counts[steps[i]]}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: counts[steps[i]]! > 0 ? AppColors.brand : AppColors.textTertiary))),
+                SizedBox(height: 2),
+                Container(padding: EdgeInsets.symmetric(horizontal: 7, vertical: 2), decoration: BoxDecoration(color: counts[steps[i]]! > 0 ? AppColors.brandSubtle : AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)), child: Text('${counts[steps[i]]}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: counts[steps[i]]! > 0 ? AppColors.brand : AppColors.textTertiary))),
               ]),
             ),
-            if (i != steps.length - 1) Container(width: 12, height: 2, color: AppColors.border, margin: const EdgeInsets.only(bottom: 22)),
+            if (i != steps.length - 1) Container(width: 12, height: 2, color: AppColors.border, margin: EdgeInsets.only(bottom: 22)),
           ],
         ]),
-        const SizedBox(height: 14),
+        SizedBox(height: 14),
         ClipRRect(
           borderRadius: BorderRadius.circular(6),
           child: Row(children: [
@@ -540,7 +542,7 @@ class _PipelineCard extends StatelessWidget {
         const SizedBox(height: 10),
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(onPressed: () => context.go('/vendor/orders'), icon: const Icon(Icons.visibility_outlined, size: 14), label: const Text('Open queue', style: TextStyle(fontSize: 12))),
+          child: OutlinedButton.icon(onPressed: () => context.go('/vendor/orders'), icon: Icon(Icons.visibility_outlined, size: 14), label: const Text('Open queue', style: TextStyle(fontSize: 12))),
         ),
       ]),
     );
@@ -556,7 +558,7 @@ class _VendorManageTile extends StatefulWidget {
   final String label, subtitle, route;
   final Color color;
   final String? badge;
-  const _VendorManageTile({required this.icon, required this.label, required this.subtitle, required this.color, required this.route, this.badge});
+  _VendorManageTile({required this.icon, required this.label, required this.subtitle, required this.color, required this.route, this.badge});
   @override
   State<_VendorManageTile> createState() => _VendorManageTileState();
 }
@@ -568,7 +570,7 @@ class _VendorManageTileState extends State<_VendorManageTile> {
         onEnter: (_) => setState(() => _hover = true),
         onExit: (_) => setState(() => _hover = false),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
+          duration: Duration(milliseconds: 160),
           decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadii.lg), border: Border.all(color: _hover ? widget.color.withOpacity(0.25) : AppColors.border), boxShadow: _hover ? AppShadows.cardHover : AppShadows.card),
           child: Material(
             color: Colors.transparent,
@@ -576,17 +578,17 @@ class _VendorManageTileState extends State<_VendorManageTile> {
               borderRadius: BorderRadius.circular(AppRadii.lg),
               onTap: () => context.go(widget.route),
               child: Padding(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
                     Container(width: 40, height: 40, decoration: BoxDecoration(color: widget.color.withOpacity(0.1), borderRadius: BorderRadius.circular(10), border: Border.all(color: widget.color.withOpacity(0.18))), child: Icon(widget.icon, color: widget.color, size: 20)),
-                    const Spacer(),
-                    if (widget.badge != null) Container(padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3), decoration: BoxDecoration(color: AppColors.warningBg, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)), child: Text(widget.badge!, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.warning))),
+                    Spacer(),
+                    if (widget.badge != null) Container(padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3), decoration: BoxDecoration(color: AppColors.warningBg, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)), child: Text(widget.badge!, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.warning))),
                   ]),
-                  const Spacer(),
-                  Text(widget.label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -0.2)),
-                  const SizedBox(height: 2),
-                  Text(widget.subtitle, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                  Spacer(),
+                  Text(widget.label, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: -0.2)),
+                  SizedBox(height: 2),
+                  Text(widget.subtitle, style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                   const SizedBox(height: 8),
                   Row(children: [Text('Open', style: TextStyle(color: widget.color, fontSize: 11, fontWeight: FontWeight.w700)), const SizedBox(width: 4), Icon(Icons.arrow_forward_rounded, size: 12, color: widget.color)]),
                 ]),
@@ -607,7 +609,7 @@ class _LiveQueueCard extends ConsumerWidget {
   final String search;
   final ValueChanged<String> onFilterChanged;
   final ValueChanged<String> onSearchChanged;
-  const _LiveQueueCard({required this.ordersAsync, required this.statusFilter, required this.search, required this.onFilterChanged, required this.onSearchChanged});
+  _LiveQueueCard({required this.ordersAsync, required this.statusFilter, required this.search, required this.onFilterChanged, required this.onSearchChanged});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -615,28 +617,28 @@ class _LiveQueueCard extends ConsumerWidget {
       padding: EdgeInsets.zero,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+          padding: EdgeInsets.fromLTRB(14, 14, 14, 10),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Container(width: 28, height: 28, decoration: BoxDecoration(color: AppColors.warningBg, borderRadius: BorderRadius.circular(7), border: Border.all(color: AppColors.border)), child: const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.warning)),
-              const SizedBox(width: 10),
-              const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Live queue', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), Text('Filter, search & take action', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
-              TextButton(onPressed: () => context.go('/vendor/orders'), child: const Text('View all', style: TextStyle(fontSize: 12))),
+              Container(width: 28, height: 28, decoration: BoxDecoration(color: AppColors.warningBg, borderRadius: BorderRadius.circular(7), border: Border.all(color: AppColors.border)), child: Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.warning)),
+              SizedBox(width: 10),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Live queue', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), Text('Filter, search & take action', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+              TextButton(onPressed: () => context.go('/vendor/orders'), child: Text('View all', style: TextStyle(fontSize: 12))),
             ]),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
-              decoration: InputDecoration(hintText: 'Search pickup code or order #', prefixIcon: const Icon(Icons.search_rounded, size: 16), isDense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border))),
+              decoration: InputDecoration(hintText: 'Search pickup code or order #', prefixIcon: Icon(Icons.search_rounded, size: 16), isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.border))),
               onChanged: onSearchChanged,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(children: [
                 for (final s in ['ALL', 'PAID', 'ACCEPTED', 'PREPARING', 'READY'])
                   Padding(
-                    padding: const EdgeInsets.only(right: 6),
+                    padding: EdgeInsets.only(right: 6),
                     child: ChoiceChip(
-                      label: Text(s, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                      label: Text(s, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                       selected: statusFilter == s,
                       selectedColor: AppColors.brandSubtle,
                       side: BorderSide(color: statusFilter == s ? AppColors.brand : AppColors.border),
@@ -648,10 +650,10 @@ class _LiveQueueCard extends ConsumerWidget {
             ),
           ]),
         ),
-        const Divider(height: 1),
+        Divider(height: 1),
         ordersAsync.when(
-          loading: () => const Padding(padding: EdgeInsets.all(24), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
-          error: (e, _) => Padding(padding: const EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: const TextStyle(color: AppColors.textTertiary, fontSize: 12))),
+          loading: () => Padding(padding: EdgeInsets.all(24), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
+          error: (e, _) => Padding(padding: EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: TextStyle(color: AppColors.textTertiary, fontSize: 12))),
           data: (list) {
             var filtered = list.where((o) => ['PAID', 'ACCEPTED', 'PREPARING', 'READY'].contains(o.status)).toList();
             if (statusFilter != 'ALL') filtered = filtered.where((o) => o.status == statusFilter).toList();
@@ -662,13 +664,13 @@ class _LiveQueueCard extends ConsumerWidget {
             filtered.sort((a, b) => (a.createdAt ?? DateTime.now()).compareTo(b.createdAt ?? DateTime.now()));
             if (filtered.isEmpty) {
               return Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 child: Column(children: [
-                  Container(width: 48, height: 48, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surfaceMuted, border: Border.all(color: AppColors.border)), child: const Icon(Icons.inbox_outlined, size: 20, color: AppColors.textTertiary)),
-                  const SizedBox(height: 10),
-                  Text(statusFilter == 'ALL' ? 'No live orders. New PAID orders appear here.' : 'No $statusFilter orders', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13), textAlign: TextAlign.center),
+                  Container(width: 48, height: 48, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.surfaceMuted, border: Border.all(color: AppColors.border)), child: Icon(Icons.inbox_outlined, size: 20, color: AppColors.textTertiary)),
+                  SizedBox(height: 10),
+                  Text(statusFilter == 'ALL' ? 'No live orders. New PAID orders appear here.' : 'No $statusFilter orders', style: TextStyle(color: AppColors.textSecondary, fontSize: 13), textAlign: TextAlign.center),
                   const SizedBox(height: 8),
-                  OutlinedButton.icon(onPressed: () => ref.invalidate(myVendorOrdersProvider), icon: const Icon(Icons.refresh_rounded, size: 14), label: const Text('Refresh', style: TextStyle(fontSize: 12))),
+                  OutlinedButton.icon(onPressed: () => ref.invalidate(myVendorOrdersProvider), icon: Icon(Icons.refresh_rounded, size: 14), label: Text('Refresh', style: TextStyle(fontSize: 12))),
                 ]),
               );
             }
@@ -676,17 +678,17 @@ class _LiveQueueCard extends ConsumerWidget {
             return Column(children: [
               for (final o in show)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                  padding: EdgeInsets.fromLTRB(14, 10, 14, 10),
                   child: AppCard(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(12),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
-                        Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6), decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.borderStrong)), child: Text(o.pickupCode, style: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1.6, fontSize: 11))),
-                        const SizedBox(width: 10),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(o.orderNumber, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)), Text('${taka(o.totalAmount)} • ${o.items.length} items • ${o.createdAt != null ? formatTime(o.createdAt!) : ''}', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+                        Container(padding: EdgeInsets.symmetric(horizontal: 9, vertical: 6), decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.borderStrong)), child: Text(o.pickupCode, style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1.6, fontSize: 11))),
+                        SizedBox(width: 10),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(o.orderNumber, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)), Text('${taka(o.totalAmount)} • ${o.items.length} items • ${o.createdAt != null ? formatTime(o.createdAt!) : ''}', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
                         StatusChip(status: o.status),
                       ]),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       Wrap(spacing: 6, runSpacing: 6, children: [
                         if (o.status == 'PAID') _MiniAction(label: 'Accept', icon: Icons.check_rounded, color: AppColors.brand, onTap: () => _setStatus(context, ref, o.id, 'ACCEPTED')),
                         if (o.status == 'ACCEPTED') _MiniAction(label: 'Start cooking', icon: Icons.soup_kitchen_rounded, color: AppColors.brand, onTap: () => _setStatus(context, ref, o.id, 'PREPARING')),
@@ -698,7 +700,7 @@ class _LiveQueueCard extends ConsumerWidget {
                   ),
                 ),
               if (filtered.length > 6)
-                Padding(padding: const EdgeInsets.fromLTRB(14, 0, 14, 12), child: Text('+ ${filtered.length - 6} more • View all to see everything', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11))),
+                Padding(padding: EdgeInsets.fromLTRB(14, 0, 14, 12), child: Text('+ ${filtered.length - 6} more • View all to see everything', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))),
             ]);
           },
         ),
@@ -729,7 +731,7 @@ class _MiniAction extends StatelessWidget {
         height: 30,
         child: outlined
             ? OutlinedButton.icon(onPressed: onTap, icon: Icon(icon, size: 12, color: color), label: Text(label, style: TextStyle(fontSize: 11, color: color)), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 10), side: BorderSide(color: color.withOpacity(0.3))))
-            : FilledButton.icon(onPressed: onTap, icon: Icon(icon, size: 12), label: Text(label, style: const TextStyle(fontSize: 11)), style: FilledButton.styleFrom(backgroundColor: color, padding: const EdgeInsets.symmetric(horizontal: 10))),
+            : FilledButton.icon(onPressed: onTap, icon: Icon(icon, size: 12), label: Text(label, style: TextStyle(fontSize: 11)), style: FilledButton.styleFrom(backgroundColor: color, padding: EdgeInsets.symmetric(horizontal: 10))),
       );
 }
 
@@ -739,59 +741,59 @@ class _MiniAction extends StatelessWidget {
 
 class _MenuHealthCard extends StatelessWidget {
   final AsyncValue<List<MenuItem>> menuAsync;
-  const _MenuHealthCard({required this.menuAsync});
+  _MenuHealthCard({required this.menuAsync});
   @override
   Widget build(BuildContext context) {
     return AppCard(
       padding: EdgeInsets.zero,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+          padding: EdgeInsets.fromLTRB(14, 14, 14, 10),
           child: Row(children: [
-            Container(width: 28, height: 28, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(7), border: Border.all(color: AppColors.border)), child: const Icon(Icons.restaurant_menu_rounded, size: 14, color: AppColors.textSecondary)),
-            const SizedBox(width: 10),
-            const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Menu health', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), Text('Availability at a glance', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
-            TextButton(onPressed: () => context.go('/vendor/menu'), child: const Text('Manage', style: TextStyle(fontSize: 12))),
+            Container(width: 28, height: 28, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(7), border: Border.all(color: AppColors.border)), child: Icon(Icons.restaurant_menu_rounded, size: 14, color: AppColors.textSecondary)),
+            SizedBox(width: 10),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Menu health', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), Text('Availability at a glance', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+            TextButton(onPressed: () => context.go('/vendor/menu'), child: Text('Manage', style: TextStyle(fontSize: 12))),
           ]),
         ),
-        const Divider(height: 1),
+        Divider(height: 1),
         menuAsync.when(
-          loading: () => const Padding(padding: EdgeInsets.all(20), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
-          error: (e, _) => Padding(padding: const EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: const TextStyle(color: AppColors.textTertiary, fontSize: 12))),
+          loading: () => Padding(padding: EdgeInsets.all(20), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
+          error: (e, _) => Padding(padding: EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: TextStyle(color: AppColors.textTertiary, fontSize: 12))),
           data: (items) {
             if (items.isEmpty) {
               return Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 child: Column(children: [
-                  const Text('No menu items yet.', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
-                  const SizedBox(height: 10),
-                  SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: () => context.go('/vendor/menu'), icon: const Icon(Icons.add_rounded, size: 16), label: const Text('Add first item'))),
+                  Text('No menu items yet.', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                  SizedBox(height: 10),
+                  SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: () => context.go('/vendor/menu'), icon: Icon(Icons.add_rounded, size: 16), label: Text('Add first item'))),
                 ]),
               );
             }
             final avail = items.where((m) => m.isAvailable).length;
             final hidden = items.length - avail;
             return Padding(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               child: Column(children: [
                 Row(children: [
-                  Expanded(child: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: AppColors.successBg, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.successBorder)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Available', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)), const SizedBox(height: 4), Text('$avail', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: AppColors.success))]))),
-                  const SizedBox(width: 8),
-                  Expanded(child: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: hidden > 0 ? AppColors.warningBg : AppColors.surfaceMuted, borderRadius: BorderRadius.circular(10), border: Border.all(color: hidden > 0 ? AppColors.border : AppColors.border)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Hidden', style: TextStyle(color: hidden > 0 ? AppColors.warning : AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)), const SizedBox(height: 4), Text('$hidden', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: hidden > 0 ? AppColors.warning : AppColors.textTertiary))]))),
+                  Expanded(child: Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: AppColors.successBg, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.successBorder)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Available', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)), SizedBox(height: 4), Text('$avail', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: AppColors.success))]))),
+                  SizedBox(width: 8),
+                  Expanded(child: Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: hidden > 0 ? AppColors.warningBg : AppColors.surfaceMuted, borderRadius: BorderRadius.circular(10), border: Border.all(color: hidden > 0 ? AppColors.border : AppColors.border)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Hidden', style: TextStyle(color: hidden > 0 ? AppColors.warning : AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)), SizedBox(height: 4), Text('$hidden', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: hidden > 0 ? AppColors.warning : AppColors.textTertiary))]))),
                 ]),
-                const SizedBox(height: 12),
-                ClipRRect(borderRadius: BorderRadius.circular(6), child: LinearProgressIndicator(value: items.isEmpty ? 0 : avail / items.length, minHeight: 6, backgroundColor: AppColors.surfaceMuted, valueColor: const AlwaysStoppedAnimation(AppColors.success))),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
+                ClipRRect(borderRadius: BorderRadius.circular(6), child: LinearProgressIndicator(value: items.isEmpty ? 0 : avail / items.length, minHeight: 6, backgroundColor: AppColors.surfaceMuted, valueColor: AlwaysStoppedAnimation(AppColors.success))),
+                SizedBox(height: 12),
                 ...items.take(3).map((it) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: EdgeInsets.only(bottom: 8),
                       child: Row(children: [
                         Icon(it.isAvailable ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 14, color: it.isAvailable ? AppColors.success : AppColors.textTertiary),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Expanded(child: Text(it.name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: it.isAvailable ? AppColors.textPrimary : AppColors.textTertiary, decoration: it.isAvailable ? null : TextDecoration.lineThrough))),
-                        Text(taka(it.priceTaka), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        Text(taka(it.priceTaka), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       ]),
                     )),
-                if (items.length > 3) Text('+ ${items.length - 3} more', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                if (items.length > 3) Text('+ ${items.length - 3} more', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
               ]),
             );
           },
@@ -807,7 +809,7 @@ class _MenuHealthCard extends StatelessWidget {
 
 class _TopItemsCard extends StatelessWidget {
   final List<Order> orders;
-  const _TopItemsCard({required this.orders});
+  _TopItemsCard({required this.orders});
   @override
   Widget build(BuildContext context) {
     final counts = <String, int>{};
@@ -823,21 +825,21 @@ class _TopItemsCard extends StatelessWidget {
     return AppCard(
       padding: EdgeInsets.zero,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Padding(padding: EdgeInsets.fromLTRB(14, 14, 14, 10), child: Row(children: [Icon(Icons.leaderboard_outlined, size: 16, color: AppColors.textSecondary), SizedBox(width: 8), Text('Top items', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13))])),
-        const Divider(height: 1),
+        Padding(padding: EdgeInsets.fromLTRB(14, 14, 14, 10), child: Row(children: [Icon(Icons.leaderboard_outlined, size: 16, color: AppColors.textSecondary), SizedBox(width: 8), Text('Top items', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13))])),
+        Divider(height: 1),
         if (top.isEmpty)
-          const Padding(padding: EdgeInsets.all(20), child: Text('No order history yet — top items appear after sales.', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)))
+          Padding(padding: EdgeInsets.all(20), child: Text('No order history yet — top items appear after sales.', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)))
         else
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             child: Column(children: [
               for (int i = 0; i < top.length; i++)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: EdgeInsets.only(bottom: 10),
                   child: Row(children: [
                     Container(width: 26, height: 26, decoration: BoxDecoration(color: i == 0 ? AppColors.warningBg : AppColors.surfaceMuted, shape: BoxShape.circle, border: Border.all(color: AppColors.border)), child: Center(child: Text('${i + 1}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: i == 0 ? AppColors.warning : AppColors.textTertiary)))),
-                    const SizedBox(width: 10),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(top[i].key, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)), Text('${top[i].value} sold • ${taka(revenue[top[i].key] ?? 0)}', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+                    SizedBox(width: 10),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(top[i].key, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)), Text('${top[i].value} sold • ${taka(revenue[top[i].key] ?? 0)}', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
                     Container(width: 60, height: 6, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(3)), child: FractionallySizedBox(alignment: Alignment.centerLeft, widthFactor: top.isEmpty ? 0 : top[i].value / top.first.value, child: Container(decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(3))))),
                   ]),
                 ),
@@ -854,7 +856,7 @@ class _TopItemsCard extends StatelessWidget {
 
 class _RecentActivityCard extends StatelessWidget {
   final List<Order> orders;
-  const _RecentActivityCard({required this.orders});
+  _RecentActivityCard({required this.orders});
   @override
   Widget build(BuildContext context) {
     final recent = [...orders]..sort((a, b) => (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now()));
@@ -863,28 +865,28 @@ class _RecentActivityCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+          padding: EdgeInsets.fromLTRB(14, 14, 14, 10),
           child: Row(children: [
-            Container(width: 28, height: 28, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(7), border: Border.all(color: AppColors.border)), child: const Icon(Icons.history_rounded, size: 14, color: AppColors.textSecondary)),
-            const SizedBox(width: 10),
-            const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Recent activity', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), Text('Latest orders across all statuses', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
-            TextButton(onPressed: () => context.go('/vendor/sales'), child: const Text('Sales', style: TextStyle(fontSize: 12))),
+            Container(width: 28, height: 28, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(7), border: Border.all(color: AppColors.border)), child: Icon(Icons.history_rounded, size: 14, color: AppColors.textSecondary)),
+            SizedBox(width: 10),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Recent activity', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), Text('Latest orders across all statuses', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+            TextButton(onPressed: () => context.go('/vendor/sales'), child: Text('Sales', style: TextStyle(fontSize: 12))),
           ]),
         ),
-        const Divider(height: 1),
+        Divider(height: 1),
         if (show.isEmpty)
-          const Padding(padding: EdgeInsets.all(20), child: Text('No orders yet.', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)))
+          Padding(padding: EdgeInsets.all(20), child: Text('No orders yet.', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)))
         else
           Column(children: [
             for (final o in show)
               InkWell(
                 onTap: () => context.go('/vendor/orders/${o.id}'),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   child: Row(children: [
-                    Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.border)), child: Center(child: Text(o.pickupCode.characters.take(2).toString(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)))),
-                    const SizedBox(width: 10),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${o.orderNumber} • ${taka(o.totalAmount)}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)), Text('${formatDate(o.createdAt ?? DateTime.now())} • ${o.items.length} items', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
+                    Container(width: 34, height: 34, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.border)), child: Center(child: Text(o.pickupCode.characters.take(2).toString(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)))),
+                    SizedBox(width: 10),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${o.orderNumber} • ${taka(o.totalAmount)}', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)), Text('${formatDate(o.createdAt ?? DateTime.now())} • ${o.items.length} items', style: TextStyle(color: AppColors.textTertiary, fontSize: 11))])),
                     StatusChip(status: o.status),
                   ]),
                 ),
@@ -903,7 +905,7 @@ class IncomingOrdersScreen extends StatelessWidget {
   const IncomingOrdersScreen({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppTopBar(title: 'Incoming orders', subtitle: 'Paid orders needing attention', onBack: () => context.go('/vendor')),
         body: const IncomingOrdersView(),
       );
@@ -916,38 +918,38 @@ class IncomingOrdersView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final orders = ref.watch(myVendorOrdersProvider);
     return orders.when(
-      loading: () => const LoadingView(),
+      loading: () => LoadingView(),
       error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(myVendorOrdersProvider)),
       data: (list) {
         final live = list.where((o) => _liveStatuses.contains(o.status)).toList()
           ..sort((a, b) => a.createdAt == null || b.createdAt == null ? 0 : a.createdAt!.compareTo(b.createdAt!));
         if (live.isEmpty) {
-          return const EmptyView(icon: Icons.room_service_outlined, message: 'No live paid orders. New paid orders appear here automatically.');
+          return EmptyView(icon: Icons.room_service_outlined, message: 'No live paid orders. New paid orders appear here automatically.');
         }
         return RefreshIndicator(
           color: AppColors.brand,
-          backgroundColor: AppColors.surface,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           onRefresh: () async => ref.invalidate(myVendorOrdersProvider),
           child: ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             itemCount: live.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            separatorBuilder: (_, __) => SizedBox(height: 10),
             itemBuilder: (_, i) {
               final o = live[i];
               return AppCard(
                 onTap: () => context.go('/vendor/orders/${o.id}'),
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14),
                 child: Row(children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                     decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.borderStrong)),
-                    child: Text(o.pickupCode, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, letterSpacing: 1.8, fontSize: 12)),
+                    child: Text(o.pickupCode, style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, letterSpacing: 1.8, fontSize: 12)),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(o.orderNumber, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
-                    const SizedBox(height: 2),
-                    Text('${taka(o.totalAmount)} • ${o.items.length} items', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                    Text(o.orderNumber, style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                    SizedBox(height: 2),
+                    Text('${taka(o.totalAmount)} • ${o.items.length} items', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                   ])),
                   StatusChip(status: o.status),
                 ]),
@@ -977,7 +979,7 @@ class VendorOrderDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(orderDetailProvider(orderId));
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(
           title: 'Order',
           onBack: () {
@@ -988,36 +990,36 @@ class VendorOrderDetailScreen extends ConsumerWidget {
             }
           }),
       body: order.when(
-        loading: () => const LoadingView(),
+        loading: () => LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orderDetailProvider(orderId))),
-        data: (o) => ListView(padding: const EdgeInsets.all(16), children: [
+        data: (o) => ListView(padding: EdgeInsets.all(16), children: [
           AppCard(
             child: Column(children: [
               Center(child: StatusChip(status: o.status)),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadii.md), border: Border.all(color: AppColors.border)),
                 child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const Text('PICKUP', style: TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1)),
-                  const SizedBox(width: 10),
-                  Text(o.pickupCode, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, letterSpacing: 5, fontSize: 18)),
+                  Text('PICKUP', style: TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1)),
+                  SizedBox(width: 10),
+                  Text(o.pickupCode, style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, letterSpacing: 5, fontSize: 18)),
                 ]),
               ),
-              if (o.createdAt != null) ...[const SizedBox(height: 8), Text(formatDateTime(o.createdAt!), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11))],
+              if (o.createdAt != null) ...[SizedBox(height: 8), Text(formatDateTime(o.createdAt!), style: TextStyle(color: AppColors.textTertiary, fontSize: 11))],
             ]),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           AppCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              ...o.items.map((it) => Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [
-                    Expanded(child: Text(it.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13))),
-                    Text('${it.quantity} × ${taka(it.unitPrice)}', style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
-                    const SizedBox(width: 10),
-                    Text(taka(it.subtotal), style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+              ...o.items.map((it) => Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Row(children: [
+                    Expanded(child: Text(it.name, style: TextStyle(color: AppColors.textPrimary, fontSize: 13))),
+                    Text('${it.quantity} × ${taka(it.unitPrice)}', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                    SizedBox(width: 10),
+                    Text(taka(it.subtotal), style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                   ]))),
-              const Divider(height: 16),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Total', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)), PriceText(o.totalAmount)]),
+              Divider(height: 16),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Total', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)), PriceText(o.totalAmount)]),
             ]),
           ),
           const SizedBox(height: 12),
@@ -1040,14 +1042,14 @@ class VendorOrderDetailScreen extends ConsumerWidget {
       'COLLECTED' => o.status == 'READY',
       _ => false,
     };
-    if (!allowed) return const SizedBox.shrink();
+    if (!allowed) return SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8),
       child: SizedBox(
         height: 46,
         width: double.infinity,
         child: isDestructive
-            ? OutlinedButton.icon(onPressed: () => _setStatus(context, ref, o.id, target), icon: Icon(icon, size: 16, color: AppColors.error), label: Text(label, style: const TextStyle(color: AppColors.error)), style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.errorBorder)))
+            ? OutlinedButton.icon(onPressed: () => _setStatus(context, ref, o.id, target), icon: Icon(icon, size: 16, color: AppColors.error), label: Text(label, style: TextStyle(color: AppColors.error)), style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.errorBorder)))
             : FilledButton.icon(onPressed: () => _setStatus(context, ref, o.id, target), icon: Icon(icon, size: 16), label: Text(label)),
       ),
     );

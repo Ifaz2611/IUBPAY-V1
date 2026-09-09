@@ -62,7 +62,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         : ref.watch(vendorMenuProvider(cart.vendorId!));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(
         title: 'Your cart',
         subtitle: cart.isEmpty
@@ -76,17 +76,17 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   final ok = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Clear cart?'),
-                      content: const Text('Remove all items?'),
+                      title: Text('Clear cart?'),
+                      content: Text('Remove all items?'),
                       actions: [
                         TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text('Cancel')),
+                            child: Text('Cancel')),
                         FilledButton(
                             onPressed: () => Navigator.pop(ctx, true),
                             style: FilledButton.styleFrom(
                                 backgroundColor: AppColors.error),
-                            child: const Text('Clear'))
+                            child: Text('Clear'))
                       ],
                     ),
                   );
@@ -95,20 +95,20 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     ref.read(cartProvider.notifier).reset();
                   }
                 },
-                child: const Text('Clear',
+                child: Text('Clear',
                     style: TextStyle(color: AppColors.error, fontSize: 13)),
               ),
       ),
       body: Column(children: [
-        const MockPaymentBanner(),
+        MockPaymentBanner(),
         if (!cart.isEmpty)
           Container(
             color: AppColors.brandSubtle,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             child: Row(children: [
-              const Icon(Icons.info_outline_rounded,
+              Icon(Icons.info_outline_rounded,
                   size: 14, color: AppColors.brand),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                   child: Text(
                       'Swipe an item left to remove • Tap −/+ to adjust',
@@ -117,7 +117,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                           fontSize: 11,
                           fontWeight: FontWeight.w500))),
               Text('${cart.lines.values.fold(0, (s, l) => s + l.qty)} pcs',
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.brand,
                       fontSize: 11,
                       fontWeight: FontWeight.w800)),
@@ -125,20 +125,20 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           ),
         Expanded(
           child: cart.isEmpty
-              ? ListView(padding: const EdgeInsets.all(20), children: [
-                  const SizedBox(height: 20),
-                  const EmptyView(
+              ? ListView(padding: EdgeInsets.all(20), children: [
+                  SizedBox(height: 20),
+                  EmptyView(
                       icon: Icons.shopping_bag_outlined,
                       message:
                           'Your cart is empty. Add items from a vendor menu.'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   PrimaryButton(
                       label: 'Browse vendors',
                       icon: Icons.storefront_rounded,
                       onPressed: () => context.go('/student/vendors')),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: EdgeInsets.all(14),
                     decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(AppRadii.md),
@@ -146,7 +146,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(children: [
+                          Row(children: [
                             Icon(Icons.lightbulb_outline_rounded,
                                 size: 14, color: AppColors.textTertiary),
                             SizedBox(width: 8),
@@ -170,16 +170,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   ),
                 ])
               : ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   children: [
                     ...cart.lines.values.map((line) => Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
+                          padding: EdgeInsets.only(bottom: 10),
                           child: Dismissible(
                             key: ValueKey(line.item.id),
                             direction: DismissDirection.endToStart,
                             background: Container(
                               alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 20),
+                              padding: EdgeInsets.only(right: 20),
                               decoration: BoxDecoration(
                                   color: AppColors.error,
                                   borderRadius:
@@ -212,7 +212,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                       behavior: SnackBarBehavior.floating));
                             },
                             child: AppCard(
-                              padding: const EdgeInsets.all(12),
+                              padding: EdgeInsets.all(12),
                               child: Row(children: [
                                 Container(
                                     width: 48,
@@ -223,28 +223,28 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                         border: Border.all(
                                             color: AppColors.brand
                                                 .withOpacity(0.15))),
-                                    child: const Icon(Icons.fastfood_rounded,
+                                    child: Icon(Icons.fastfood_rounded,
                                         color: AppColors.brand, size: 20)),
-                                const SizedBox(width: 12),
+                                SizedBox(width: 12),
                                 Expanded(
                                     child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                       Text(line.item.name,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                               color: AppColors.textPrimary,
                                               fontWeight: FontWeight.w700,
                                               fontSize: 14)),
-                                      const SizedBox(height: 2),
+                                      SizedBox(height: 2),
                                       Row(children: [
                                         PriceText(line.item.priceTaka,
                                             fontSize: 12,
                                             color: AppColors.textSecondary,
                                             bold: false),
-                                        const SizedBox(width: 6),
+                                        SizedBox(width: 6),
                                         Container(
-                                            padding: const EdgeInsets.symmetric(
+                                            padding: EdgeInsets.symmetric(
                                                 horizontal: 6, vertical: 2),
                                             decoration: BoxDecoration(
                                                 color: AppColors.surfaceMuted,
@@ -253,7 +253,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                                 border: Border.all(
                                                     color: AppColors.border)),
                                             child: Text(line.item.category,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                     color:
                                                         AppColors.textTertiary,
                                                     fontSize: 10,
@@ -262,7 +262,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                       ]),
                                       Text(
                                           '${line.qty} × ${taka(line.item.priceTaka)} = ${taka(line.qty * line.item.priceTaka)}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                               color: AppColors.textTertiary,
                                               fontSize: 11)),
                                     ])),
@@ -274,7 +274,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                           Border.all(color: AppColors.border)),
                                   child: Row(children: [
                                     IconButton(
-                                        icon: const Icon(Icons.remove_rounded,
+                                        icon: Icon(Icons.remove_rounded,
                                             size: 16),
                                         onPressed: () {
                                           HapticFeedback.selectionClick();
@@ -284,10 +284,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                         },
                                         padding: EdgeInsets.zero,
                                         constraints:
-                                            const BoxConstraints.tightFor(
+                                            BoxConstraints.tightFor(
                                                 width: 32, height: 32)),
                                     Container(
-                                        padding: const EdgeInsets.symmetric(
+                                        padding: EdgeInsets.symmetric(
                                             horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
                                             color: AppColors.surface,
@@ -296,12 +296,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                             border: Border.all(
                                                 color: AppColors.border)),
                                         child: Text('${line.qty}',
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 color: AppColors.textPrimary,
                                                 fontWeight: FontWeight.w800,
                                                 fontSize: 13))),
                                     IconButton(
-                                        icon: const Icon(Icons.add_rounded,
+                                        icon: Icon(Icons.add_rounded,
                                             size: 16),
                                         onPressed: () {
                                           HapticFeedback.selectionClick();
@@ -316,17 +316,17 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                         },
                                         padding: EdgeInsets.zero,
                                         constraints:
-                                            const BoxConstraints.tightFor(
+                                            BoxConstraints.tightFor(
                                                 width: 32, height: 32)),
                                   ]),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8),
                                 Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       PriceText(line.qty * line.item.priceTaka,
                                           fontSize: 13),
-                                      const Text('total',
+                                      Text('total',
                                           style: TextStyle(
                                               color: AppColors.textTertiary,
                                               fontSize: 10))
@@ -335,14 +335,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             ),
                           ),
                         )),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     // Promo code
                     AppCard(
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14),
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(children: [
+                            Row(children: [
                               Icon(Icons.local_offer_outlined,
                                   size: 14, color: AppColors.brand),
                               SizedBox(width: 8),
@@ -352,8 +352,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                       fontWeight: FontWeight.w700,
                                       fontSize: 13))
                             ]),
-                            const SizedBox(height: 2),
-                            const Text(
+                            SizedBox(height: 2),
+                            Text(
                                 'Try CAMPUS10 (10% off) or IUB5 (5৳ off) — demo only',
                                 style: TextStyle(
                                     color: AppColors.textTertiary,
@@ -368,12 +368,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   decoration: InputDecoration(
                                     hintText: 'Enter code',
                                     isDense: true,
-                                    prefixIcon: const Icon(
+                                    prefixIcon: Icon(
                                         Icons.confirmation_num_outlined,
                                         size: 16),
                                     suffixIcon: _promoApplied != null
                                         ? IconButton(
-                                            icon: const Icon(
+                                            icon: Icon(
                                                 Icons.close_rounded,
                                                 size: 16),
                                             onPressed: () => setState(() {
@@ -391,16 +391,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   child: FilledButton(
                                       onPressed: _applyPromo,
                                       style: FilledButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
+                                          padding: EdgeInsets.symmetric(
                                               horizontal: 16)),
                                       child: Text(_promoApplied == null
                                           ? 'Apply'
                                           : 'Applied'))),
                             ]),
                             if (_promoApplied != null) ...[
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(
+                                padding: EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 8),
                                 decoration: BoxDecoration(
                                     color: AppColors.successBg,
@@ -408,11 +408,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                     border: Border.all(
                                         color: AppColors.successBorder)),
                                 child: Row(children: [
-                                  const Icon(Icons.check_circle_rounded,
+                                  Icon(Icons.check_circle_rounded,
                                       size: 14, color: AppColors.success),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8),
                                   Text('$_promoApplied • -${taka(_discount)}',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           color: AppColors.success,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 12)),
@@ -422,21 +422,21 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                             _promoApplied = null;
                                             _promoCtrl.clear();
                                           }),
-                                      child: const Text('Remove',
+                                      child: Text('Remove',
                                           style: TextStyle(fontSize: 11)))
                                 ]),
                               ),
                             ],
                           ]),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     // Tip selector
                     AppCard(
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14),
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(children: [
+                            Row(children: [
                               Icon(Icons.volunteer_activism_outlined,
                                   size: 14, color: AppColors.textSecondary),
                               SizedBox(width: 8),
@@ -446,11 +446,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                       fontWeight: FontWeight.w700,
                                       fontSize: 13))
                             ]),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Row(children: [
                               for (final v in [0, 5, 10, 20])
                                 Padding(
-                                  padding: const EdgeInsets.only(right: 8),
+                                  padding: EdgeInsets.only(right: 8),
                                   child: ChoiceChip(
                                     label: Text(
                                         v == 0 ? 'No tip' : '+${taka(v)}',
@@ -480,14 +480,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             ]),
                           ]),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     // Note
                     AppCard(
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14),
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(children: [
+                            Row(children: [
                               Icon(Icons.notes_rounded,
                                   size: 14, color: AppColors.textSecondary),
                               SizedBox(width: 8),
@@ -520,12 +520,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   m.isAvailable)
                               .take(3)
                               .toList();
-                          if (others.isEmpty) return const SizedBox.shrink();
+                          if (others.isEmpty) return SizedBox.shrink();
                           return AppCard(
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Row(children: [
+                                  Row(children: [
                                     Icon(Icons.add_circle_outline_rounded,
                                         size: 14, color: AppColors.brand),
                                     SizedBox(width: 8),
@@ -535,10 +535,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                             fontWeight: FontWeight.w700,
                                             fontSize: 13))
                                   ]),
-                                  const SizedBox(height: 10),
+                                  SizedBox(height: 10),
                                   ...others.map((it) => Padding(
                                         padding:
-                                            const EdgeInsets.only(bottom: 8),
+                                            EdgeInsets.only(bottom: 8),
                                         child: Row(children: [
                                           Container(
                                               width: 36,
@@ -549,7 +549,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                                       BorderRadius.circular(8),
                                                   border: Border.all(
                                                       color: AppColors.border)),
-                                              child: const Icon(
+                                              child: Icon(
                                                   Icons.lunch_dining_rounded,
                                                   size: 16,
                                                   color: AppColors.brand)),
@@ -560,14 +560,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                 Text(it.name,
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                         color: AppColors
                                                             .textPrimary,
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         fontSize: 13)),
                                                 Text(taka(it.priceTaka),
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                         color: AppColors
                                                             .textTertiary,
                                                         fontSize: 11))
@@ -585,8 +585,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                                       horizontal: 12,
                                                       vertical: 6),
                                                   minimumSize:
-                                                      const Size(0, 32)),
-                                              child: const Text('Add',
+                                                      Size(0, 32)),
+                                              child: Text('Add',
                                                   style:
                                                       TextStyle(fontSize: 11))),
                                         ]),
@@ -600,8 +600,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         ),
         if (!cart.isEmpty)
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
                 color: AppColors.surface,
                 border: Border(top: BorderSide(color: AppColors.border))),
             child: SafeArea(
@@ -609,67 +609,67 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Subtotal',
+                      Text('Subtotal',
                           style: TextStyle(
                               color: AppColors.textSecondary, fontSize: 13)),
                       PriceText(cart.subtotal, fontSize: 14)
                     ]),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Service fee',
+                      Text('Service fee',
                           style: TextStyle(
                               color: AppColors.textTertiary, fontSize: 12)),
                       Text(taka(5),
-                          style: const TextStyle(
+                          style: TextStyle(
                               color: AppColors.textTertiary, fontSize: 12))
                     ]),
                 if (_tip > 0) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Tip',
+                        Text('Tip',
                             style: TextStyle(
                                 color: AppColors.textTertiary, fontSize: 12)),
                         Text(taka(_tip),
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: AppColors.textSecondary, fontSize: 12))
                       ])
                 ],
                 if (_discount > 0) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Discount ($_promoApplied)',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: AppColors.success,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600)),
                         Text('-${taka(_discount)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: AppColors.success,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700))
                       ])
                 ],
-                const Divider(height: 18),
+                Divider(height: 18),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total',
+                      Text('Total',
                           style: TextStyle(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w800,
                               fontSize: 14)),
                       PriceText(cartTotal, fontSize: 18)
                     ]),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                     '${cart.lines.values.fold(0, (s, l) => s + l.qty)} items • Pickup at counter',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.textTertiary, fontSize: 11)),
                 const SizedBox(height: 12),
                 PrimaryButton(
@@ -677,11 +677,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     icon: Icons.arrow_forward_rounded,
                     onPressed: () =>
                         context.go('/student/checkout/${cart.vendorId}')),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 TextButton.icon(
                     onPressed: () => context.go('/student/vendors'),
-                    icon: const Icon(Icons.add_rounded, size: 14),
-                    label: const Text('Continue shopping',
+                    icon: Icon(Icons.add_rounded, size: 14),
+                    label: Text('Continue shopping',
                         style: TextStyle(fontSize: 12))),
               ]),
             ),
@@ -694,16 +694,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 class _TipRow extends StatelessWidget {
   final IconData icon;
   final String text;
-  const _TipRow({required this.icon, required this.text});
+  _TipRow({required this.icon, required this.text});
   @override
   Widget build(BuildContext context) => Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.only(bottom: 6),
       child: Row(children: [
         Icon(icon, size: 12, color: AppColors.textTertiary),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text(text,
             style:
-                const TextStyle(color: AppColors.textSecondary, fontSize: 12))
+                TextStyle(color: AppColors.textSecondary, fontSize: 12))
       ]));
 }
 
@@ -750,7 +750,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     final cart = ref.watch(cartProvider);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(
           title: 'Checkout',
           subtitle: 'Confirm your order',
@@ -769,12 +769,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SectionHeader(
+                    SectionHeader(
                         title: 'Order summary',
                         subtitle: 'Prices verified by the server'),
-                    const SizedBox(height: 14),
+                    SizedBox(height: 14),
                     ...cart.lines.values.map((l) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          padding: EdgeInsets.symmetric(vertical: 6),
                           child: Row(children: [
                             Expanded(
                                 child: Column(
@@ -782,48 +782,48 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                   Text(l.item.name,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           color: AppColors.textPrimary,
                                           fontWeight: FontWeight.w600,
                                           fontSize: 13)),
                                   Text('${l.qty} × ${taka(l.item.priceTaka)}',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           color: AppColors.textTertiary,
                                           fontSize: 11)),
                                 ])),
                             Text(taka(l.qty * l.item.priceTaka),
-                                style: const TextStyle(
+                                style: TextStyle(
                                     color: AppColors.textPrimary,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13)),
                           ]),
                         )),
-                    const Divider(height: 24),
+                    Divider(height: 24),
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Subtotal',
+                          Text('Subtotal',
                               style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 13)),
                           PriceText(cart.subtotal, fontSize: 14)
                         ]),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Service fee',
+                          Text('Service fee',
                               style: TextStyle(
                                   color: AppColors.textTertiary, fontSize: 12)),
                           Text(taka(5),
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: AppColors.textSecondary, fontSize: 12))
                         ]),
-                    const Divider(height: 22),
+                    Divider(height: 22),
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Total',
+                          Text('Total',
                               style: TextStyle(
                                   color: AppColors.textPrimary,
                                   fontWeight: FontWeight.w700)),
@@ -831,14 +831,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ]),
                   ]),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                   color: AppColors.successBg,
                   borderRadius: BorderRadius.circular(AppRadii.md),
                   border: Border.all(color: AppColors.successBorder)),
-              child: const Row(children: [
+              child: Row(children: [
                 Icon(Icons.verified_outlined,
                     size: 16, color: AppColors.success),
                 SizedBox(width: 10),
@@ -857,11 +857,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ])),
               ]),
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: 18),
             if (_error != null)
               Container(
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(12),
+                  margin: EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                       color: AppColors.errorBg,
                       borderRadius: BorderRadius.circular(AppRadii.md),
@@ -869,12 +869,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.error_outline_rounded,
+                        Icon(Icons.error_outline_rounded,
                             size: 16, color: AppColors.error),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Expanded(
                             child: Text(_error!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                     color: AppColors.error, fontSize: 13))),
                       ])),
             PrimaryButton(
@@ -882,8 +882,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 icon: Icons.lock_outline_rounded,
                 busy: _busy,
                 onPressed: _busy || cart.isEmpty ? null : _placeOrder),
-            const SizedBox(height: 8),
-            const Center(
+            SizedBox(height: 8),
+            Center(
                 child: Text('You’ll confirm payment on the next screen',
                     style: TextStyle(
                         color: AppColors.textTertiary, fontSize: 11))),

@@ -47,7 +47,7 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
     final recentOrders = orders.take(3).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         titleSpacing: 16,
         title: Row(children: [
@@ -55,22 +55,23 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(8)),
-            child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
+            child: Icon(Icons.person_rounded, color: Colors.white, size: 18),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Text('$_greeting, $first ', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-              Text(_greetingEmoji, style: const TextStyle(fontSize: 13)),
+              Text('$_greeting, $first ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+              Text(_greetingEmoji, style: TextStyle(fontSize: 13)),
             ]),
-            const Text('What would you like to eat today?', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w400)),
+            Text('What would you like to eat today?', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w400)),
           ]),
         ]),
         actions: [
+          ThemeToggleButton(),
           // Cart badge
           Stack(children: [
             IconButton(
-              icon: const Icon(Icons.shopping_bag_outlined, size: 20),
+              icon: Icon(Icons.shopping_bag_outlined, size: 20),
               tooltip: 'Cart',
               onPressed: () {
                 HapticFeedback.selectionClick();
@@ -82,35 +83,35 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                 right: 6,
                 top: 6,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(color: AppColors.error, borderRadius: BorderRadius.circular(10)),
-                  child: Text('${cart.lines.length}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                  child: Text('${cart.lines.length}', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
                 ),
               ),
           ]),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, size: 20),
+            icon: Icon(Icons.logout_rounded, size: 20),
             tooltip: 'Sign out',
             onPressed: () async {
               await ref.read(authProvider.notifier).logout();
               if (context.mounted) context.go('/login');
             },
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
         ],
-        bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),
+        bottom: PreferredSize(preferredSize: Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),
       ),
       drawer: _StudentDrawer(userName: user?.name, email: user?.email, cartCount: cart.lines.length, orderCount: orders.length),
       body: RefreshIndicator(
         color: AppColors.brand,
-        backgroundColor: AppColors.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         onRefresh: () async {
           ref.invalidate(vendorListProvider);
           ref.invalidate(myOrdersProvider);
-          await Future.delayed(const Duration(milliseconds: 400));
+          await Future.delayed(Duration(milliseconds: 400));
         },
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: EdgeInsets.all(AppSpacing.lg),
           children: [
             // ── Search bar ──
             GestureDetector(
@@ -119,7 +120,7 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                 context.go('/student/vendors');
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadii.md),
@@ -128,67 +129,67 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                 ),
                 child: Row(children: [
                   Container(
-                    padding: const EdgeInsets.all(7),
+                    padding: EdgeInsets.all(7),
                     decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(8)),
-                    child: const Icon(Icons.search_rounded, size: 16, color: AppColors.brand),
+                    child: Icon(Icons.search_rounded, size: 16, color: AppColors.brand),
                   ),
-                  const SizedBox(width: 12),
-                  const Expanded(
+                  SizedBox(width: 12),
+                  Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('Search vendors or dishes', style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
                       Text('Try “biryani”, “burger”, “F-Block”', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                     ]),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)),
-                    child: const Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.textTertiary),
+                    child: Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.textTertiary),
                   ),
                 ]),
               ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
 
             // ── Account summary — now with live stats ──
             AppCard(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: EdgeInsets.all(AppSpacing.lg),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  const Text('Account',
+                  Text('Account',
                       style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.6)),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(color: AppColors.successBg, borderRadius: BorderRadius.circular(AppRadii.pill), border: Border.all(color: AppColors.successBorder)),
-                    child: const Row(children: [
+                    child: Row(children: [
                       Icon(Icons.circle, size: 6, color: AppColors.success),
                       SizedBox(width: 6),
                       Text('ACTIVE', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                     ]),
                   ),
                 ]),
-                const SizedBox(height: 10),
-                Text(user?.email ?? '', style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+                SizedBox(height: 10),
+                Text(user?.email ?? '', style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
                 if (user?.studentId != null) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Row(children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)),
                       child: Row(children: [
-                        const Icon(Icons.badge_outlined, size: 11, color: AppColors.textTertiary),
-                        const SizedBox(width: 4),
-                        Text('ID ${user!.studentId}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
+                        Icon(Icons.badge_outlined, size: 11, color: AppColors.textTertiary),
+                        SizedBox(width: 4),
+                        Text('ID ${user!.studentId}', style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
                       ]),
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.verified_rounded, size: 14, color: AppColors.success),
-                    const SizedBox(width: 3),
-                    const Text('Verified', style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w600)),
+                    SizedBox(width: 8),
+                    Icon(Icons.verified_rounded, size: 14, color: AppColors.success),
+                    SizedBox(width: 3),
+                    Text('Verified', style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w600)),
                   ]),
                 ],
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Container(height: 1, color: AppColors.border),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(children: [
                   _MiniStat(
                     label: 'Vendors',
@@ -197,7 +198,7 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                     icon: Icons.storefront_rounded,
                   ),
                   Container(width: 1, height: 42, color: AppColors.border),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   _MiniStat(
                     label: 'Orders',
                     value: ordersAsync.isLoading ? '…' : '${orders.length}',
@@ -220,16 +221,16 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
 
             // ── Active order banner ──
             if (activeOrder != null) ...[
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               GestureDetector(
                 onTap: () {
                   HapticFeedback.selectionClick();
                   context.go('/student/orders/${activeOrder.id}');
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF0F5B4A), Color(0xFF147A63)]),
+                    gradient: LinearGradient(colors: [Color(0xFF0F5B4A), Color(0xFF147A63)]),
                     borderRadius: BorderRadius.circular(AppRadii.md),
                     boxShadow: [BoxShadow(color: AppColors.brand.withOpacity(0.25), blurRadius: 12, offset: const Offset(0, 4))],
                   ),
@@ -238,30 +239,30 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 20),
+                      child: Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 20),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
-                          const Text('Active order', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
-                          const SizedBox(width: 8),
+                          Text('Active order', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                          SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            padding: EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
-                            child: Text(activeOrder.status.replaceAll('_', ' '), style: const TextStyle(color: AppColors.brand, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
+                            child: Text(activeOrder.status.replaceAll('_', ' '), style: TextStyle(color: AppColors.brand, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
                           ),
                         ]),
-                        const SizedBox(height: 3),
+                        SizedBox(height: 3),
                         Text('${activeOrder.orderNumber} • ${taka(activeOrder.totalAmount)} • ${activeOrder.pickupCode}',
-                            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
-                        const Text('Tap to track live', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                            style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                        Text('Tap to track live', style: TextStyle(color: Colors.white70, fontSize: 11)),
                       ]),
                     ),
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.brand),
+                      child: Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.brand),
                     ),
                   ]),
                 ),
@@ -357,7 +358,7 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: featured.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      separatorBuilder: (_, __) => SizedBox(width: 12),
                       itemBuilder: (_, i) {
                         final v = featured[i];
                         return GestureDetector(
@@ -367,7 +368,7 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                           },
                           child: Container(
                             width: 160,
-                            padding: const EdgeInsets.all(14),
+                            padding: EdgeInsets.all(14),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
                               borderRadius: BorderRadius.circular(AppRadii.lg),
@@ -380,33 +381,33 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
-                                  child: const Icon(Icons.restaurant_rounded, color: AppColors.brand, size: 18),
+                                  child: Icon(Icons.restaurant_rounded, color: AppColors.brand, size: 18),
                                 ),
-                                const Spacer(),
+                                Spacer(),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                  padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                                   decoration: BoxDecoration(color: AppColors.successBg, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.successBorder)),
                                   child: Row(children: [
-                                    Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.success)),
-                                    const SizedBox(width: 4),
-                                    const Text('Open', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700)),
+                                    Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.success)),
+                                    SizedBox(width: 4),
+                                    Text('Open', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700)),
                                   ]),
                                 ),
                               ]),
-                              const SizedBox(height: 12),
-                              Text(v.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
-                              const SizedBox(height: 2),
+                              SizedBox(height: 12),
+                              Text(v.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
+                              SizedBox(height: 2),
                               Row(children: [
-                                const Icon(Icons.place_outlined, size: 11, color: AppColors.textTertiary),
-                                const SizedBox(width: 3),
-                                Expanded(child: Text(v.location, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11))),
+                                Icon(Icons.place_outlined, size: 11, color: AppColors.textTertiary),
+                                SizedBox(width: 3),
+                                Expanded(child: Text(v.location, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.textSecondary, fontSize: 11))),
                               ]),
-                              const Spacer(),
+                              Spacer(),
                               Row(children: [
-                                const Icon(Icons.star_rounded, size: 13, color: Color(0xFFF59E0B)),
-                                const SizedBox(width: 3),
-                                Text('${(4.2 + (i * 0.3) % 0.7).toStringAsFixed(1)}', style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700)),
-                                const Text(' • 15–20 min', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                                Icon(Icons.star_rounded, size: 13, color: Color(0xFFF59E0B)),
+                                SizedBox(width: 3),
+                                Text('${(4.2 + (i * 0.3) % 0.7).toStringAsFixed(1)}', style: TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700)),
+                                Text(' • 15–20 min', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                               ]),
                             ]),
                           ),
@@ -424,17 +425,17 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
               SectionHeader(
                 title: 'Recent orders',
                 subtitle: 'Your last ${recentOrders.length} orders',
-                action: TextButton(onPressed: () => context.go('/student/orders'), child: const Text('History', style: TextStyle(fontSize: 12))),
+                action: TextButton(onPressed: () => context.go('/student/orders'), child: Text('History', style: TextStyle(fontSize: 12))),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               ...recentOrders.map((o) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: EdgeInsets.only(bottom: 8),
                     child: AppCard(
                       onTap: () {
                         HapticFeedback.selectionClick();
                         context.go('/student/orders/${o.id}');
                       },
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12),
                       child: Row(children: [
                         Container(
                           width: 44,
@@ -452,20 +453,20 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                             color: AppColors.textSecondary,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Row(children: [
-                              Expanded(child: Text(o.orderNumber, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13))),
+                              Expanded(child: Text(o.orderNumber, style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13))),
                               StatusChip(status: o.status),
                             ]),
-                            const SizedBox(height: 3),
+                            SizedBox(height: 3),
                             Text('${o.items.length} items • ${taka(o.totalAmount)} • ${o.createdAt != null ? formatDate(o.createdAt!) : ''}',
-                                style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                                style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                           ]),
                         ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textTertiary),
+                        SizedBox(width: 8),
+                        Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textTertiary),
                       ]),
                     ),
                   )),
@@ -473,18 +474,18 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
 
             // ── Promo / tip banner ──
             if (_showPromo) ...[
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: AppColors.infoBg,
                   borderRadius: BorderRadius.circular(AppRadii.md),
                   border: Border.all(color: AppColors.info.withOpacity(0.15)),
                 ),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Container(padding: const EdgeInsets.all(7), decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.lightbulb_outline_rounded, size: 16, color: AppColors.info)),
-                  const SizedBox(width: 12),
-                  const Expanded(
+                  Container(padding: EdgeInsets.all(7), decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8)), child: Icon(Icons.lightbulb_outline_rounded, size: 16, color: AppColors.info)),
+                  SizedBox(width: 12),
+                  Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('Pro tip', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
                       SizedBox(height: 2),
@@ -492,20 +493,20 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                     ]),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 16, color: AppColors.textTertiary),
+                    icon: Icon(Icons.close_rounded, size: 16, color: AppColors.textTertiary),
                     onPressed: () => setState(() => _showPromo = false),
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints.tightFor(width: 24, height: 24),
+                    constraints: BoxConstraints.tightFor(width: 24, height: 24),
                   ),
                 ]),
               ),
             ],
 
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadii.md), border: Border.all(color: AppColors.border)),
-              child: const Row(children: [
+              child: Row(children: [
                 Icon(Icons.info_outline_rounded, size: 16, color: AppColors.textTertiary),
                 SizedBox(width: 10),
                 Expanded(child: Text('All payments are simulated. No real money moves.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.3))),
@@ -519,8 +520,8 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
                   ref.invalidate(vendorListProvider);
                   ref.invalidate(myOrdersProvider);
                 },
-                icon: const Icon(Icons.refresh_rounded, size: 14),
-                label: const Text('Refresh', style: TextStyle(fontSize: 12)),
+                icon: Icon(Icons.refresh_rounded, size: 14),
+                label: Text('Refresh', style: TextStyle(fontSize: 12)),
               ),
             ),
           ],
@@ -536,19 +537,19 @@ class _MiniStat extends StatelessWidget {
   final String sub;
   final IconData icon;
   final bool highlight;
-  const _MiniStat({required this.label, required this.value, required this.sub, required this.icon, this.highlight = false});
+  _MiniStat({required this.label, required this.value, required this.sub, required this.icon, this.highlight = false});
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Icon(icon, size: 11, color: highlight ? AppColors.brand : AppColors.textTertiary),
-          const SizedBox(width: 4),
-          Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500)),
+          SizedBox(width: 4),
+          Text(label, style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w500)),
         ]),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(value, style: TextStyle(color: highlight ? AppColors.brand : AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
-        Text(sub, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+        Text(sub, style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
       ]),
     );
   }
@@ -562,12 +563,12 @@ class _ActionTile extends StatelessWidget {
   final String? badge;
   final Color? badgeColor;
   final VoidCallback onTap;
-  const _ActionTile({required this.icon, required this.label, required this.hint, this.primary = false, this.badge, this.badgeColor, required this.onTap});
+  _ActionTile({required this.icon, required this.label, required this.hint, this.primary = false, this.badge, this.badgeColor, required this.onTap});
   @override
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Container(
@@ -580,23 +581,23 @@ class _ActionTile extends StatelessWidget {
             ),
             child: Icon(icon, color: primary ? Colors.white : AppColors.textSecondary, size: 20),
           ),
-          const Spacer(),
+          Spacer(),
           if (badge != null)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
               decoration: BoxDecoration(color: (badgeColor ?? AppColors.brand).withOpacity(0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: (badgeColor ?? AppColors.brand).withOpacity(0.2))),
               child: Text(badge!, style: TextStyle(color: badgeColor ?? AppColors.brand, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.3)),
             ),
         ]),
-        const Spacer(),
-        Text(label, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: -0.1)),
-        const SizedBox(height: 2),
-        Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
-        const SizedBox(height: 8),
+        Spacer(),
+        Text(label, style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: -0.1)),
+        SizedBox(height: 2),
+        Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+        SizedBox(height: 8),
         Row(children: [
           Text(primary ? 'Browse' : 'Open',
               style: TextStyle(color: primary ? AppColors.brand : AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           Icon(Icons.arrow_forward_rounded, size: 12, color: primary ? AppColors.brand : AppColors.textTertiary),
         ]),
       ]),
@@ -609,24 +610,24 @@ class _StudentDrawer extends ConsumerWidget {
   final String? email;
   final int cartCount;
   final int orderCount;
-  const _StudentDrawer({this.userName, this.email, this.cartCount = 0, this.orderCount = 0});
+  _StudentDrawer({this.userName, this.email, this.cartCount = 0, this.orderCount = 0});
   @override
   Widget build(BuildContext context, WidgetRef ref) => Drawer(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         child: ListView(children: [
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 48, 20, 20),
-            decoration: const BoxDecoration(color: AppColors.surfaceMuted, border: Border(bottom: BorderSide(color: AppColors.border))),
+            padding: EdgeInsets.fromLTRB(20, 48, 20, 20),
+            decoration: BoxDecoration(color: AppColors.surfaceMuted, border: Border(bottom: BorderSide(color: AppColors.border))),
             child: Row(children: [
-              Container(width: 44, height: 44, decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.person_rounded, color: Colors.white)),
-              const SizedBox(width: 12),
+              Container(width: 44, height: 44, decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(10)), child: Icon(Icons.person_rounded, color: Colors.white)),
+              SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(userName ?? '', style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                Text(email ?? '', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                Text(userName ?? '', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                Text(email ?? '', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                 const SizedBox(height: 4),
                 Row(children: [
                   _DrawerPill(icon: Icons.shopping_bag_outlined, label: '$cartCount in cart'),
-                  const SizedBox(width: 6),
+                  SizedBox(width: 6),
                   _DrawerPill(icon: Icons.receipt_long_rounded, label: '$orderCount orders'),
                 ]),
               ])),
@@ -636,19 +637,20 @@ class _StudentDrawer extends ConsumerWidget {
           _dTile(Icons.receipt_long_rounded, 'My orders', () => context.go('/student/orders'), trailing: orderCount > 0 ? '$orderCount' : null),
           _dTile(Icons.shopping_bag_outlined, 'Cart', () => context.go('/student/cart'), trailing: cartCount > 0 ? '$cartCount' : null),
           _dTile(Icons.person_outline_rounded, 'Profile', () => context.go('/student/profile')),
-          const Divider(color: AppColors.border, height: 1),
+          Divider(color: AppColors.border, height: 1),
+          ThemeToggleTile(),
           _dTile(Icons.logout_rounded, 'Sign out', () async {
             await ref.read(authProvider.notifier).logout();
             if (context.mounted) context.go('/login');
           }, color: AppColors.error),
-          const Padding(padding: EdgeInsets.all(16), child: Text('Demo • Mock payments', style: TextStyle(fontSize: 11, color: AppColors.textTertiary))),
+          Padding(padding: EdgeInsets.all(16), child: Text('Demo • Mock payments', style: TextStyle(fontSize: 11, color: AppColors.textTertiary))),
         ]),
       );
-  Widget _dTile(IconData ic, String t, VoidCallback onTap, {Color color = AppColors.textPrimary, String? trailing}) =>
+  Widget _dTile(IconData ic, String t, VoidCallback onTap, {Color? color, String? trailing}) =>
       ListTile(
-        leading: Icon(ic, color: color, size: 20),
-        title: Text(t, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w500)),
-        trailing: trailing == null ? null : Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(20)), child: Text(trailing, style: const TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w700))),
+        leading: Icon(ic, color: color ?? AppColors.textPrimary, size: 20),
+        title: Text(t, style: TextStyle(color: color ?? AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w500)),
+        trailing: trailing == null ? null : Container(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3), decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(20)), child: Text(trailing, style: TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w700))),
         onTap: onTap,
       );
 }
@@ -656,11 +658,11 @@ class _StudentDrawer extends ConsumerWidget {
 class _DrawerPill extends StatelessWidget {
   final IconData icon;
   final String label;
-  const _DrawerPill({required this.icon, required this.label});
+  _DrawerPill({required this.icon, required this.label});
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
         decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
-        child: Row(children: [Icon(icon, size: 10, color: AppColors.textTertiary), const SizedBox(width: 4), Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w600))]),
+        child: Row(children: [Icon(icon, size: 10, color: AppColors.textTertiary), SizedBox(width: 4), Text(label, style: TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w600))]),
       );
 }

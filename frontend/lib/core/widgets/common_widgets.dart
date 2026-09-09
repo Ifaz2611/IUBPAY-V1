@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../shared/api/api_client.dart';
 import '../constants/app_constants.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_provider.dart';
 import '../utils/money_formatter.dart';
 
 // ─── App background — calm warm canvas ────────────────────────
@@ -13,9 +14,70 @@ class AppBackground extends StatelessWidget {
   const AppBackground({super.key, required this.child});
   @override
   Widget build(BuildContext context) => Container(
-        color: AppColors.background,
+        color: context.appColors.background,
         child: child,
       );
+}
+
+// ─── Theme toggle button — light/dark ────────────────────────
+class ThemeToggleButton extends ConsumerWidget {
+  final bool compact;
+  const ThemeToggleButton({super.key, this.compact = false});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(themeModeProvider);
+    final isDark = mode == ThemeMode.dark ||
+        (mode == ThemeMode.system && MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+    final icon = isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded;
+    final tooltip = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+    if (compact) {
+      return IconButton(
+        icon: Icon(icon, size: 20),
+        tooltip: tooltip,
+        onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
+      );
+    }
+    return IconButton(
+      icon: Icon(icon, size: 20),
+      tooltip: tooltip,
+      onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
+    );
+  }
+}
+
+class ThemeToggleTile extends ConsumerWidget {
+  const ThemeToggleTile({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(themeModeProvider);
+    final isDark = mode == ThemeMode.dark ||
+        (mode == ThemeMode.system && MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+    final c = context.appColors;
+    return AppCard(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: c.surfaceMuted, borderRadius: BorderRadius.circular(8), border: Border.all(color: c.border)),
+          child: Icon(isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded, size: 16, color: c.textSecondary),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(isDark ? 'Dark mode' : 'Light mode', style: TextStyle(color: c.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+            Text(isDark ? 'Dark • easy on eyes' : 'Light • classic', style: TextStyle(color: c.textTertiary, fontSize: 11)),
+          ]),
+        ),
+        Switch(
+          value: isDark,
+          activeThumbColor: c.brand,
+          onChanged: (_) => ref.read(themeModeProvider.notifier).toggle(),
+        ),
+      ]),
+    );
+  }
 }
 
 // ─── App bar — simple, trustworthy ────────────────────────────
@@ -25,6 +87,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? action;
   final bool showBack;
   final VoidCallback? onBack;
+  final bool showThemeToggle;
 
   const AppTopBar({
     super.key,
@@ -33,6 +96,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     this.action,
     this.showBack = true,
     this.onBack,
+    this.showThemeToggle = true,
   });
 
   @override
@@ -40,10 +104,11 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return AppBar(
       leading: showBack
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: Icon(Icons.arrow_back_rounded),
               onPressed: onBack ??
                   () {
                     if (context.canPop()) context.pop();
@@ -56,13 +121,17 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
           Text(title),
           if (subtitle != null)
             Text(subtitle!,
-                style: const TextStyle(color: AppColors.textTertiary, fontSize: 12, fontWeight: FontWeight.w400)),
+                style: TextStyle(color: c.textTertiary, fontSize: 12, fontWeight: FontWeight.w400)),
         ],
       ),
-      actions: action != null ? [Padding(padding: const EdgeInsets.only(right: 8), child: action!)] : null,
+      actions: [
+        if (showThemeToggle) const ThemeToggleButton(),
+        if (action != null) Padding(padding: const EdgeInsets.only(right: 8), child: action!),
+        if (action == null && !showThemeToggle) const SizedBox(width: 8),
+      ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: AppColors.border),
+        child: Container(height: 1, color: c.border),
       ),
     );
   }
@@ -86,13 +155,15 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
+    final isDark = context.isDarkMode;
     final card = Container(
       padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: c.surface,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: AppColors.border, width: 1),
-        boxShadow: AppShadows.card,
+        border: Border.all(color: c.border, width: 1),
+        boxShadow: isDark ? AppShadows.cardDark : AppShadows.card,
       ),
       child: child,
     );
@@ -163,7 +234,7 @@ class PrimaryButton extends StatelessWidget {
     final child = busy
         ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
         : Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-            if (icon != null) ...[Icon(icon, size: 18), const SizedBox(width: 8)],
+            if (icon != null) ...[Icon(icon, size: 18), SizedBox(width: 8)],
             Text(label),
           ]);
     if (outlined) {
@@ -188,13 +259,13 @@ class NeonButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool busy;
   final List<Color> gradient;
-  const NeonButton({
+  NeonButton({
     super.key,
     required this.label,
     this.icon,
     this.onPressed,
     this.busy = false,
-    this.gradient = const [AppColors.brand, AppColors.brand],
+    this.gradient = const [Color(0xFF0F5B4A), Color(0xFF0F5B4A)],
   });
   @override
   Widget build(BuildContext context) => PrimaryButton(label: label, icon: icon, onPressed: onPressed, busy: busy);
@@ -205,26 +276,26 @@ class StatusChip extends StatelessWidget {
   final String status;
   const StatusChip({super.key, required this.status});
 
-  static const _map = {
-    'PENDING_PAYMENT': (AppColors.warning, AppColors.warningBg, 'Awaiting payment'),
-    'PAYMENT_PROCESSING': (AppColors.warning, AppColors.warningBg, 'Processing'),
-    'PAYMENT_FAILED': (AppColors.error, AppColors.errorBg, 'Payment failed'),
-    'PAID': (AppColors.success, AppColors.successBg, 'Paid'),
-    'ACCEPTED': (AppColors.info, AppColors.infoBg, 'Accepted'),
-    'PREPARING': (AppColors.accentAmber, AppColors.accentAmberBg, 'Preparing'),
-    'READY': (AppColors.success, AppColors.successBg, 'Ready for pickup'),
-    'COLLECTED': (AppColors.textSecondary, AppColors.surfaceMuted, 'Collected'),
-    'CANCELLED': (AppColors.textTertiary, AppColors.surfaceMuted, 'Cancelled'),
-    'REJECTED': (AppColors.error, AppColors.errorBg, 'Rejected'),
-    'REFUND_PENDING': (AppColors.warning, AppColors.warningBg, 'Refunding'),
-    'REFUNDED': (AppColors.textSecondary, AppColors.surfaceMuted, 'Refunded'),
-  };
-
   @override
   Widget build(BuildContext context) {
-    final v = _map[status];
-    final Color fg = (v?.$1) ?? AppColors.textSecondary;
-    final Color bg = (v?.$2) ?? AppColors.surfaceMuted;
+    final c = context.appColors;
+    final map = {
+      'PENDING_PAYMENT': (c.warning, c.warningBg, 'Awaiting payment'),
+      'PAYMENT_PROCESSING': (c.warning, c.warningBg, 'Processing'),
+      'PAYMENT_FAILED': (c.error, c.errorBg, 'Payment failed'),
+      'PAID': (c.success, c.successBg, 'Paid'),
+      'ACCEPTED': (c.info, c.infoBg, 'Accepted'),
+      'PREPARING': (c.accentAmber, c.accentAmberBg, 'Preparing'),
+      'READY': (c.success, c.successBg, 'Ready for pickup'),
+      'COLLECTED': (c.textSecondary, c.surfaceMuted, 'Collected'),
+      'CANCELLED': (c.textTertiary, c.surfaceMuted, 'Cancelled'),
+      'REJECTED': (c.error, c.errorBg, 'Rejected'),
+      'REFUND_PENDING': (c.warning, c.warningBg, 'Refunding'),
+      'REFUNDED': (c.textSecondary, c.surfaceMuted, 'Refunded'),
+    };
+    final v = map[status];
+    final Color fg = (v?.$1) ?? c.textSecondary;
+    final Color bg = (v?.$2) ?? c.surfaceMuted;
     final String label = (v?.$3) ?? status.replaceAll('_', ' ');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -260,7 +331,7 @@ class PriceText extends StatelessWidget {
         style: TextStyle(
           fontSize: fontSize,
           fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-          color: color ?? AppColors.textPrimary,
+          color: color ?? context.appColors.textPrimary,
           letterSpacing: -0.2,
           fontFeatures: const [FontFeature.tabularFigures()],
         ),
@@ -274,18 +345,21 @@ class LoadingView extends StatelessWidget {
   final String? message;
   const LoadingView({super.key, this.message});
   @override
-  Widget build(BuildContext context) => Center(
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.2, color: AppColors.brand)),
+            SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.2, color: c.brand)),
             if (message != null) ...[
               const SizedBox(height: 12),
-              Text(message!, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              Text(message!, style: TextStyle(color: c.textSecondary, fontSize: 13)),
             ]
           ]),
         ),
       );
+  }
 }
 
 class EmptyView extends StatelessWidget {
@@ -295,7 +369,9 @@ class EmptyView extends StatelessWidget {
   final VoidCallback? onAction;
   const EmptyView({super.key, this.icon = Icons.inbox_outlined, required this.message, this.actionLabel, this.onAction});
   @override
-  Widget build(BuildContext context) => Center(
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -304,20 +380,21 @@ class EmptyView extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.surfaceMuted,
-                border: Border.all(color: AppColors.border),
+                color: c.surfaceMuted,
+                border: Border.all(color: c.border),
               ),
-              child: Icon(icon, size: 28, color: AppColors.textTertiary),
+              child: Icon(icon, size: 28, color: c.textTertiary),
             ),
             const SizedBox(height: 14),
-            Text(message, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.4)),
+            Text(message, textAlign: TextAlign.center, style: TextStyle(color: c.textSecondary, fontSize: 14, height: 1.4)),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 16),
-              OutlinedButton.icon(onPressed: onAction, icon: const Icon(Icons.refresh_rounded, size: 16), label: Text(actionLabel!)),
+              OutlinedButton.icon(onPressed: onAction, icon: Icon(Icons.refresh_rounded, size: 16), label: Text(actionLabel!)),
             ]
           ]),
         ),
       );
+  }
 }
 
 class ErrorView extends ConsumerWidget {
@@ -325,42 +402,48 @@ class ErrorView extends ConsumerWidget {
   final VoidCallback onRetry;
   const ErrorView({super.key, required this.error, required this.onRetry});
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Center(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.appColors;
+    return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.errorBg, border: Border.all(color: AppColors.errorBorder)),
-              child: const Icon(Icons.wifi_off_rounded, size: 28, color: AppColors.error),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: c.errorBg, border: Border.all(color: c.errorBorder)),
+              child: Icon(Icons.wifi_off_rounded, size: 28, color: c.error),
             ),
             const SizedBox(height: 14),
-            Text(apiErrorMessage(error), textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4)),
+            Text(apiErrorMessage(error), textAlign: TextAlign.center, style: TextStyle(color: c.textSecondary, fontSize: 13, height: 1.4)),
             const SizedBox(height: 16),
             PrimaryButton(label: 'Try again', icon: Icons.refresh_rounded, onPressed: onRetry),
           ]),
         ),
       );
+  }
 }
 
 class MockPaymentBanner extends StatelessWidget {
   const MockPaymentBanner({super.key});
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-        decoration: const BoxDecoration(
-          color: AppColors.warningBg,
-          border: Border(bottom: BorderSide(color: AppColors.border)),
+        decoration: BoxDecoration(
+          color: c.warningBg,
+          border: Border(bottom: BorderSide(color: c.border)),
         ),
-        child: const Row(children: [
-          Icon(Icons.info_outline_rounded, size: 14, color: AppColors.warning),
-          SizedBox(width: 8),
+        child: Row(children: [
+          Icon(Icons.info_outline_rounded, size: 14, color: c.warning),
+          const SizedBox(width: 8),
           Expanded(
               child: Text('Demo mode — payments are simulated and no real money moves.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary))),
+                  style: TextStyle(fontSize: 12, color: c.textSecondary))),
         ]),
       );
+  }
 }
 
 /// Section header — plain, no neon accent
@@ -370,14 +453,16 @@ class SectionHeader extends StatelessWidget {
   final Widget? action;
   const SectionHeader({super.key, required this.title, this.subtitle, this.action});
   @override
-  Widget build(BuildContext context) => Row(children: [
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Row(children: [
         Flexible(
             fit: FlexFit.loose,
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
+              Text(title, style: TextStyle(color: c.textPrimary, fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
               if (subtitle != null) ...[
                 const SizedBox(height: 2),
-                Text(subtitle!, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                Text(subtitle!, style: TextStyle(color: c.textTertiary, fontSize: 12)),
               ]
             ])),
         if (action != null) ...[
@@ -385,6 +470,7 @@ class SectionHeader extends StatelessWidget {
           action!,
         ],
       ]);
+  }
 }
 
 /// Thin list row helper
@@ -397,6 +483,7 @@ class AppListRow extends StatelessWidget {
   const AppListRow({super.key, required this.leading, required this.title, this.subtitle, this.trailing, this.onTap});
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     final row = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(children: [
@@ -404,10 +491,10 @@ class AppListRow extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
+          Text(title, style: TextStyle(color: c.textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
           if (subtitle != null) ...[
             const SizedBox(height: 2),
-            Text(subtitle!, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+            Text(subtitle!, style: TextStyle(color: c.textTertiary, fontSize: 12)),
           ]
         ])),
         if (trailing != null) trailing!,

@@ -45,10 +45,10 @@ class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
     order.whenData((o) => _startPollingIfNeeded(o.status));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(title: 'Payment result', onBack: () => context.go('/student')),
       body: order.when(
-        loading: () => const LoadingView(),
+        loading: () => LoadingView(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orderDetailProvider(widget.orderId))),
         data: (o) {
           final paid = o.status == 'PAID' || o.latestPayment?.status == 'SUCCEEDED';
@@ -68,9 +68,9 @@ class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
                 decoration: BoxDecoration(shape: BoxShape.circle, color: bg, border: Border.all(color: accent.withValues(alpha: 0.2))),
                 child: Icon(ic, size: 34, color: accent),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(title, style: TextStyle(color: accent, fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: -0.2)),
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
               Text(
                 processing
                     ? 'Waiting for webhook confirmation…'
@@ -78,32 +78,32 @@ class _PaymentResultScreenState extends ConsumerState<PaymentResultScreen> {
                         ? 'Webhook verified — funds captured.'
                         : o.latestPayment?.failureReason ?? 'Provider declined the charge.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
               ),
               if (processing) ...[
-                const SizedBox(height: 12),
-                const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                const SizedBox(height: 8),
-                const Text('Auto-refreshing…', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                SizedBox(height: 12),
+                SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                SizedBox(height: 8),
+                Text('Auto-refreshing…', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
               ],
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               AppCard(
                 child: Column(children: [
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    const Text('Order', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
-                    Text(o.orderNumber, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 12)),
+                    Text('Order', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                    Text(o.orderNumber, style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 12)),
                   ]),
-                  const SizedBox(height: 8),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Total', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)), PriceText(o.totalAmount, fontSize: 15)]),
+                  SizedBox(height: 8),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Total', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)), PriceText(o.totalAmount, fontSize: 15)]),
                   if (o.latestPayment?.failureReason != null) ...[
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(color: AppColors.errorBg, borderRadius: BorderRadius.circular(AppRadii.md)),
                         child: Row(children: [
-                          const Icon(Icons.info_outline_rounded, size: 14, color: AppColors.error),
-                          const SizedBox(width: 6),
-                          Expanded(child: Text('Reason: ${o.latestPayment!.failureReason}', style: const TextStyle(color: AppColors.error, fontSize: 12))),
+                          Icon(Icons.info_outline_rounded, size: 14, color: AppColors.error),
+                          SizedBox(width: 6),
+                          Expanded(child: Text('Reason: ${o.latestPayment!.failureReason}', style: TextStyle(color: AppColors.error, fontSize: 12))),
                         ])),
                   ],
                 ]),

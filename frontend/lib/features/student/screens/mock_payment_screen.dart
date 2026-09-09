@@ -91,44 +91,44 @@ class _MockPaymentScreenState extends ConsumerState<MockPaymentScreen> {
     final canAct = !_busy && _paymentId != null && _error == null;
     final creating = _busy && _paymentId == null && _amount == null;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(
           title: 'Payment',
           subtitle: 'Mock — verify locally, trust the webhook',
           onBack: () => context.go('/student')),
       body: Column(children: [
-        const MockPaymentBanner(),
+        MockPaymentBanner(),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   AppCard(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(20),
                     child: Column(children: [
-                      const Text('Amount to pay',
+                      Text('Amount to pay',
                           style: TextStyle(
                               color: AppColors.textTertiary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.6)),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       if (_amount != null)
                         PriceText(_amount!, fontSize: 36)
                       else if (creating || _busy)
-                        const LoadingView(message: 'Contacting mock provider…')
+                        LoadingView(message: 'Contacting mock provider…')
                       else if (_error != null)
-                        const Icon(Icons.error_outline_rounded,
+                        Icon(Icons.error_outline_rounded,
                             color: AppColors.error, size: 28),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       Text('Order $_shortOrderId…',
-                          style: const TextStyle(
+                          style: TextStyle(
                               color: AppColors.textTertiary, fontSize: 11)),
-                      const SizedBox(height: 14),
-                      const Divider(height: 1),
-                      const SizedBox(height: 14),
-                      const Row(
+                      SizedBox(height: 14),
+                      Divider(height: 1),
+                      SizedBox(height: 14),
+                      Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.verified_outlined,
@@ -160,23 +160,23 @@ class _MockPaymentScreenState extends ConsumerState<MockPaymentScreen> {
                       onPressed:
                           canAct ? () => _complete(success: false) : null,
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     AppCard(
                       onTap: canAct
                           ? () async {
                               setState(() => _busy = true);
-                              await Future.delayed(const Duration(seconds: 3));
+                              await Future.delayed(Duration(seconds: 3));
                               if (mounted) await _complete(success: true);
                             }
                           : null,
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14),
                       child: Row(children: [
                         Icon(Icons.hourglass_top_rounded,
                             size: 18,
                             color: canAct
                                 ? AppColors.textSecondary
                                 : AppColors.textTertiary),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +188,7 @@ class _MockPaymentScreenState extends ConsumerState<MockPaymentScreen> {
                                           : AppColors.textTertiary,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13)),
-                              const Text('Simulates network latency',
+                              Text('Simulates network latency',
                                   style: TextStyle(
                                       color: AppColors.textTertiary,
                                       fontSize: 11)),
@@ -201,7 +201,7 @@ class _MockPaymentScreenState extends ConsumerState<MockPaymentScreen> {
                       ]),
                     ),
                     if (_paymentId == null && !_busy && _error != null) ...[
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       PrimaryButton(
                           label: 'Retry',
                           icon: Icons.refresh_rounded,
@@ -210,9 +210,9 @@ class _MockPaymentScreenState extends ConsumerState<MockPaymentScreen> {
                     ],
                   ],
                   if (_error != null) ...[
-                    const SizedBox(height: 14),
+                    SizedBox(height: 14),
                     Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
                             color: AppColors.errorBg,
                             borderRadius: BorderRadius.circular(AppRadii.md),
@@ -220,18 +220,18 @@ class _MockPaymentScreenState extends ConsumerState<MockPaymentScreen> {
                         child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.error_outline_rounded,
+                              Icon(Icons.error_outline_rounded,
                                   color: AppColors.error, size: 16),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Expanded(
                                   child: Text(_error!,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           color: AppColors.error,
                                           fontSize: 13))),
                             ])),
                   ],
-                  const SizedBox(height: 18),
-                  const Center(
+                  SizedBox(height: 18),
+                  Center(
                       child: Text(
                           'Result is webhook-verified — don’t trust client success alone.',
                           textAlign: TextAlign.center,

@@ -31,7 +31,7 @@ class _VendorListScreenState extends ConsumerState<VendorListScreen> {
   Widget build(BuildContext context) {
     final vendors = ref.watch(vendorListProvider);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(
         title: 'Vendors',
         subtitle: 'Choose a cafeteria to start ordering',
@@ -57,24 +57,24 @@ class _VendorListScreenState extends ConsumerState<VendorListScreen> {
               onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
               decoration: InputDecoration(
                 hintText: 'Search by name or location',
-                prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                prefixIcon: Icon(Icons.search_rounded, size: 18),
                 suffixIcon: _query.isNotEmpty
-                    ? IconButton(icon: const Icon(Icons.close_rounded, size: 16), onPressed: () => setState(() => _query = ''))
+                    ? IconButton(icon: Icon(Icons.close_rounded, size: 16), onPressed: () => setState(() => _query = ''))
                     : null,
                 isDense: true,
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Row(children: [
               FilterChip(
                 label: Row(children: [
                   Icon(_favoritesOnly ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 14, color: _favoritesOnly ? Colors.white : AppColors.error),
-                  const SizedBox(width: 6),
+                  SizedBox(width: 6),
                   Text('Favorites', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _favoritesOnly ? Colors.white : AppColors.textSecondary)),
                 ]),
                 selected: _favoritesOnly,
                 selectedColor: AppColors.error,
-                backgroundColor: AppColors.surface,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 side: BorderSide(color: _favoritesOnly ? AppColors.error : AppColors.border),
                 showCheckmark: false,
                 onSelected: (v) {
@@ -82,24 +82,24 @@ class _VendorListScreenState extends ConsumerState<VendorListScreen> {
                   setState(() => _favoritesOnly = v);
                 },
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                 decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadii.pill), border: Border.all(color: AppColors.border)),
                 child: Row(children: [
-                  const Icon(Icons.bolt_rounded, size: 12, color: AppColors.warning),
-                  const SizedBox(width: 6),
-                  Text('${_favs.length} saved', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
+                  Icon(Icons.bolt_rounded, size: 12, color: AppColors.warning),
+                  SizedBox(width: 6),
+                  Text('${_favs.length} saved', style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
                 ]),
               ),
-              const Spacer(),
+              Spacer(),
               TextButton.icon(
                 onPressed: () => ref.invalidate(vendorListProvider),
-                icon: const Icon(Icons.refresh_rounded, size: 14),
-                label: const Text('Refresh', style: TextStyle(fontSize: 12)),
-                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), minimumSize: const Size(0, 32)),
+                icon: Icon(Icons.refresh_rounded, size: 14),
+                label: Text('Refresh', style: TextStyle(fontSize: 12)),
+                style: TextButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6), minimumSize: Size(0, 32)),
               ),
             ]),
           ]),
@@ -125,7 +125,7 @@ class _VendorListScreenState extends ConsumerState<VendorListScreen> {
               if (_gridMode) {
                 return RefreshIndicator(
                   color: AppColors.brand,
-                  backgroundColor: AppColors.surface,
+                  backgroundColor: Theme.of(context).colorScheme.surface,
                   onRefresh: () async => ref.invalidate(vendorListProvider),
                   child: GridView.builder(
                     padding: const EdgeInsets.all(16),
@@ -147,12 +147,12 @@ class _VendorListScreenState extends ConsumerState<VendorListScreen> {
               }
               return RefreshIndicator(
                 color: AppColors.brand,
-                backgroundColor: AppColors.surface,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 onRefresh: () async => ref.invalidate(vendorListProvider),
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (_, __) => SizedBox(height: 10),
                   itemBuilder: (_, i) {
                     final v = filtered[i];
                     final isFav = _favs.contains(v.id);
@@ -161,79 +161,79 @@ class _VendorListScreenState extends ConsumerState<VendorListScreen> {
                         HapticFeedback.selectionClick();
                         context.go('/student/vendor/${v.id}');
                       },
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14),
                       child: Row(children: [
                         Stack(children: [
                           Container(
                             width: 56,
                             height: 56,
                             decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
-                            child: const Icon(Icons.restaurant_rounded, color: AppColors.brand, size: 24),
+                            child: Icon(Icons.restaurant_rounded, color: AppColors.brand, size: 24),
                           ),
                           Positioned(
                             bottom: -2,
                             right: -2,
                             child: Container(
-                              padding: const EdgeInsets.all(4),
+                              padding: EdgeInsets.all(4),
                               decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle, border: Border.all(color: AppColors.border)),
-                              child: const Icon(Icons.verified_rounded, size: 12, color: AppColors.success),
+                              child: Icon(Icons.verified_rounded, size: 12, color: AppColors.success),
                             ),
                           ),
                         ]),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Row(children: [
-                            Expanded(child: Text(v.name, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 14))),
+                            Expanded(child: Text(v.name, style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 14))),
                             GestureDetector(
                               onTap: () {
                                 HapticFeedback.selectionClick();
                                 setState(() => isFav ? _favs.remove(v.id) : _favs.add(v.id));
                               },
                               child: Container(
-                                padding: const EdgeInsets.all(6),
+                                padding: EdgeInsets.all(6),
                                 decoration: BoxDecoration(color: isFav ? AppColors.errorBg : AppColors.surfaceMuted, shape: BoxShape.circle, border: Border.all(color: isFav ? AppColors.errorBorder : AppColors.border)),
                                 child: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 14, color: isFav ? AppColors.error : AppColors.textTertiary),
                               ),
                             ),
                           ]),
-                          const SizedBox(height: 2),
+                          SizedBox(height: 2),
                           Row(children: [
-                            const Icon(Icons.place_outlined, size: 12, color: AppColors.textTertiary),
-                            const SizedBox(width: 4),
-                            Expanded(child: Text(v.location, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))),
+                            Icon(Icons.place_outlined, size: 12, color: AppColors.textTertiary),
+                            SizedBox(width: 4),
+                            Expanded(child: Text(v.location, style: TextStyle(color: AppColors.textSecondary, fontSize: 12))),
                           ]),
-                          const SizedBox(height: 6),
+                          SizedBox(height: 6),
                           Row(children: [
-                            const _OpenChip(),
-                            const SizedBox(width: 6),
+                            _OpenChip(),
+                            SizedBox(width: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                               decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)),
                               child: Row(children: [
-                                const Icon(Icons.star_rounded, size: 11, color: Color(0xFFF59E0B)),
-                                const SizedBox(width: 3),
-                                Text(_mockRating(v.id).toStringAsFixed(1), style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700)),
+                                Icon(Icons.star_rounded, size: 11, color: Color(0xFFF59E0B)),
+                                SizedBox(width: 3),
+                                Text(_mockRating(v.id).toStringAsFixed(1), style: TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700)),
                               ]),
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                               decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)),
                               child: Row(children: [
-                                const Icon(Icons.timer_outlined, size: 11, color: AppColors.textTertiary),
-                                const SizedBox(width: 3),
-                                Text(_mockTime(v.id), style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w500)),
+                                Icon(Icons.timer_outlined, size: 11, color: AppColors.textTertiary),
+                                SizedBox(width: 3),
+                                Text(_mockTime(v.id), style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w500)),
                               ]),
                             ),
                           ]),
                           if (v.description != null && v.description!.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(v.description!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                            SizedBox(height: 4),
+                            Text(v.description!, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                           ],
                         ])),
-                        const SizedBox(width: 6),
-                        const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textTertiary),
+                        SizedBox(width: 6),
+                        Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textTertiary),
                       ]),
                     );
                   },
@@ -254,33 +254,33 @@ class _VendorGridCard extends StatelessWidget {
   final bool isFav;
   final VoidCallback onFav;
   final VoidCallback onTap;
-  const _VendorGridCard({required this.vendor, required this.rating, required this.eta, required this.isFav, required this.onFav, required this.onTap});
+  _VendorGridCard({required this.vendor, required this.rating, required this.eta, required this.isFav, required this.onFav, required this.onTap});
   @override
   Widget build(BuildContext context) => AppCard(
         onTap: onTap,
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Container(width: 44, height: 44, decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)), child: const Icon(Icons.restaurant_rounded, color: AppColors.brand, size: 20)),
-            const Spacer(),
+            Container(width: 44, height: 44, decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)), child: Icon(Icons.restaurant_rounded, color: AppColors.brand, size: 20)),
+            Spacer(),
             GestureDetector(
               onTap: onFav,
-              child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: isFav ? AppColors.errorBg : AppColors.surfaceMuted, shape: BoxShape.circle, border: Border.all(color: isFav ? AppColors.errorBorder : AppColors.border)), child: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 13, color: isFav ? AppColors.error : AppColors.textTertiary)),
+              child: Container(padding: EdgeInsets.all(6), decoration: BoxDecoration(color: isFav ? AppColors.errorBg : AppColors.surfaceMuted, shape: BoxShape.circle, border: Border.all(color: isFav ? AppColors.errorBorder : AppColors.border)), child: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 13, color: isFav ? AppColors.error : AppColors.textTertiary)),
             ),
           ]),
-          const SizedBox(height: 10),
-          Text(vendor.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
-          const SizedBox(height: 2),
-          Row(children: [const Icon(Icons.place_outlined, size: 11, color: AppColors.textTertiary), const SizedBox(width: 3), Expanded(child: Text(vendor.location, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)))]),
-          const Spacer(),
+          SizedBox(height: 10),
+          Text(vendor.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
+          SizedBox(height: 2),
+          Row(children: [Icon(Icons.place_outlined, size: 11, color: AppColors.textTertiary), SizedBox(width: 3), Expanded(child: Text(vendor.location, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.textSecondary, fontSize: 11)))]),
+          Spacer(),
           Row(children: [
-            Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3), decoration: BoxDecoration(color: AppColors.successBg, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.successBorder)), child: const Row(children: [Icon(Icons.circle, size: 5, color: AppColors.success), SizedBox(width: 4), Text('Open', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700))])),
-            const SizedBox(width: 6),
-            const Icon(Icons.star_rounded, size: 12, color: Color(0xFFF59E0B)),
-            Text(rating.toStringAsFixed(1), style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700)),
+            Container(padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3), decoration: BoxDecoration(color: AppColors.successBg, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.successBorder)), child: Row(children: [Icon(Icons.circle, size: 5, color: AppColors.success), SizedBox(width: 4), Text('Open', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700))])),
+            SizedBox(width: 6),
+            Icon(Icons.star_rounded, size: 12, color: Color(0xFFF59E0B)),
+            Text(rating.toStringAsFixed(1), style: TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w700)),
           ]),
-          const SizedBox(height: 6),
-          Row(children: [const Icon(Icons.timer_outlined, size: 11, color: AppColors.textTertiary), const SizedBox(width: 4), Text(eta, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)), const Spacer(), const Icon(Icons.arrow_forward_rounded, size: 12, color: AppColors.textTertiary)]),
+          SizedBox(height: 6),
+          Row(children: [Icon(Icons.timer_outlined, size: 11, color: AppColors.textTertiary), SizedBox(width: 4), Text(eta, style: TextStyle(color: AppColors.textTertiary, fontSize: 11)), Spacer(), Icon(Icons.arrow_forward_rounded, size: 12, color: AppColors.textTertiary)]),
         ]),
       );
 }
@@ -324,7 +324,7 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
     final menu = ref.watch(vendorMenuProvider(widget.vendorId));
     final cart = ref.watch(cartProvider);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(
         title: 'Menu',
         subtitle: cart.isEmpty ? 'Freshly made on campus' : '${cart.lines.length} item${cart.lines.length == 1 ? '' : 's'} • ${cart.subtotal}৳ in cart',
@@ -336,13 +336,13 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                   context.go('/student/cart');
                 },
                 icon: Badge(
-                  label: Text('${cart.lines.length}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800)),
+                  label: Text('${cart.lines.length}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800)),
                   backgroundColor: Colors.white,
                   textColor: AppColors.brand,
-                  child: const Icon(Icons.shopping_bag_outlined, size: 14, color: Colors.white),
+                  child: Icon(Icons.shopping_bag_outlined, size: 14, color: Colors.white),
                 ),
                 label: Text('Cart • ${cart.subtotal}৳'),
-                style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), minimumSize: const Size(0, 32), textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                style: FilledButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6), minimumSize: Size(0, 32), textStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
               )
             : null,
       ),
@@ -355,16 +355,16 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
               onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
               decoration: InputDecoration(
                 hintText: 'Search dishes, e.g. chicken, biryani',
-                prefixIcon: const Icon(Icons.search_rounded, size: 18),
-                suffixIcon: _query.isNotEmpty ? IconButton(icon: const Icon(Icons.close_rounded, size: 16), onPressed: () => setState(() => _query = '')) : null,
+                prefixIcon: Icon(Icons.search_rounded, size: 18),
+                suffixIcon: _query.isNotEmpty ? IconButton(icon: Icon(Icons.close_rounded, size: 16), onPressed: () => setState(() => _query = '')) : null,
                 isDense: true,
               ),
             ),
             const SizedBox(height: 10),
             // Category chips + filters
             menu.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              loading: () => SizedBox.shrink(),
+              error: (_, __) => SizedBox.shrink(),
               data: (items) {
                 final cats = <String>{'All', ...items.map((e) => e.category)}.toList();
                 return Column(children: [
@@ -373,7 +373,7 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: cats.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      separatorBuilder: (_, __) => SizedBox(width: 8),
                       itemBuilder: (_, i) {
                         final c = cats[i];
                         final selected = c == _category;
@@ -382,7 +382,7 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                           label: Text(c, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: selected ? AppColors.brand : AppColors.textSecondary)),
                           selected: selected,
                           selectedColor: AppColors.brandSubtle,
-                          backgroundColor: AppColors.surface,
+                          backgroundColor: Theme.of(context).colorScheme.surface,
                           side: BorderSide(color: selected ? AppColors.brand.withValues(alpha: 0.3) : AppColors.border),
                           showCheckmark: false,
                           onSelected: (_) {
@@ -390,50 +390,50 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                             setState(() => _category = c);
                           },
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          padding: EdgeInsets.symmetric(horizontal: 10),
                         );
                       },
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(children: [
                       FilterChip(
-                        label: const Text('Veg only', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                        label: Text('Veg only', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                         avatar: Icon(Icons.eco_rounded, size: 14, color: _vegOnly ? Colors.white : AppColors.success),
                         selected: _vegOnly,
                         selectedColor: AppColors.success,
-                        backgroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
                         side: BorderSide(color: _vegOnly ? AppColors.success : AppColors.border),
                         labelStyle: TextStyle(color: _vegOnly ? Colors.white : AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600),
                         showCheckmark: false,
                         onSelected: (v) => setState(() => _vegOnly = v),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       FilterChip(
-                        label: const Text('Available', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                        label: Text('Available', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                         avatar: Icon(Icons.check_circle_outline_rounded, size: 14, color: _availableOnly ? Colors.white : AppColors.success),
                         selected: _availableOnly,
                         selectedColor: AppColors.brand,
-                        backgroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
                         side: BorderSide(color: _availableOnly ? AppColors.brand : AppColors.border),
                         labelStyle: TextStyle(color: _availableOnly ? Colors.white : AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600),
                         showCheckmark: false,
                         onSelected: (v) => setState(() => _availableOnly = v),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Container(
                         decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(AppRadii.pill), border: Border.all(color: AppColors.border)),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: EdgeInsets.symmetric(horizontal: 10),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _sort,
                             isDense: true,
-                            icon: const Icon(Icons.sort_rounded, size: 14, color: AppColors.textTertiary),
-                            style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w600),
+                            icon: Icon(Icons.sort_rounded, size: 14, color: AppColors.textTertiary),
+                            style: TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w600),
                             items: const [
                               DropdownMenuItem(value: 'popular', child: Text('Popular')),
                               DropdownMenuItem(value: 'price_low', child: Text('Price ↑')),
@@ -453,17 +453,17 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
             ),
             // cart hint
             if (!cart.isEmpty) ...[
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.brand.withOpacity(0.15))),
                 child: Row(children: [
-                  const Icon(Icons.shopping_bag_rounded, size: 14, color: AppColors.brand),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text('${cart.lines.length} item${cart.lines.length == 1 ? '' : 's'} • ${cart.subtotal}৳ — tap Add (+/−) to adjust', style: const TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w600))),
+                  Icon(Icons.shopping_bag_rounded, size: 14, color: AppColors.brand),
+                  SizedBox(width: 8),
+                  Expanded(child: Text('${cart.lines.length} item${cart.lines.length == 1 ? '' : 's'} • ${cart.subtotal}৳ — tap Add (+/−) to adjust', style: TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w600))),
                   GestureDetector(
                     onTap: () => context.go('/student/cart'),
-                    child: const Text('View cart →', style: TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w800)),
+                    child: Text('View cart →', style: TextStyle(color: AppColors.brand, fontSize: 11, fontWeight: FontWeight.w800)),
                   ),
                 ]),
               ),
@@ -516,12 +516,12 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
               }
               return RefreshIndicator(
                 color: AppColors.brand,
-                backgroundColor: AppColors.surface,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 onRefresh: () async => ref.invalidate(vendorMenuProvider(widget.vendorId)),
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (_, __) => SizedBox(height: 10),
                   itemBuilder: (_, i) {
                     final item = filtered[i];
                     final unavailable = !item.isAvailable;
@@ -529,7 +529,7 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                     final isFav = _favs.contains(item.id);
                     final isPopular = i < 2 && item.isAvailable;
                     return AppCard(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12),
                       child: Row(children: [
                         Stack(children: [
                           Container(
@@ -546,18 +546,18 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                               top: -2,
                               left: -2,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(color: const Color(0xFFF59E0B), borderRadius: BorderRadius.circular(6)),
-                                child: const Text('★ Popular', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w800)),
+                                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: Color(0xFFF59E0B), borderRadius: BorderRadius.circular(6)),
+                                child: Text('★ Popular', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w800)),
                               ),
                             ),
                         ]),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Row(children: [
                             Expanded(child: Text(item.name, style: TextStyle(color: unavailable ? AppColors.textTertiary : AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 14, decoration: unavailable ? TextDecoration.lineThrough : null))),
-                            const SizedBox(width: 6),
+                            SizedBox(width: 6),
                             GestureDetector(
                               onTap: () {
                                 HapticFeedback.selectionClick();
@@ -566,36 +566,36 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                               child: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 16, color: isFav ? AppColors.error : AppColors.textTertiary),
                             ),
                             if (unavailable) ...[
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6),
                               Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.border)),
-                                  child: const Text('Unavailable', style: TextStyle(color: AppColors.textTertiary, fontSize: 9, fontWeight: FontWeight.w700))),
+                                  child: Text('Unavailable', style: TextStyle(color: AppColors.textTertiary, fontSize: 9, fontWeight: FontWeight.w700))),
                             ],
                           ]),
-                          const SizedBox(height: 3),
+                          SizedBox(height: 3),
                           Row(children: [
                             PriceText(item.priceTaka, fontSize: 13, color: unavailable ? AppColors.textTertiary : AppColors.textPrimary),
-                            const SizedBox(width: 6),
-                            Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(5), border: Border.all(color: AppColors.border)), child: Text(item.category, style: const TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w600))),
+                            SizedBox(width: 6),
+                            Container(padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(5), border: Border.all(color: AppColors.border)), child: Text(item.category, style: TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w600))),
                             if (cartQty > 0) ...[
-                              const SizedBox(width: 6),
-                              Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(5), border: Border.all(color: AppColors.brand.withOpacity(0.15))), child: Text('×$cartQty in cart', style: const TextStyle(color: AppColors.brand, fontSize: 10, fontWeight: FontWeight.w700))),
+                              SizedBox(width: 6),
+                              Container(padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: AppColors.brandSubtle, borderRadius: BorderRadius.circular(5), border: Border.all(color: AppColors.brand.withOpacity(0.15))), child: Text('×$cartQty in cart', style: TextStyle(color: AppColors.brand, fontSize: 10, fontWeight: FontWeight.w700))),
                             ],
                           ]),
                           if (item.description != null && item.description!.isNotEmpty)
                             Padding(
-                                padding: const EdgeInsets.only(top: 4),
+                                padding: EdgeInsets.only(top: 4),
                                 child: Text(item.description!,
-                                    style: const TextStyle(color: AppColors.textTertiary, fontSize: 11, height: 1.3), maxLines: 2, overflow: TextOverflow.ellipsis)),
+                                    style: TextStyle(color: AppColors.textTertiary, fontSize: 11, height: 1.3), maxLines: 2, overflow: TextOverflow.ellipsis)),
                           Row(children: [
                             Icon(Icons.timer_outlined, size: 10, color: AppColors.textTertiary.withOpacity(0.8)),
-                            const SizedBox(width: 3),
-                            Text('${10 + (item.id.hashCode.abs() % 8)} min', style: const TextStyle(color: AppColors.textTertiary, fontSize: 10)),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.star_rounded, size: 11, color: Color(0xFFF59E0B)),
-                            const SizedBox(width: 2),
-                            Text((4.3 + (item.id.hashCode.abs() % 6) * 0.1).toStringAsFixed(1), style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w600)),
+                            SizedBox(width: 3),
+                            Text('${10 + (item.id.hashCode.abs() % 8)} min', style: TextStyle(color: AppColors.textTertiary, fontSize: 10)),
+                            SizedBox(width: 8),
+                            Icon(Icons.star_rounded, size: 11, color: Color(0xFFF59E0B)),
+                            SizedBox(width: 2),
+                            Text((4.3 + (item.id.hashCode.abs() % 6) * 0.1).toStringAsFixed(1), style: TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w600)),
                           ]),
                         ])),
                         const SizedBox(width: 10),
@@ -618,18 +618,18 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                                           final added = ref.read(cartProvider.notifier).add(item);
                                           if (!added) {
                                             ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Maximum quantity (20) reached'), behavior: SnackBarBehavior.floating),
+                                              SnackBar(content: Text('Maximum quantity (20) reached'), behavior: SnackBarBehavior.floating),
                                             );
                                             return;
                                           }
                                           HapticFeedback.selectionClick();
-                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${item.name} added'), duration: const Duration(milliseconds: 900), behavior: SnackBarBehavior.floating));
+                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${item.name} added'), duration: Duration(milliseconds: 900), behavior: SnackBarBehavior.floating));
                                         },
-                                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), minimumSize: const Size(0, 36), side: const BorderSide(color: AppColors.brand)),
-                                        child: const Text('Add', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.brand)),
+                                        style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), minimumSize: Size(0, 36), side: BorderSide(color: AppColors.brand)),
+                                        child: Text('Add', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.brand)),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text('${item.priceTaka}৳', style: const TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w600)),
+                                      SizedBox(height: 4),
+                                      Text('${item.priceTaka}৳', style: TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.w600)),
                                     ])
                                   : Container(
                                       decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(10)),
@@ -641,12 +641,12 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                                             ref.read(cartProvider.notifier).add(item);
                                           },
                                           borderRadius: BorderRadius.circular(6),
-                                          child: Container(padding: const EdgeInsets.all(4), child: const Icon(Icons.add_rounded, size: 16, color: Colors.white)),
+                                          child: Container(padding: EdgeInsets.all(4), child: Icon(Icons.add_rounded, size: 16, color: Colors.white)),
                                         ),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
-                                          child: Text('$cartQty', style: const TextStyle(color: AppColors.brand, fontWeight: FontWeight.w800, fontSize: 13)),
+                                          child: Text('$cartQty', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w800, fontSize: 13)),
                                         ),
                                         InkWell(
                                           onTap: () {
@@ -654,7 +654,7 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
                                             ref.read(cartProvider.notifier).decrement(item.id);
                                           },
                                           borderRadius: BorderRadius.circular(6),
-                                          child: Container(padding: const EdgeInsets.all(4), child: const Icon(Icons.remove_rounded, size: 16, color: Colors.white)),
+                                          child: Container(padding: EdgeInsets.all(4), child: Icon(Icons.remove_rounded, size: 16, color: Colors.white)),
                                         ),
                                       ]),
                                     ),
@@ -671,16 +671,16 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
       bottomNavigationBar: cart.isEmpty
           ? null
           : Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              decoration: const BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: AppColors.border))),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 16),
+              decoration: BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: AppColors.border))),
               child: SafeArea(
                 child: Row(children: [
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('${cart.lines.length} item${cart.lines.length == 1 ? '' : 's'} • ${cart.lines.values.fold(0, (s, l) => s + l.qty)} pcs', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                    Text('${cart.lines.length} item${cart.lines.length == 1 ? '' : 's'} • ${cart.lines.values.fold(0, (s, l) => s + l.qty)} pcs', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                     PriceText(cart.subtotal, fontSize: 16),
-                    const Text('+ 5৳ service fee', style: TextStyle(color: AppColors.textTertiary, fontSize: 10)),
+                    Text('+ 5৳ service fee', style: TextStyle(color: AppColors.textTertiary, fontSize: 10)),
                   ]),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(child: PrimaryButton(label: 'View cart → ${cart.subtotal + 5}৳', icon: Icons.shopping_bag_outlined, onPressed: () => context.go('/student/cart'))),
                 ]),
               ),
@@ -690,17 +690,17 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
 }
 
 class _OpenChip extends StatelessWidget {
-  const _OpenChip();
+  _OpenChip();
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.successBg,
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: AppColors.successBorder),
       ),
-      child: const Row(mainAxisSize: MainAxisSize.min, children: [
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.circle, size: 6, color: AppColors.success),
         SizedBox(width: 6),
         Text('Open', style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5)),

@@ -9,12 +9,14 @@ class TokenStore {
   static const _key = 'jwt_token';
   static const _refreshKey = 'refresh_token';
   static const _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
-  Future<void> save(String token) async => _storage.write(key: _key, value: token);
-  Future<void> saveRefresh(String token) async => _storage.write(key: _refreshKey, value: token);
+  Future<void> save(String token) async =>
+      _storage.write(key: _key, value: token);
+  Future<void> saveRefresh(String token) async =>
+      _storage.write(key: _refreshKey, value: token);
   Future<String?> read() async => _storage.read(key: _key);
   Future<String?> readRefresh() async => _storage.read(key: _refreshKey);
   Future<void> clear() async {
@@ -40,16 +42,20 @@ final dioProvider = Provider<Dio>((ref) {
       handler.next(options);
     },
     onError: (e, handler) async {
-      if (e.response?.statusCode == 401 && !e.requestOptions.path.contains('/auth/refresh') && !e.requestOptions.path.contains('/auth/login')) {
+      if (e.response?.statusCode == 401 &&
+          !e.requestOptions.path.contains('/auth/refresh') &&
+          !e.requestOptions.path.contains('/auth/login')) {
         final refresh = await ref.read(tokenStoreProvider).readRefresh();
         if (refresh != null) {
           try {
-            final r = await Dio(BaseOptions(baseUrl: kApiBaseUrl)).post('/auth/refresh', data: {'refresh_token': refresh});
+            final r = await Dio(BaseOptions(baseUrl: kApiBaseUrl))
+                .post('/auth/refresh', data: {'refresh_token': refresh});
             final newAccess = r.data['access_token'] as String?;
             final newRefresh = r.data['refresh_token'] as String?;
             if (newAccess != null) {
               await ref.read(tokenStoreProvider).save(newAccess);
-              if (newRefresh != null) await ref.read(tokenStoreProvider).saveRefresh(newRefresh);
+              if (newRefresh != null)
+                await ref.read(tokenStoreProvider).saveRefresh(newRefresh);
               e.requestOptions.headers['Authorization'] = 'Bearer $newAccess';
               final retry = await dio.fetch(e.requestOptions);
               return handler.resolve(retry);

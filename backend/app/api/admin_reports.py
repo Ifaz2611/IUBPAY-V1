@@ -1,6 +1,3 @@
-import csv
-import io
-
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
@@ -58,17 +55,19 @@ def reports_transactions(
     total = db.scalar(select(func.count(Payment.id))) or 0
     rows = []
     for p, o, v in db.execute(q).all():
-        rows.append({
-            "payment_id": p.id,
-            "created_at": p.created_at.isoformat() if p.created_at else None,
-            "provider": p.provider,
-            "status": p.status.value,
-            "amount_taka": p.amount_taka,
-            "failure_reason": p.failure_reason,
-            "order_number": o.order_number,
-            "vendor_name": v.name,
-            "order_status": o.status.value,
-        })
+        rows.append(
+            {
+                "payment_id": p.id,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+                "provider": p.provider,
+                "status": p.status.value,
+                "amount_taka": p.amount_taka,
+                "failure_reason": p.failure_reason,
+                "order_number": o.order_number,
+                "vendor_name": v.name,
+                "order_status": o.status.value,
+            }
+        )
     return {"total": total, "items": rows}
 
 
@@ -95,6 +94,7 @@ def list_users(
     _: User = Depends(require_role(Role.ADMIN)),
 ):
     from sqlalchemy import func
+
     from app.schemas.auth import UserOut
 
     base = select(User).order_by(User.created_at.desc())

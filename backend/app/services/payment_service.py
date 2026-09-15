@@ -1,23 +1,24 @@
 """Payment + refund logic. Every money movement writes a LedgerEntry and an
 AuditLog row inside the same DB transaction as the state change."""
+
 import asyncio
 import time
+from datetime import UTC
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.models.ledger import LedgerEntry
 from app.models.order import Order
 from app.models.payment import Payment, Refund
+from app.services.audit_service import audit
+from app.services.order_service import transition_order
 from app.utils.enums import (
     LedgerEntryType,
     OrderStatus,
     PaymentStatus,
     RefundStatus,
 )
-from app.services.audit_service import audit
-from app.services.order_service import transition_order
 
 
 def _ledger(db: Session, payment: Payment, entry_type: LedgerEntryType, amount: int, ref: str):
@@ -39,7 +40,11 @@ def create_payment(db: Session, order: Order) -> Payment:
     return that payment instead of charging again (never charge twice).
     """
     active = next(
-        (p for p in order.payments if p.status in (PaymentStatus.CREATED, PaymentStatus.PROCESSING)),
+        (
+            p
+            for p in order.payments
+            if p.status in (PaymentStatus.CREATED, PaymentStatus.PROCESSING)
+        ),
         None,
     )
     if active is not None:
@@ -93,27 +98,34 @@ def apply_webhook_event(
 
     if event == "payment.succeeded":
         payment.status = PaymentStatus.SUCCEEDED
-        from datetime import datetime, timezone
+        from datetime import datetime
 
-        payment.verified_at = datetime.now(timezone.utc)
+        payment.verified_at = datetime.now(UTC)
         transition_order(db, order, OrderStatus.PAID)
-        _ledger(db, payment, LedgerEntryType.PAYMENT, payment.amount_taka,
-                f"income:{payment.provider_transaction_id}")
-        audit(db, None, "payment.succeeded", "payment", payment.id,
-              {"order": order.order_number})
+        _ledger(
+            db,
+            payment,
+            LedgerEntryType.PAYMENT,
+            payment.amount_taka,
+            f"income:{payment.provider_transaction_id}",
+        )
+        audit(db, None, "payment.succeeded", "payment", payment.id, {"order": order.order_number})
     else:
         payment.status = PaymentStatus.FAILED
         payment.failure_reason = failure_reason or "MOCK_DECLINED"
         transition_order(db, order, OrderStatus.PAYMENT_FAILED)
-        audit(db, None, "payment.failed", "payment", payment.id,
-              {"reason": payment.failure_reason})
+        audit(db, None, "payment.failed", "payment", payment.id, {"reason": payment.failure_reason})
 
     db.commit()
     return {"status": "processed", "payment_status": payment.status.value}
 
 
 def create_and_process_refund(
-    db: Session, *, payment: Payment, reason: str, processed_by: str | None,
+    db: Session,
+    *,
+    payment: Payment,
+    reason: str,
+    processed_by: str | None,
     commit: bool = True,
 ) -> Refund:
     """Mock instant refund. Records REFUND_PENDING then REFUNDED in the ledger."""
@@ -133,10 +145,15 @@ def create_and_process_refund(
     db.add(refund)
 
     order = db.get(Order, payment.order_id)
-    _ledger(db, payment, LedgerEntryType.REFUND, -payment.amount_taka,
-            f"refund:{refund.id}")
-    audit(db, processed_by, "refund.created", "refund", refund.id,
-          {"payment": payment.id, "amount_taka": payment.amount_taka})
+    _ledger(db, payment, LedgerEntryType.REFUND, -payment.amount_taka, f"refund:{refund.id}")
+    audit(
+        db,
+        processed_by,
+        "refund.created",
+        "refund",
+        refund.id,
+        {"payment": payment.id, "amount_taka": payment.amount_taka},
+    )
 
     # Mock provider processes instantly; a real integration would await the callback.
     refund.status = RefundStatus.PROCESSED

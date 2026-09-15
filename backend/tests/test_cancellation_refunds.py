@@ -17,12 +17,16 @@ def _paid_order(client, db):
     h, s = student_client(db, client, "1")
     order = place_order(client, h, v.id, [{"menu_item_id": mi.id, "quantity": 1}])
     payment = pay_order(client, h, order["id"])
-    r = client.post("/api/payments/webhook", headers=WEBHOOK_HEADERS, json={
-        "event": "payment.succeeded",
-        "payment_id": payment["payment_id"],
-        "provider_transaction_id": payment["provider_transaction_id"],
-        "amount_taka": payment["amount_taka"],
-    })
+    r = client.post(
+        "/api/payments/webhook",
+        headers=WEBHOOK_HEADERS,
+        json={
+            "event": "payment.succeeded",
+            "payment_id": payment["payment_id"],
+            "provider_transaction_id": payment["provider_transaction_id"],
+            "amount_taka": payment["amount_taka"],
+        },
+    )
     assert r.status_code == 200
     return v, vh, h, s, order, payment
 
@@ -56,8 +60,10 @@ def test_cancel_paid_order_creates_refund(client, db):
 
     # Ledger: one inflow + one outflow that cancel out.
     entries = db.scalars(
-        select(LedgerEntry).where(LedgerEntry.order_id == order["id"])
-        .order_by(LedgerEntry.created_at)).all()
+        select(LedgerEntry)
+        .where(LedgerEntry.order_id == order["id"])
+        .order_by(LedgerEntry.created_at)
+    ).all()
     types = [e.entry_type for e in entries]
     assert types.count("PAYMENT") == 1
     assert types.count("REFUND") == 1
@@ -70,9 +76,12 @@ def test_cannot_cancel_after_preparing(client, db):
     v, vh, h, s, order, payment = _paid_order(client, db)
 
     for status in ["ACCEPTED", "PREPARING"]:
-        assert client.patch(
-            f"/api/orders/{order['id']}/status", json={"status": status},
-            headers=vh).status_code == 200
+        assert (
+            client.patch(
+                f"/api/orders/{order['id']}/status", json={"status": status}, headers=vh
+            ).status_code
+            == 200
+        )
 
     r = client.post(f"/api/orders/{order['id']}/cancel", headers=h)
     assert r.status_code == 409
@@ -81,8 +90,7 @@ def test_cannot_cancel_after_preparing(client, db):
 def test_vendor_rejection_refunds_student(client, db):
     v, vh, h, s, order, payment = _paid_order(client, db)
 
-    r = client.patch(f"/api/orders/{order['id']}/status",
-                     json={"status": "REJECTED"}, headers=vh)
+    r = client.patch(f"/api/orders/{order['id']}/status", json={"status": "REJECTED"}, headers=vh)
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "REFUNDED"

@@ -3,8 +3,7 @@ from tests.conftest import TEST_PASSWORD, login_headers, make_user
 
 def test_login_success(client, db):
     make_user(db, "s@test.bd")
-    r = client.post("/api/auth/login",
-                    json={"email": "s@test.bd", "password": TEST_PASSWORD})
+    r = client.post("/api/auth/login", json={"email": "s@test.bd", "password": TEST_PASSWORD})
     assert r.status_code == 200
     body = r.json()
     assert body["token_type"] == "bearer"
@@ -44,14 +43,26 @@ def test_register_test_user_admin_only(client, db):
     admin = make_user(db, "admin@test.bd", role="admin")
     student = make_user(db, "stu@test.bd")
 
-    r = client.post("/api/auth/register-test-user", json={
-        "name": "New Student", "email": "new@test.bd",
-        "password": "LongEnough1!", "role": "student"},
-        headers=login_headers(client, student.email))
+    r = client.post(
+        "/api/auth/register-test-user",
+        json={
+            "name": "New Student",
+            "email": "new@test.bd",
+            "password": "LongEnough1!",
+            "role": "student",
+        },
+        headers=login_headers(client, student.email),
+    )
     assert r.status_code == 403
 
-    r = client.post("/api/auth/register-test-user", json={
-        "name": "New Student", "email": "new@test.bd",
-        "password": "LongEnough1!", "role": "student"},
-        headers=login_headers(client, admin.email))
+    r = client.post(
+        "/api/auth/register-test-user",
+        json={
+            "name": "New Student",
+            "email": "new@test.bd",
+            "password": "LongEnough1!",
+            "role": "student",
+        },
+        headers=login_headers(client, admin.email),
+    )
     assert r.status_code == 201

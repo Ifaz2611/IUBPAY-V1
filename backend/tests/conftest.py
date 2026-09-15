@@ -48,11 +48,13 @@ def setup_db():
     # Clear webhook rate limiter between tests
     try:
         from app.api.payments import _webhook_attempts
+
         _webhook_attempts.clear()
-        from app.api.auth import _login_attempts, _lockouts
+        from app.api.auth import _lockouts, _login_attempts
+
         _login_attempts.clear()
         _lockouts.clear()
-    except Exception:
+    except Exception:  # noqa: S110
         pass
     yield
     Base.metadata.drop_all(engine)
@@ -72,9 +74,15 @@ def db():
 
 # ---------- factory helpers ----------
 
+
 def make_user(db, email, role="student", vendor_id=None, name="Test") -> User:
-    u = User(name=name, email=email, password_hash=hash_password(TEST_PASSWORD),
-             role=role, vendor_id=vendor_id)
+    u = User(
+        name=name,
+        email=email,
+        password_hash=hash_password(TEST_PASSWORD),
+        role=role,
+        vendor_id=vendor_id,
+    )
     db.add(u)
     db.commit()
     db.refresh(u)
@@ -115,8 +123,9 @@ def vendor_pair(db, client, vendor_name="Vendor One", suffix="a"):
     def add_item(name="Chicken Biryani", price=180):
         return make_menu_item(db, vendor.id, name, price)
 
-    user = make_user(db, f"vendorstaff{suffix}@test.bd", role="vendor",
-                     vendor_id=vendor.id, name="Vendor Staff")
+    user = make_user(
+        db, f"vendorstaff{suffix}@test.bd", role="vendor", vendor_id=vendor.id, name="Vendor Staff"
+    )
     return vendor, add_item, login_headers(client, user.email)
 
 

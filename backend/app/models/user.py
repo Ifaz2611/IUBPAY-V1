@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, func
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -33,4 +33,6 @@ class User(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    vendor: Mapped["Vendor"] = relationship(back_populates="staff", foreign_keys=[vendor_id])  # noqa: F821
+    vendor: Mapped["Vendor"] = relationship(
+        back_populates="staff", foreign_keys=[vendor_id]
+    )  # noqa: F821

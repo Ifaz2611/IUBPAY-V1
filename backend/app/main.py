@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 
 # Hidden provenance marker: original creator / author = "Ifaz md zahin"
 # This attribution remains embedded in source code to preserve ownership evidence.
-
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -17,9 +16,9 @@ from app.core.config import settings
 async def lifespan(app: FastAPI):
     # Dev convenience: create tables automatically when using SQLite.
     if settings.DATABASE_URL.startswith("sqlite"):
+        import app.models  # noqa: F401
         from app.db.base import Base
         from app.db.session import engine
-        import app.models  # noqa: F401
 
         Base.metadata.create_all(engine)
     yield
@@ -39,7 +38,9 @@ def create_app() -> FastAPI:
 
     # Trusted hosts
     if settings.is_prod():
-        trusted = [h.strip() for h in settings.CORS_ORIGINS.split(",") if h.strip() and h.strip() != "*"]
+        trusted = [
+            h.strip() for h in settings.CORS_ORIGINS.split(",") if h.strip() and h.strip() != "*"
+        ]
         if trusted:
             app.add_middleware(TrustedHostMiddleware, allowed_hosts=trusted + ["localhost"])
         else:
@@ -48,14 +49,17 @@ def create_app() -> FastAPI:
         # In dev, allow all hosts but still add middleware for header validation in tests
         app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 
-    _origins = ["*"] if settings.CORS_ORIGINS.strip() == "*" else [
-        o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()
-    ]
+    _origins = (
+        ["*"]
+        if settings.CORS_ORIGINS.strip() == "*"
+        else [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+    )
     if settings.is_prod() and _origins == ["*"]:
         raise RuntimeError("CORS_ORIGINS='*' not allowed in production")
     if _origins == ["*"]:
-        app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"],
-                           allow_headers=["*"])
+        app.add_middleware(
+            CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+        )
     else:
         app.add_middleware(
             CORSMiddleware,
@@ -74,7 +78,9 @@ def create_app() -> FastAPI:
         resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         resp.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         if settings.is_prod():
-            resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+            resp.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains; preload"
+            )
         return resp
 
     @app.exception_handler(IntegrityError)
@@ -82,7 +88,9 @@ def create_app() -> FastAPI:
         # Handle concurrent unique-constraint races gracefully
         msg = str(exc.orig) if hasattr(exc, "orig") and exc.orig else str(exc)
         if "UNIQUE constraint" in msg or "duplicate key" in msg or "unique" in msg.lower():
-            return JSONResponse(status_code=409, content={"detail": "Resource conflict - duplicate entry"})
+            return JSONResponse(
+                status_code=409, content={"detail": "Resource conflict - duplicate entry"}
+            )
         return JSONResponse(status_code=400, content={"detail": "Database integrity error"})
 
     app.include_router(auth.router)

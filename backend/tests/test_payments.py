@@ -25,12 +25,16 @@ def test_successful_payment_flow_via_webhook(client, db):
     assert len(r.json()) == 0
 
     # Simulated provider webhook.
-    r = client.post("/api/payments/webhook", headers=WEBHOOK_HEADERS, json={
-        "event": "payment.succeeded",
-        "payment_id": payment["payment_id"],
-        "provider_transaction_id": payment["provider_transaction_id"],
-        "amount_taka": payment["amount_taka"],
-    })
+    r = client.post(
+        "/api/payments/webhook",
+        headers=WEBHOOK_HEADERS,
+        json={
+            "event": "payment.succeeded",
+            "payment_id": payment["payment_id"],
+            "provider_transaction_id": payment["provider_transaction_id"],
+            "amount_taka": payment["amount_taka"],
+        },
+    )
     assert r.status_code == 200
     assert r.json()["status"] == "processed"
 
@@ -39,8 +43,10 @@ def test_successful_payment_flow_via_webhook(client, db):
 
     # Ledger has exactly one PAYMENT entry of the full amount.
     entries = db.scalars(
-        select(LedgerEntry).where(LedgerEntry.order_id == order["id"],
-                                  LedgerEntry.entry_type == "PAYMENT")).all()
+        select(LedgerEntry).where(
+            LedgerEntry.order_id == order["id"], LedgerEntry.entry_type == "PAYMENT"
+        )
+    ).all()
     assert len(entries) == 1
     assert entries[0].amount_taka == payment["amount_taka"]
 
@@ -52,13 +58,17 @@ def test_failed_payment(client, db):
     order = place_order(client, h, v.id, [{"menu_item_id": mi.id, "quantity": 1}])
     payment = pay_order(client, h, order["id"])
 
-    r = client.post("/api/payments/webhook", headers=WEBHOOK_HEADERS, json={
-        "event": "payment.failed",
-        "payment_id": payment["payment_id"],
-        "provider_transaction_id": payment["provider_transaction_id"],
-        "amount_taka": payment["amount_taka"],
-        "failure_reason": "MOCK_INSUFFICIENT_BALANCE",
-    })
+    r = client.post(
+        "/api/payments/webhook",
+        headers=WEBHOOK_HEADERS,
+        json={
+            "event": "payment.failed",
+            "payment_id": payment["payment_id"],
+            "provider_transaction_id": payment["provider_transaction_id"],
+            "amount_taka": payment["amount_taka"],
+            "failure_reason": "MOCK_INSUFFICIENT_BALANCE",
+        },
+    )
     assert r.status_code == 200
 
     r = client.get(f"/api/orders/{order['id']}", headers=h)
@@ -84,8 +94,10 @@ def test_duplicate_webhook_is_idempotent_and_never_double_charges(client, db):
         "provider_transaction_id": payment["provider_transaction_id"],
         "amount_taka": payment["amount_taka"],
     }
-    responses = [client.post("/api/payments/webhook", headers=WEBHOOK_HEADERS, json=payload)
-                 for _ in range(3)]
+    responses = [
+        client.post("/api/payments/webhook", headers=WEBHOOK_HEADERS, json=payload)
+        for _ in range(3)
+    ]
 
     # First callback processed; repeats are acknowledged but harmless.
     assert responses[0].json()["status"] == "processed"
@@ -94,8 +106,10 @@ def test_duplicate_webhook_is_idempotent_and_never_double_charges(client, db):
         assert dup.json()["status"] == "already_processed"
 
     entries = db.scalars(
-        select(LedgerEntry).where(LedgerEntry.entry_type == "PAYMENT",
-                                  LedgerEntry.order_id == order["id"])).all()
+        select(LedgerEntry).where(
+            LedgerEntry.entry_type == "PAYMENT", LedgerEntry.order_id == order["id"]
+        )
+    ).all()
     assert len(entries) == 1, "duplicate callback must not create a second ledger entry"
 
 
@@ -106,12 +120,16 @@ def test_amount_mismatch_in_webhook_rejected(client, db):
     order = place_order(client, h, v.id, [{"menu_item_id": mi.id, "quantity": 1}])
     payment = pay_order(client, h, order["id"])
 
-    r = client.post("/api/payments/webhook", headers=WEBHOOK_HEADERS, json={
-        "event": "payment.succeeded",
-        "payment_id": payment["payment_id"],
-        "provider_transaction_id": payment["provider_transaction_id"],
-        "amount_taka": 1,  # tampered amount
-    })
+    r = client.post(
+        "/api/payments/webhook",
+        headers=WEBHOOK_HEADERS,
+        json={
+            "event": "payment.succeeded",
+            "payment_id": payment["payment_id"],
+            "provider_transaction_id": payment["provider_transaction_id"],
+            "amount_taka": 1,  # tampered amount
+        },
+    )
     assert r.status_code == 400
 
 
@@ -125,7 +143,6 @@ def test_student_cannot_pay_same_order_twice(client, db):
     assert p1["payment_id"] == p2["payment_id"]
 
     # Complete it, then trying again must fail outright.
-    client.post("/api/payments/mock/complete",
-                json={"payment_id": p1["payment_id"]}, headers=h)
+    client.post("/api/payments/mock/complete", json={"payment_id": p1["payment_id"]}, headers=h)
     r = client.post("/api/payments/create", json={"order_id": order["id"]}, headers=h)
     assert r.status_code == 409

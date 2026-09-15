@@ -1,4 +1,5 @@
 """Audit-log helper. Call inside the same DB transaction as the audited change."""
+
 from sqlalchemy.orm import Session
 
 from app.models.audit_log import AuditLog

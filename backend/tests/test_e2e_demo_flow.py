@@ -4,6 +4,7 @@ student login -> browse vendors -> menu -> create order -> mock payment ->
 webhook verification -> vendor sees paid order -> vendor marks ready ->
 student views receipt.
 """
+
 import uuid
 
 from app.models.user import User as UserModel
@@ -56,24 +57,33 @@ def test_e2e_demo_flow(client, db):
     payment = r.json()
     assert payment["status"] == "PROCESSING"
 
-    r = client.post("/api/payments/mock/complete",
-                    json={"payment_id": payment["payment_id"], "delay_seconds": 0},
-                    headers=stu_h)
+    r = client.post(
+        "/api/payments/mock/complete",
+        json={"payment_id": payment["payment_id"], "delay_seconds": 0},
+        headers=stu_h,
+    )
     assert r.status_code == 200
     assert r.json()["payment_status"] == "SUCCEEDED"
 
     # duplicate callback must be harmless
-    r = client.post("/api/payments/webhook", headers=WEBHOOK_HEADERS, json={
-        "event": "payment.succeeded",
-        "payment_id": payment["payment_id"],
-        "provider_transaction_id": payment["provider_transaction_id"],
-        "amount_taka": payment["amount_taka"],
-    })
+    r = client.post(
+        "/api/payments/webhook",
+        headers=WEBHOOK_HEADERS,
+        json={
+            "event": "payment.succeeded",
+            "payment_id": payment["payment_id"],
+            "provider_transaction_id": payment["provider_transaction_id"],
+            "amount_taka": payment["amount_taka"],
+        },
+    )
     assert r.json()["status"] == "already_processed"
 
     # ---------- 5. vendor sees the PAID order ----------
-    staff = db.query(UserModel).filter(
-        UserModel.vendor_id == cafeteria_v.id, UserModel.role == "vendor").first()
+    staff = (
+        db.query(UserModel)
+        .filter(UserModel.vendor_id == cafeteria_v.id, UserModel.role == "vendor")
+        .first()
+    )
     assert staff is not None
     vh = login_headers(client, staff.email)
 
@@ -96,7 +106,6 @@ def test_e2e_demo_flow(client, db):
     assert any(p["status"] == "SUCCEEDED" for p in receipt["payments"])
 
     # ---------- bonus: reports reconcile with the ledger ----------
-    from tests.conftest import make_user
 
     admin_h = login_headers(client, make_user(db, "admin@e2e.example.com", role="admin").email)
     r = client.get("/api/admin/reports/summary", headers=admin_h)

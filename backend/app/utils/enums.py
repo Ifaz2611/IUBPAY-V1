@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from sqlalchemy import Enum as SaEnum
 
@@ -9,24 +9,24 @@ def sa_enum(enum_cls):
     return SaEnum(enum_cls, values_callable=lambda cls: [m.value for m in cls])
 
 
-class Role(str, Enum):
+class Role(StrEnum):
     STUDENT = "student"
     VENDOR = "vendor"
     ADMIN = "admin"
 
 
-class UserStatus(str, Enum):
+class UserStatus(StrEnum):
     ACTIVE = "ACTIVE"
     SUSPENDED = "SUSPENDED"
 
 
-class VendorStatus(str, Enum):
+class VendorStatus(StrEnum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     SUSPENDED = "SUSPENDED"
 
 
-class OrderStatus(str, Enum):
+class OrderStatus(StrEnum):
     PENDING_PAYMENT = "PENDING_PAYMENT"
     PAYMENT_PROCESSING = "PAYMENT_PROCESSING"
     PAYMENT_FAILED = "PAYMENT_FAILED"
@@ -41,7 +41,8 @@ class OrderStatus(str, Enum):
     REFUNDED = "REFUNDED"
 
 
-# Single source of truth for the order lifecycle. Any transition not listed here is rejected with 409.
+# Single source of truth for order lifecycle.
+# Any transition not listed here is rejected with 409.
 ALLOWED_TRANSITIONS: dict["OrderStatus", set["OrderStatus"]] = {
     OrderStatus.PENDING_PAYMENT: {OrderStatus.PAYMENT_PROCESSING, OrderStatus.CANCELLED},
     OrderStatus.PAYMENT_PROCESSING: {OrderStatus.PAID, OrderStatus.PAYMENT_FAILED},
@@ -67,27 +68,27 @@ PAID_STATUSES = {
 }
 
 
-class PaymentStatus(str, Enum):
+class PaymentStatus(StrEnum):
     CREATED = "CREATED"
     PROCESSING = "PROCESSING"
     SUCCEEDED = "SUCCEEDED"
     FAILED = "FAILED"
 
 
-class RefundStatus(str, Enum):
+class RefundStatus(StrEnum):
     PENDING = "REFUND_PENDING"
     PROCESSED = "REFUNDED"
     FAILED = "FAILED"
 
 
-class LedgerEntryType(str, Enum):
+class LedgerEntryType(StrEnum):
     PAYMENT = "PAYMENT"
     REFUND = "REFUND"
     FEE = "FEE"
     ADJUSTMENT = "ADJUSTMENT"
 
 
-class ItemCategory(str, Enum):
+class ItemCategory(StrEnum):
     MEAL = "MEAL"
     SNACK = "SNACK"
     BEVERAGE = "BEVERAGE"

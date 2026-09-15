@@ -1025,9 +1025,9 @@ class VendorOrderDetailScreen extends ConsumerWidget {
       'COLLECTED' => o.status == 'READY',
       _ => false,
     };
-    if (!allowed) return SizedBox.shrink();
+    if (!allowed) return const SizedBox.shrink();
     return Padding(
-      padding: EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8),
       child: SizedBox(
         height: 46,
         width: double.infinity,

@@ -20,10 +20,15 @@ def test_order_creation_computes_totals_on_backend(client, db):
     b = make_menu_item(db, v.id, "Tea", 25)
 
     h, _ = student_client(db, client, "1")
-    order = place_order(client, h, v.id, [
-        {"menu_item_id": a.id, "quantity": 2},
-        {"menu_item_id": b.id, "quantity": 1},
-    ])
+    order = place_order(
+        client,
+        h,
+        v.id,
+        [
+            {"menu_item_id": a.id, "quantity": 2},
+            {"menu_item_id": b.id, "quantity": 1},
+        ],
+    )
 
     assert order["subtotal_taka"] == 180 * 2 + 25  # 385
     assert order["service_fee_taka"] == 5
@@ -49,10 +54,13 @@ def test_order_cannot_mix_items_from_two_vendors(client, db):
     i2 = add2("Coffee", 60)
 
     h, _ = student_client(db, client, "1")
-    r = client.post("/api/orders",
-                    json=_order_body(v1.id, [{"menu_item_id": i1.id, "quantity": 1},
-                                             {"menu_item_id": i2.id, "quantity": 1}]),
-                    headers=h)
+    r = client.post(
+        "/api/orders",
+        json=_order_body(
+            v1.id, [{"menu_item_id": i1.id, "quantity": 1}, {"menu_item_id": i2.id, "quantity": 1}]
+        ),
+        headers=h,
+    )
     assert r.status_code in (403, 422)
 
 
@@ -62,9 +70,11 @@ def test_order_creation_is_idempotent(client, db):
     h, _ = student_client(db, client, "1")
 
     key = uuid.uuid4().hex
-    body = {"vendor_id": v.id,
-            "items": [{"menu_item_id": mi.id, "quantity": 2}],
-            "idempotency_key": key}
+    body = {
+        "vendor_id": v.id,
+        "items": [{"menu_item_id": mi.id, "quantity": 2}],
+        "idempotency_key": key,
+    }
     r1 = client.post("/api/orders", json=body, headers=h)
     r2 = client.post("/api/orders", json=body, headers=h)
 
@@ -87,9 +97,9 @@ def test_unavailable_item_cannot_be_ordered(client, db):
     db.commit()
 
     h, _ = student_client(db, client, "1")
-    r = client.post("/api/orders",
-                    json=_order_body(v.id, [{"menu_item_id": mi.id, "quantity": 1}]),
-                    headers=h)
+    r = client.post(
+        "/api/orders", json=_order_body(v.id, [{"menu_item_id": mi.id, "quantity": 1}]), headers=h
+    )
     assert r.status_code == 422
 
 
@@ -100,8 +110,9 @@ def test_invalid_status_transition_rejected(client, db):
     order = place_order(client, h, v.id, [{"menu_item_id": mi.id, "quantity": 1}])
     payment = pay_order(client, h, order["id"])
     # complete the mock payment so the order becomes PAID
-    r = client.post("/api/payments/mock/complete",
-                    json={"payment_id": payment["payment_id"]}, headers=h)
+    r = client.post(
+        "/api/payments/mock/complete", json={"payment_id": payment["payment_id"]}, headers=h
+    )
     assert r.status_code == 200 and r.json()["payment_status"] == "SUCCEEDED"
     oid = order["id"]
 

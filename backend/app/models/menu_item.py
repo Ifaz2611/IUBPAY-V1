@@ -1,7 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 from app.models.user import gen_uuid
@@ -18,7 +27,9 @@ class MenuItem(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     price_taka: Mapped[int] = mapped_column(Integer)  # whole Taka; no floats for money
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    category: Mapped[ItemCategory] = mapped_column(sa_enum(ItemCategory), default=ItemCategory.OTHER)
+    category: Mapped[ItemCategory] = mapped_column(
+        sa_enum(ItemCategory), default=ItemCategory.OTHER
+    )
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
 
     created_at: Mapped[datetime | None] = mapped_column(

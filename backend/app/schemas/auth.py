@@ -1,8 +1,8 @@
 import re
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
-from typing_extensions import Annotated
 
 # Lenient email check: unlike pydantic's EmailStr this accepts reserved
 # development domains such as '@iub.test' used by our seed data.
@@ -26,7 +26,7 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str | None = None
-    token_type: str = "bearer"
+    token_type: str = "bearer"  # noqa: S105
     user: "UserOut"
 
 

@@ -1,11 +1,9 @@
-import uuid
-
-from sqlalchemy import DateTime, Enum, String, Text, func
+from sqlalchemy import DateTime, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.utils.enums import VendorStatus, sa_enum
 from app.models.user import gen_uuid
+from app.utils.enums import VendorStatus, sa_enum
 
 
 class Vendor(Base):
@@ -17,7 +15,9 @@ class Vendor(Base):
     location: Mapped[str] = mapped_column(String(200))
     contact_phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
     settlement_reference: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    status: Mapped[VendorStatus] = mapped_column(sa_enum(VendorStatus), default=VendorStatus.PENDING)
+    status: Mapped[VendorStatus] = mapped_column(
+        sa_enum(VendorStatus), default=VendorStatus.PENDING
+    )
     service_fee_taka: Mapped[int | None] = mapped_column(default=None, nullable=True)
     created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

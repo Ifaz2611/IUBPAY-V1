@@ -1,4 +1,3 @@
-import asyncio
 import hmac
 import time
 from collections import defaultdict
@@ -16,7 +15,6 @@ from app.schemas.payment import MockCompleteRequest, PaymentCreate, WebhookPaylo
 from app.services.payment_service import (
     apply_webhook_event,
     create_payment,
-    simulate_provider_latency,
 )
 from app.utils.enums import Role
 
@@ -36,8 +34,11 @@ def _check_webhook_rate_limit(identifier: str) -> None:
 
 
 @router.post("/create", status_code=201)
-def create(body: PaymentCreate, db: Session = Depends(get_db),
-           student: User = Depends(require_role(Role.STUDENT))):
+def create(
+    body: PaymentCreate,
+    db: Session = Depends(get_db),
+    student: User = Depends(require_role(Role.STUDENT)),
+):
     order = db.get(Order, body.order_id)
     if order is None or order.student_id != student.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Order not found")
@@ -52,8 +53,11 @@ def create(body: PaymentCreate, db: Session = Depends(get_db),
 
 
 @router.get("/{payment_id}")
-def get_payment(payment_id: str, db: Session = Depends(get_db),
-                user: User = Depends(require_role(Role.STUDENT, Role.VENDOR, Role.ADMIN))):
+def get_payment(
+    payment_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role(Role.STUDENT, Role.VENDOR, Role.ADMIN)),
+):
     p = db.get(Payment, payment_id)
     if p is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Payment not found")
@@ -62,9 +66,12 @@ def get_payment(payment_id: str, db: Session = Depends(get_db),
         if order.student_id != user.id:
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your payment")
     return {
-        "id": p.id, "order_id": p.order_id, "provider": p.provider,
+        "id": p.id,
+        "order_id": p.order_id,
+        "provider": p.provider,
         "provider_transaction_id": p.provider_transaction_id,
-        "amount_taka": p.amount_taka, "status": p.status.value,
+        "amount_taka": p.amount_taka,
+        "status": p.status.value,
         "failure_reason": p.failure_reason,
         "verified_at": p.verified_at.isoformat() if p.verified_at else None,
     }
@@ -88,6 +95,7 @@ async def mock_complete(
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your payment")
 
     from app.services.payment_service import simulate_provider_latency_async
+
     await simulate_provider_latency_async(body.delay_seconds)
     result = apply_webhook_event(
         db,
@@ -131,11 +139,13 @@ def failure_reason_for(code: int) -> str:
 @router.get("/{order_id}/stream")
 async def order_stream(order_id: str):
     """SSE endpoint for real-time order tracking. Fallback to polling if SSE unsupported."""
+    import asyncio as _asyncio
+    import json as _json
+
     from fastapi.responses import StreamingResponse
     from sqlalchemy.orm import Session as _Session
+
     from app.db.session import SessionLocal
-    import json as _json
-    import asyncio as _asyncio
 
     async def event_gen():
         for _ in range(120):  # up to 10 minutes
@@ -145,15 +155,30 @@ async def order_stream(order_id: str):
                 if order is None:
                     yield f"data: {_json.dumps({'error': 'not found'})}\n\n"
                     break
-                payload = _json.dumps({"id": order.id, "status": order.status.value if hasattr(order.status, 'value') else str(order.status), "pickup_code": order.pickup_code, "updated_at": order.updated_at.isoformat() if order.updated_at else None})
+                payload = _json.dumps(
+                    {
+                        "id": order.id,
+                        "status": (
+                            order.status.value
+                            if hasattr(order.status, "value")
+                            else str(order.status)
+                        ),
+                        "pickup_code": order.pickup_code,
+                        "updated_at": order.updated_at.isoformat() if order.updated_at else None,
+                    }
+                )
                 yield f"data: {payload}\n\n"
                 if order.status.value in ("COLLECTED", "CANCELLED", "REFUNDED", "REJECTED"):
                     break
             finally:
                 db.close()
             await _asyncio.sleep(2)
-    return StreamingResponse(event_gen(), media_type="text/event-stream",
-                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+    return StreamingResponse(
+        event_gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.post("/webhook")

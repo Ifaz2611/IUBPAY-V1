@@ -1,6 +1,6 @@
 import secrets
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -14,7 +14,7 @@ from app.utils.enums import ALLOWED_TRANSITIONS, PAID_STATUSES, OrderStatus, Ven
 
 
 def _gen_order_number(db: Session) -> str:
-    date_part = datetime.now(timezone.utc).strftime("%Y%m%d")
+    date_part = datetime.now(UTC).strftime("%Y%m%d")
     for _ in range(5):
         candidate = f"IUB-{date_part}-{secrets.token_hex(3).upper()}"
         exists = db.scalar(select(Order).where(Order.order_number == candidate))
@@ -28,10 +28,14 @@ def _gen_pickup_code(db: Session) -> str:
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O/I/1 confusables
     for _ in range(10):
         code = "".join(secrets.choice(alphabet) for _ in range(6))
-        active = db.scalar(select(Order).where(
-            Order.pickup_code == code,
-            Order.status.notin_([OrderStatus.COLLECTED, OrderStatus.CANCELLED, OrderStatus.REFUNDED])
-        ))
+        active = db.scalar(
+            select(Order).where(
+                Order.pickup_code == code,
+                Order.status.notin_(
+                    [OrderStatus.COLLECTED, OrderStatus.CANCELLED, OrderStatus.REFUNDED]
+                ),
+            )
+        )
         if not active:
             return code
     # fallback
@@ -127,13 +131,19 @@ def create_order(
 
 
 def transition_order(
-    db: Session, order: Order, new_status: OrderStatus, *, actor_id: str | None = None,
+    db: Session,
+    order: Order,
+    new_status: OrderStatus,
+    *,
+    actor_id: str | None = None,
     expected_version: int | None = None,
 ) -> Order:
     """Enforce the order state machine. Invalid transitions raise 409.
     Optimistic locking: if expected_version provided, 409 if stale."""
     if expected_version is not None and order.version != expected_version:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Order was updated concurrently. Please refresh.")
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "Order was updated concurrently. Please refresh."
+        )
     allowed = ALLOWED_TRANSITIONS.get(order.status, set())
     if new_status not in allowed:
         raise HTTPException(
@@ -145,8 +155,14 @@ def transition_order(
     order.version = (order.version or 1) + 1
     from app.services.audit_service import audit
 
-    audit(db, actor_id, "order.transition", "order", order.id,
-          {"from": old.value, "to": new_status.value})
+    audit(
+        db,
+        actor_id,
+        "order.transition",
+        "order",
+        order.id,
+        {"from": old.value, "to": new_status.value},
+    )
     return order
 
 

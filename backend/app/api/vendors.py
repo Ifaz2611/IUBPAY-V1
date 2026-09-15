@@ -25,7 +25,9 @@ def my_vendor_sales(
     user: User = Depends(require_role(Role.VENDOR)),
 ):
     from datetime import date, timedelta
+
     from app.services.report_service import vendor_sales
+
     if user.vendor_id is None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "User is not linked to a vendor")
     since = (date.today() - timedelta(days=days - 1)) if days else None
@@ -50,8 +52,7 @@ def list_vendors(
     count_q = select(func.count(Vendor.id))
     if include_all:
         if user.role != Role.ADMIN:
-            raise HTTPException(status.HTTP_403_FORBIDDEN,
-                                "include_all requires admin role")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "include_all requires admin role")
     else:
         q = q.where(Vendor.status == VendorStatus.APPROVED)
         count_q = count_q.where(Vendor.status == VendorStatus.APPROVED)
@@ -87,7 +88,9 @@ def _get_vendor_or_404(db: Session, vendor_id: str) -> Vendor:
 
 
 @router.get("/{vendor_id}", response_model=VendorOut)
-def get_vendor(vendor_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_vendor(
+    vendor_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     return _get_vendor_or_404(db, vendor_id)
 
 
@@ -143,8 +146,13 @@ def suspend_vendor(
             transition_order(db, order, OrderStatus.REJECTED, actor_id=admin.id)
             payment = next((p for p in order.payments if p.status == PaymentStatus.SUCCEEDED), None)
             if payment:
-                create_and_process_refund(db, payment=payment, reason="Vendor suspended",
-                                          processed_by=admin.id, commit=False)
+                create_and_process_refund(
+                    db,
+                    payment=payment,
+                    reason="Vendor suspended",
+                    processed_by=admin.id,
+                    commit=False,
+                )
                 refunded.append(order.order_number)
         audit(db, admin.id, "vendor.suspended", "vendor", vendor.id, {"refunded": refunded})
         db.commit()

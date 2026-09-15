@@ -1,6 +1,7 @@
 /// Plain Dart models mirroring backend JSON responses.
 /// Parsing is defensive — missing or mistyped fields fall back to safe defaults
 /// and never throw on rendering paths.
+library;
 
 class User {
   final String id, name, email, role, status;

@@ -34,7 +34,9 @@ def _check_rate_limit(identifier: str) -> None:
     # lockout check
     until = _lockouts.get(identifier, 0)
     if now < until:
-        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Account temporarily locked. Try again later.")
+        raise HTTPException(
+            status.HTTP_429_TOO_MANY_REQUESTS, "Account temporarily locked. Try again later."
+        )
     # sliding window 5 attempts / 60s
     attempts = [t for t in _login_attempts[identifier] if now - t < 60]
     _login_attempts[identifier] = attempts
@@ -64,10 +66,14 @@ def login(body: LoginRequest, request: Request, db: Session = Depends(get_db)):
     _lockouts.pop(key, None)
     token = create_access_token(subject=user.id, role=user.role.value)
     refresh = create_refresh_token(subject=user.id, role=user.role.value)
-    resp = TokenResponse(access_token=token, user=UserOut.model_validate(user))
     # attach refresh token via extra field if schema allows, otherwise return dict
     # Keep backward compat: return access_token, include refresh_token in response
-    return {"access_token": token, "refresh_token": refresh, "user": UserOut.model_validate(user), "token_type": "bearer"}
+    return {
+        "access_token": token,
+        "refresh_token": refresh,
+        "user": UserOut.model_validate(user),
+        "token_type": "bearer",
+    }
 
 
 @router.post("/register-test-user", response_model=UserOut, status_code=201)
@@ -100,12 +106,13 @@ def register_test_user(
 class RefreshRequest(BaseModel):
     refresh_token: str
 
+
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
     try:
         payload = decode_access_token(body.refresh_token, verify_type="refresh")
-    except Exception:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token")
+    except Exception as err:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token") from err
     user = db.get(User, payload.get("sub"))
     if user is None or user.status != "ACTIVE":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User no longer exists")
@@ -113,7 +120,12 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
     revoke_token(body.refresh_token)
     new_access = create_access_token(subject=user.id, role=user.role.value)
     new_refresh = create_refresh_token(subject=user.id, role=user.role.value)
-    return {"access_token": new_access, "refresh_token": new_refresh, "user": UserOut.model_validate(user), "token_type": "bearer"}
+    return {
+        "access_token": new_access,
+        "refresh_token": new_refresh,
+        "user": UserOut.model_validate(user),
+        "token_type": "bearer",
+    }
 
 
 @router.post("/logout")

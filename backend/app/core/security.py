@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import bcrypt
 import jwt
@@ -34,10 +34,13 @@ def _base_payload(subject: str, role: str, jti: str, now: datetime, exp: datetim
 
 
 def create_access_token(subject: str, role: str) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     jti = uuid.uuid4().hex
     payload = _base_payload(
-        subject, role, jti, now,
+        subject,
+        role,
+        jti,
+        now,
         now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     payload["type"] = "access"
@@ -45,10 +48,13 @@ def create_access_token(subject: str, role: str) -> str:
 
 
 def create_refresh_token(subject: str, role: str) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     jti = uuid.uuid4().hex
     payload = _base_payload(
-        subject, role, jti, now,
+        subject,
+        role,
+        jti,
+        now,
         now + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES),
     )
     payload["type"] = "refresh"
@@ -58,7 +64,8 @@ def create_refresh_token(subject: str, role: str) -> str:
 def decode_access_token(token: str, *, verify_type: str = "access") -> dict:
     """Raises jwt.PyJWTError on invalid/expired tokens. Checks blacklist and type."""
     payload = jwt.decode(
-        token, settings.SECRET_KEY,
+        token,
+        settings.SECRET_KEY,
         algorithms=[settings.JWT_ALGORITHM],
         issuer=settings.JWT_ISSUER,
         audience=settings.JWT_AUDIENCE,
@@ -67,7 +74,7 @@ def decode_access_token(token: str, *, verify_type: str = "access") -> dict:
     jti = payload.get("jti")
     if jti in _revoked_jtis:
         # lazy cleanup
-        now_ts = datetime.now(timezone.utc).timestamp()
+        now_ts = datetime.now(UTC).timestamp()
         if _revoked_jtis[jti] < now_ts:
             _revoked_jtis.pop(jti, None)
         else:
@@ -79,8 +86,12 @@ def decode_access_token(token: str, *, verify_type: str = "access") -> dict:
 
 def revoke_token(token: str) -> None:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
-                             options={"verify_exp": False})
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+            options={"verify_exp": False},
+        )
         jti = payload.get("jti")
         exp = payload.get("exp")
         if jti and exp:

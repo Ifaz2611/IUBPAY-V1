@@ -2,10 +2,11 @@ def test_public_menu_lists_available_items(client, db):
     from tests.conftest import vendor_pair
 
     v, add_item, _ = vendor_pair(db, client)
-    biryani = add_item("Chicken Biryani", 180)
+    add_item("Chicken Biryani", 180)
     add_item("Tea", 25)
 
     from fastapi.testclient import TestClient  # noqa: F401
+
     from tests.conftest import student_client
 
     sh, _ = student_client(db, client, "x")
@@ -18,7 +19,6 @@ def test_public_menu_lists_available_items(client, db):
 
 
 def test_disabled_items_hidden_by_default(client, db):
-    from app.models.menu_item import MenuItem
     from tests.conftest import make_menu_item, student_client, vendor_pair
 
     v, add_item, vh = vendor_pair(db, client)

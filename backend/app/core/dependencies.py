@@ -19,8 +19,8 @@ def get_current_user(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
     try:
         payload = decode_access_token(credentials.credentials)
-    except pyjwt.PyJWTError:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token")
+    except pyjwt.PyJWTError as err:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token") from err
     user = db.get(User, payload.get("sub"))
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User no longer exists")

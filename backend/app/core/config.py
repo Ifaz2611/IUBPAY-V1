@@ -1,5 +1,3 @@
-import secrets as _secrets
-
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -24,7 +22,9 @@ class Settings(BaseSettings):
 
     # Shared secret between the mock payment provider and this backend.
     # In a real system this would be the provider's webhook signature secret.
-    MOCK_PAYMENT_WEBHOOK_TOKEN: str = Field(default="mock-webhook-token-dev-32-chars-long!!", min_length=32)
+    MOCK_PAYMENT_WEBHOOK_TOKEN: str = Field(
+        default="mock-webhook-token-dev-32-chars-long!!", min_length=32
+    )
 
     # Flat service fee charged per order, in whole Taka.
     SERVICE_FEE_TAKA: int = 5
@@ -43,11 +43,18 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _validate_prod_secrets(self):
-        weak_defaults = {"dev-only-secret-change-me", "mock-webhook-token-dev", "change-me-in-real-deployments"}
+        weak_defaults = {
+            "dev-only-secret-change-me",
+            "mock-webhook-token-dev",
+            "change-me-in-real-deployments",
+        }
         if self.ENV.lower() in ("prod", "production"):
             if self.SECRET_KEY in weak_defaults or len(self.SECRET_KEY) < 32:
                 raise ValueError("SECRET_KEY must be strong (>=32 chars) in production")
-            if self.MOCK_PAYMENT_WEBHOOK_TOKEN in weak_defaults or len(self.MOCK_PAYMENT_WEBHOOK_TOKEN) < 32:
+            if (
+                self.MOCK_PAYMENT_WEBHOOK_TOKEN in weak_defaults
+                or len(self.MOCK_PAYMENT_WEBHOOK_TOKEN) < 32
+            ):
                 raise ValueError("MOCK_PAYMENT_WEBHOOK_TOKEN must be strong in production")
             if self.CORS_ORIGINS.strip() == "*":
                 raise ValueError("CORS_ORIGINS='*' is not allowed in production")

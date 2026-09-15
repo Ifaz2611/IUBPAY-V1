@@ -38,7 +38,7 @@ exclude = ["alembic", ".venv", "__pycache__"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "C4", "UP", "S"]
-ignore = ["S101", "S603", "S607"]
+ignore = ["S101", "S603", "S607", "B008", "S105", "F821"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

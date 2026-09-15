@@ -26,9 +26,11 @@ VENDOR_ALLOWED_STATUSES = {
 
 
 def _get_order(db: Session, order_id: str) -> Order:
-    order = db.scalars(
-        select(Order).options(joinedload(Order.items)).where(Order.id == order_id)
-    ).unique().first()
+    order = (
+        db.scalars(select(Order).options(joinedload(Order.items)).where(Order.id == order_id))
+        .unique()
+        .first()
+    )
     if order is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Order not found")
     return order
@@ -42,8 +44,13 @@ def place_order(
 ):
     """Idempotent order creation: same idempotency_key returns the same order."""
     from app.models.vendor import Vendor
+
     vendor = db.get(Vendor, body.vendor_id)
-    fee = vendor.service_fee_taka if vendor and vendor.service_fee_taka is not None else settings.SERVICE_FEE_TAKA
+    fee = (
+        vendor.service_fee_taka
+        if vendor and vendor.service_fee_taka is not None
+        else settings.SERVICE_FEE_TAKA
+    )
     return create_order(
         db,
         student_id=student.id,
@@ -82,9 +89,15 @@ def vendor_orders(
     if vendor_user.vendor_id is None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "User is not linked to a vendor")
     statuses = [
-        OrderStatus.PAID, OrderStatus.ACCEPTED, OrderStatus.PREPARING,
-        OrderStatus.READY, OrderStatus.COLLECTED, OrderStatus.REJECTED,
-        OrderStatus.CANCELLED, OrderStatus.REFUND_PENDING, OrderStatus.REFUNDED,
+        OrderStatus.PAID,
+        OrderStatus.ACCEPTED,
+        OrderStatus.PREPARING,
+        OrderStatus.READY,
+        OrderStatus.COLLECTED,
+        OrderStatus.REJECTED,
+        OrderStatus.CANCELLED,
+        OrderStatus.REFUND_PENDING,
+        OrderStatus.REFUNDED,
     ]
     base = select(Order).where(Order.vendor_id == vendor_user.vendor_id, Order.status.in_(statuses))
     q = base.options(joinedload(Order.items)).order_by(Order.created_at.desc())
@@ -126,10 +139,13 @@ def verify_pickup(
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your vendor's order")
     code = (body.get("pickup_code") or "").strip().upper()
     import hmac
+
     if not hmac.compare_digest(code, order.pickup_code.upper()):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid pickup code")
     if order.status != OrderStatus.READY:
-        raise HTTPException(status.HTTP_409_CONFLICT, f"Order not ready for pickup (status={order.status.value})")
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, f"Order not ready for pickup (status={order.status.value})"
+        )
     transition_order(db, order, OrderStatus.COLLECTED, actor_id=user.id)
     db.commit()
     db.refresh(order)
@@ -146,17 +162,18 @@ def update_order_status(
     order = _get_order(db, order_id)
     try:
         new_status = OrderStatus(body.status)
-    except ValueError:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"Unknown status '{body.status}'")
+    except ValueError as err:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY, f"Unknown status '{body.status}'"
+        ) from err
 
     if user.role == Role.VENDOR:
         if user.vendor_id is None or order.vendor_id != user.vendor_id:
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your vendor's order")
         if new_status not in VENDOR_ALLOWED_STATUSES:
-            raise HTTPException(status.HTTP_403_FORBIDDEN,
-                                "Vendors cannot set this status")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Vendors cannot set this status")
 
-    expected = body.version if hasattr(body, 'version') and body.version else None
+    expected = body.version if hasattr(body, "version") and body.version else None
     transition_order(db, order, new_status, actor_id=user.id, expected_version=expected)
 
     # Vendor rejection after payment triggers an automatic refund.
@@ -166,9 +183,9 @@ def update_order_status(
         )
         if succeeded_payment and order.status != OrderStatus.REFUNDED:
             transition_order(db, order, OrderStatus.REFUND_PENDING, actor_id=user.id)
-            create_and_process_refund(db, payment=succeeded_payment,
-                                      reason="Vendor rejected order",
-                                      processed_by=user.id)
+            create_and_process_refund(
+                db, payment=succeeded_payment, reason="Vendor rejected order", processed_by=user.id
+            )
 
     db.commit()
     db.refresh(order)
@@ -199,8 +216,9 @@ def cancel_order(
         payment = next((p for p in order.payments if p.status == PaymentStatus.SUCCEEDED), None)
         if payment:
             transition_order(db, order, OrderStatus.REFUND_PENDING, actor_id=student.id)
-            create_and_process_refund(db, payment=payment, reason="Student cancelled order",
-                                      processed_by=student.id)
+            create_and_process_refund(
+                db, payment=payment, reason="Student cancelled order", processed_by=student.id
+            )
 
     db.commit()
     db.refresh(order)

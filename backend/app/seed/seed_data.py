@@ -2,6 +2,7 @@
 
 DEVELOPMENT ONLY. Passwords below are documented test passwords and must
 never be used in production."""
+
 from sqlalchemy import select
 
 from app.core.security import hash_password
@@ -12,7 +13,7 @@ from app.models.vendor import Vendor
 from app.utils.enums import ItemCategory, Role, VendorStatus
 
 # Documented development passwords (prototype only!)
-DEV_PASSWORD = "Passw0rd!Dev"
+DEV_PASSWORD = "Passw0rd!Dev"  # noqa: S105
 
 VENDORS = [
     {
@@ -46,9 +47,8 @@ MENU = {
 
 
 def run():
-    Base_created = None
-    from app.db.base import Base
     import app.models  # noqa: F401
+    from app.db.base import Base
 
     Base.metadata.create_all(engine)
 
@@ -58,17 +58,29 @@ def run():
             print("Seed data already present; skipping.")
             return
 
-        student = User(name="Test Student", email="student@iub.test",
-                       password_hash=hash_password(DEV_PASSWORD),
-                       student_id="2011234567", phone="+8801800000001",
-                       role=Role.STUDENT)
-        admin = User(name="Test Admin", email="admin@iub.test",
-                     password_hash=hash_password(DEV_PASSWORD), role=Role.ADMIN)
+        student = User(
+            name="Test Student",
+            email="student@iub.test",
+            password_hash=hash_password(DEV_PASSWORD),
+            student_id="2011234567",
+            phone="+8801800000001",
+            role=Role.STUDENT,
+        )
+        admin = User(
+            name="Test Admin",
+            email="admin@iub.test",
+            password_hash=hash_password(DEV_PASSWORD),
+            role=Role.ADMIN,
+        )
         db.add_all([student, admin])
 
         vendor_users = {}
         for v in VENDORS:
-            vendor = Vendor(**v, status=VendorStatus.APPROVED, settlement_reference=f"SETT-{v['name'][:10].upper().replace(' ', '')}")
+            vendor = Vendor(
+                **v,
+                status=VendorStatus.APPROVED,
+                settlement_reference=f"SETT-{v['name'][:10].upper().replace(' ', '')}",
+            )
             db.add(vendor)
             db.flush()
             staff = User(
@@ -83,8 +95,16 @@ def run():
             vendor_users[v["name"]] = (vendor, staff)
 
             for name, desc, price, cat in MENU[v["name"]]:
-                db.add(MenuItem(vendor_id=vendor.id, name=name, description=desc,
-                                price_taka=price, category=cat, is_available=True))
+                db.add(
+                    MenuItem(
+                        vendor_id=vendor.id,
+                        name=name,
+                        description=desc,
+                        price_taka=price,
+                        category=cat,
+                        is_available=True,
+                    )
+                )
 
         db.commit()
         print("Seed complete.")

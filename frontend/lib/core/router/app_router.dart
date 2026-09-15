@@ -17,17 +17,22 @@ import '../../features/student/screens/vendor_browse_screens.dart';
 import '../../features/vendor/screens/vendor_menu_sales_screens.dart';
 import '../../features/vendor/screens/vendor_screens.dart';
 
-final _refresh = _Signaler();
-
-class _Signaler extends ChangeNotifier {
+class Signaler extends ChangeNotifier {
   void ping() => notifyListeners();
 }
 
+final signalerProvider = Provider<Signaler>((ref) {
+  final s = Signaler();
+  ref.onDispose(s.dispose);
+  return s;
+});
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  ref.listen(authProvider, (_, __) => _refresh.ping());
+  final signaler = ref.watch(signalerProvider);
+  ref.listen(authProvider, (_, __) => signaler.ping());
   return GoRouter(
     initialLocation: '/splash',
-    refreshListenable: _refresh,
+    refreshListenable: signaler,
     redirect: (context, state) {
       final auth = ref.read(authProvider);
       final user = auth.valueOrNull;

@@ -1,8 +1,9 @@
 import asyncio
 import hmac
 import time
+from collections import defaultdict
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -20,6 +21,18 @@ from app.services.payment_service import (
 from app.utils.enums import Role
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
+
+# Simple in-memory webhook rate limiting (10/minute per IP)
+_webhook_attempts: dict[str, list[float]] = defaultdict(list)
+
+
+def _check_webhook_rate_limit(identifier: str) -> None:
+    now = time.time()
+    attempts = [t for t in _webhook_attempts[identifier] if now - t < 60]
+    _webhook_attempts[identifier] = attempts
+    if len(attempts) >= 10:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Webhook rate limit exceeded")
+    _webhook_attempts[identifier].append(now)
 
 
 @router.post("/create", status_code=201)
@@ -58,7 +71,7 @@ def get_payment(payment_id: str, db: Session = Depends(get_db),
 
 
 @router.post("/mock/complete")
-def mock_complete(
+async def mock_complete(
     body: MockCompleteRequest,
     db: Session = Depends(get_db),
     student: User = Depends(require_role(Role.STUDENT)),
@@ -74,7 +87,8 @@ def mock_complete(
     if order.student_id != student.id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your payment")
 
-    simulate_provider_latency(body.delay_seconds)
+    from app.services.payment_service import simulate_provider_latency_async
+    await simulate_provider_latency_async(body.delay_seconds)
     result = apply_webhook_event(
         db,
         payment=payment,
@@ -145,12 +159,15 @@ async def order_stream(order_id: str):
 @router.post("/webhook")
 def webhook(
     payload: WebhookPayload,
+    request: Request,
     x_webhook_token: str | None = Header(default=None),
     db: Session = Depends(get_db),
 ):
     """Provider webhook endpoint. Protected by shared-secret header.
 
     Idempotent: repeated callbacks for the same transaction are safe."""
+    client_id = request.client.host if request.client else "unknown"
+    _check_webhook_rate_limit(client_id)
     if x_webhook_token is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Missing webhook token")
     if not hmac.compare_digest(x_webhook_token, settings.MOCK_PAYMENT_WEBHOOK_TOKEN):

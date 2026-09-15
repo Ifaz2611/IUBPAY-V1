@@ -24,8 +24,8 @@ services:
       - ./backend/.env
     environment:
       DATABASE_URL: postgresql+psycopg://iub_cafe:iub_cafe_dev_pw@db:5432/iub_cafeteria
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-real-deployments-generate-32-chars-min}
-      MOCK_PAYMENT_WEBHOOK_TOKEN: ${MOCK_PAYMENT_WEBHOOK_TOKEN:-mock-webhook-token-dev-change-me}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-real-deployments-generate-32-chars-min!!}
+      MOCK_PAYMENT_WEBHOOK_TOKEN: ${MOCK_PAYMENT_WEBHOOK_TOKEN:-mock-webhook-token-dev-32-chars-long!!}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
       ENV: ${ENV:-docker-dev}
     ports:

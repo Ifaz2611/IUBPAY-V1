@@ -1,9 +1,9 @@
 import os
 
 # Must be set before app modules are imported.
-os.environ["SECRET_KEY"] = "test-secret-key-16-chars-min"
+os.environ["SECRET_KEY"] = "test-secret-key-32-chars-long-1234567890"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["MOCK_PAYMENT_WEBHOOK_TOKEN"] = "test-webhook-token-16chars"
+os.environ["MOCK_PAYMENT_WEBHOOK_TOKEN"] = "test-webhook-token-32-chars-long-123456"
 os.environ["SERVICE_FEE_TAKA"] = "5"
 
 import pytest  # noqa: E402
@@ -21,7 +21,7 @@ from app.models.user import User  # noqa: E402
 from app.models.vendor import Vendor  # noqa: E402
 
 TEST_PASSWORD = "Passw0rd!Test"
-WEBHOOK_HEADERS = {"X-Webhook-Token": "test-webhook-token-16chars"}
+WEBHOOK_HEADERS = {"X-Webhook-Token": "test-webhook-token-32-chars-long-123456"}
 
 engine = create_engine(
     "sqlite://",
@@ -45,6 +45,15 @@ app.dependency_overrides[get_db] = override_get_db
 @pytest.fixture(autouse=True)
 def setup_db():
     Base.metadata.create_all(engine)
+    # Clear webhook rate limiter between tests
+    try:
+        from app.api.payments import _webhook_attempts
+        _webhook_attempts.clear()
+        from app.api.auth import _login_attempts, _lockouts
+        _login_attempts.clear()
+        _lockouts.clear()
+    except Exception:
+        pass
     yield
     Base.metadata.drop_all(engine)
 

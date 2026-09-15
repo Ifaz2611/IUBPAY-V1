@@ -37,6 +37,16 @@ This project has **two parts**: a Python backend (API) and a Flutter frontend (a
 
 ### Step A — Start the backend
 
+**First — configure environment variables:**
+
+```bash
+cp .env.example backend/.env
+# Edit backend/.env and set SECRET_KEY, DATABASE_URL, etc.
+# For production you MUST set strong secrets (>=32 chars) and CORS_ORIGINS (no wildcard)
+```
+
+> Note: `backend/alembic.ini` has `sqlalchemy.url =` empty on purpose — the app reads `DATABASE_URL` from `backend/.env` (via `pydantic-settings`). Alembic picks it up at runtime via `env.py`.
+
 **Option 1 — Docker (easiest):**
 
 ```bash
@@ -55,6 +65,9 @@ cd backend
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+
+# Ensure .env exists (see above)
+# cp ../.env.example .env
 
 python -m app.seed.seed_data        # creates test users, vendors, menus
 uvicorn app.main:app --reload       # starts the API

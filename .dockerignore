@@ -1,0 +1,24 @@
+# Prevent copying dev artifacts into Docker builds
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.git
+.gitignore
+.env
+*.db
+*.sqlite
+frontend/build
+frontend/.dart_tool
+frontend/android/build
+node_modules
+.DS_Store
+.idea
+.vscode
+coverage
+htmlcov
+*.log

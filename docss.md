@@ -1,6 +1,39 @@
 
 
+How to start (Windows):
+Backend:
+cp .env.example backend/.env   # edit SECRET_KEY etc if needed
+# Docker (easiest):
+docker compose up --build       # http://localhost:8000/docs, seed runs auto
+# OR local:
+cd backend
+python -m venv .venv && .venv\Scripts\activate
+pip install -r requirements.txt
+alembic upgrade head
+python -m app.seed.seed_data
+uvicorn app.main:app --reload   # keep open
+================================================
+Frontend (frontend/lib/main.dart:1 is unified, main_student/vendor/admin.dart are split entrypoints):
+cd frontend
+flutter pub get
+flutter analyze        # → 995 infos, 0 errors
+flutter test           # → 1 passed
 
+# default unified app:
+flutter run -d chrome
+flutter run -d windows
+
+# split apps (per todo):
+flutter run -t lib/main_student.dart -d windows  # StudentApp localhost:8000
+flutter run -t lib/main_vendor.dart -d windows   # VendorApp
+flutter run -t lib/main_admin.dart -d windows    # AdminApp
+
+# physical phone on same WiFi:
+flutter run --dart-define=API_BASE_URL=http://<PC_LAN_IP>:8000/api
+
+# release (enforces HTTPS in lib/core/constants/app_constants.dart:8):
+flutter run --dart-define=API_BASE_URL=https://api.example.com/api --release
+Test accounts (Passw0rd!Dev): student@iub.test, vendor@iub.test, admin@iub.test.
 
 
 

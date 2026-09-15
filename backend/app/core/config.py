@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = "sqlite:///./iub_cafeteria.db"
 
-    SECRET_KEY: str = Field(default="dev-only-secret-change-me-32-chars-long!!", min_length=16)
+    SECRET_KEY: str = Field(default="dev-only-secret-change-me-32-chars-long!!", min_length=32)
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=15, ge=5, le=60)
     REFRESH_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 24 * 7, ge=60)
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # Shared secret between the mock payment provider and this backend.
     # In a real system this would be the provider's webhook signature secret.
-    MOCK_PAYMENT_WEBHOOK_TOKEN: str = Field(default="mock-webhook-token-dev-32-chars-long!!", min_length=16)
+    MOCK_PAYMENT_WEBHOOK_TOKEN: str = Field(default="mock-webhook-token-dev-32-chars-long!!", min_length=32)
 
     # Flat service fee charged per order, in whole Taka.
     SERVICE_FEE_TAKA: int = 5

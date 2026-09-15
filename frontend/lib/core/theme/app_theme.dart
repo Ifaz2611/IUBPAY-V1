@@ -397,17 +397,35 @@ class AppShadows {
 }
 
 class AppTheme {
+  static final lightScheme = ColorScheme.fromSeed(
+    seedColor: Color(0xFF0F5B4A),
+    primary: Color(0xFF0F5B4A),
+    onPrimary: Colors.white,
+    secondary: Color(0xFF5E6166),
+    surface: Color(0xFFFFFFFF),
+    error: Color(0xFFDC2626),
+    brightness: Brightness.light,
+  );
+
+  static final darkScheme = ColorScheme.fromSeed(
+    seedColor: Color(0xFF1FAA8A),
+    primary: Color(0xFF1FAA8A),
+    onPrimary: Colors.black,
+    secondary: Color(0xFFB0B3B8),
+    surface: Color(0xFF1C1E21),
+    error: Color(0xFFEF4444),
+    brightness: Brightness.dark,
+  ).copyWith(
+    surface: Color(0xFF1C1E21),
+    error: Color(0xFFEF4444),
+    onSurface: Color(0xFFF1F1F1),
+    primary: Color(0xFF1FAA8A),
+    onPrimary: Colors.white,
+  );
+
   static ThemeData light() {
     const ext = AppColorExtension.light;
-    final scheme = ColorScheme.fromSeed(
-      seedColor: Color(0xFF0F5B4A),
-      primary: Color(0xFF0F5B4A),
-      onPrimary: Colors.white,
-      secondary: Color(0xFF5E6166),
-      surface: Color(0xFFFFFFFF),
-      error: Color(0xFFDC2626),
-      brightness: Brightness.light,
-    );
+    final scheme = lightScheme;
 
     return ThemeData(
       useMaterial3: true,
@@ -545,26 +563,12 @@ class AppTheme {
 
   static ThemeData dark() {
     const ext = AppColorExtension.dark;
-    final scheme = ColorScheme.fromSeed(
-      seedColor: Color(0xFF1FAA8A),
-      primary: Color(0xFF1FAA8A),
-      onPrimary: Colors.black,
-      secondary: Color(0xFFB0B3B8),
-      surface: Color(0xFF1C1E21),
-      error: Color(0xFFEF4444),
-      brightness: Brightness.dark,
-    );
+    final scheme = darkScheme;
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: scheme.copyWith(
-        surface: Color(0xFF1C1E21),
-        error: Color(0xFFEF4444),
-        onSurface: Color(0xFFF1F1F1),
-        primary: Color(0xFF1FAA8A),
-        onPrimary: Colors.white,
-      ),
+      colorScheme: scheme,
       scaffoldBackgroundColor: Color(0xFF121416),
       extensions: const [ext],
       fontFamily: null,

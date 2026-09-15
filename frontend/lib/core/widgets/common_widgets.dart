@@ -170,12 +170,15 @@ class AppCard extends StatelessWidget {
     if (onTap != null) {
       return Padding(
         padding: margin ?? EdgeInsets.zero,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(borderRadius),
-            onTap: onTap,
-            child: card,
+        child: Semantics(
+          button: true,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(borderRadius),
+              onTap: onTap,
+              child: card,
+            ),
           ),
         ),
       );
@@ -297,15 +300,29 @@ class StatusChip extends StatelessWidget {
     final Color fg = (v?.$1) ?? c.textSecondary;
     final Color bg = (v?.$2) ?? c.surfaceMuted;
     final String label = (v?.$3) ?? status.replaceAll('_', ' ');
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppRadii.pill),
-        border: Border.all(color: fg.withOpacity(0.18), width: 1),
+    return Semantics(
+      label: 'Order status: $label',
+      container: true,
+      child: Tooltip(
+        message: label,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            border: Border.all(color: fg.withOpacity(0.18), width: 1),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Semantics(
+              excludeSemantics: true,
+              child: Container(width: 6, height: 6, decoration: BoxDecoration(color: fg, shape: BoxShape.circle)),
+            ),
+            const SizedBox(width: 6),
+            Text(label,
+                style: TextStyle(color: fg, fontWeight: FontWeight.w600, fontSize: 11.5, letterSpacing: 0.15)),
+          ]),
+        ),
       ),
-      child: Text(label,
-          style: TextStyle(color: fg, fontWeight: FontWeight.w600, fontSize: 11.5, letterSpacing: 0.15)),
     );
   }
 }
@@ -504,5 +521,35 @@ class AppListRow extends StatelessWidget {
       return Material(color: Colors.transparent, child: InkWell(onTap: onTap, child: row));
     }
     return row;
+  }
+}
+
+/// Generic async value handler to deduplicate when(data, error, loading)
+class AsyncValueWidget<T> extends StatelessWidget {
+  final AsyncValue<T> value;
+  final Widget Function(T data) data;
+  final Widget Function(Object error, StackTrace? st)? error;
+  final Widget Function()? loading;
+  final VoidCallback? onRetry;
+
+  const AsyncValueWidget({
+    super.key,
+    required this.value,
+    required this.data,
+    this.error,
+    this.loading,
+    this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return value.when(
+      data: data,
+      loading: () => loading?.call() ?? const LoadingView(),
+      error: (e, st) {
+        if (error != null) return error!(e, st);
+        return ErrorView(error: e, onRetry: onRetry ?? () {});
+      },
+    );
   }
 }

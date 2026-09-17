@@ -15,7 +15,7 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: signaler,
     redirect: (context, state) {
       final auth = ref.read(authProvider);
-      final user = auth.valueOrNull;
+      final user = auth.value;
       final loading = auth.isLoading && !auth.hasValue;
       final loc = state.matchedLocation;
       if (loading) return loc == '/splash' ? '/splash' : null;

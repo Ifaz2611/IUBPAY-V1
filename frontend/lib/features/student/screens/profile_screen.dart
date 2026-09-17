@@ -12,10 +12,10 @@ class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).valueOrNull;
+    final user = ref.watch(authProvider).value;
     final ordersAsync = ref.watch(myOrdersProvider);
     final cart = ref.watch(cartProvider);
-    final orders = ordersAsync.valueOrNull ?? [];
+    final orders = ordersAsync.value ?? [];
     final totalSpent = orders.where((o) => o.status == 'COLLECTED' || o.status == 'PAID' || o.status == 'READY').fold(0, (s, o) => s + o.totalAmount);
     final activeCount = orders.where((o) => ['PAID', 'ACCEPTED', 'PREPARING', 'READY'].contains(o.status)).length;
 

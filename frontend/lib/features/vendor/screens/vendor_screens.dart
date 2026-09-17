@@ -36,15 +36,15 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProvider).valueOrNull;
+    final user = ref.watch(authProvider).value;
     final ordersAsync = ref.watch(myVendorOrdersProvider);
     final menuAsync = ref.watch(myVendorMenuProvider);
     final salesAsync = ref.watch(vendorSalesProvider);
     final wide = MediaQuery.of(context).size.width > 900;
     final isTablet = MediaQuery.of(context).size.width > 650;
 
-    final orders = ordersAsync.valueOrNull ?? [];
-    final menu = menuAsync.valueOrNull ?? [];
+    final orders = ordersAsync.value ?? [];
+    final menu = menuAsync.value ?? [];
 
     final live = orders.where((o) => ['PAID', 'ACCEPTED', 'PREPARING'].contains(o.status)).toList();
     final ready = orders.where((o) => o.status == 'READY').toList();

@@ -5,13 +5,14 @@ import 'app_theme.dart';
 
 const _kThemeKey = 'iub_theme_mode';
 
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
-  return ThemeModeNotifier();
-});
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
 
-class ThemeModeNotifier extends StateNotifier<ThemeMode> {
-  ThemeModeNotifier() : super(ThemeMode.light) {
-    _load();
+class ThemeModeNotifier extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() {
+    // Load persisted preference asynchronously and update state when ready
+    Future.microtask(_load);
+    return ThemeMode.light;
   }
 
   Future<void> _load() async {

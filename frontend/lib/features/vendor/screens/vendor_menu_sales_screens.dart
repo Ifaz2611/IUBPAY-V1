@@ -101,7 +101,7 @@ class MenuManagementScreen extends ConsumerWidget {
                 final body = <String, dynamic>{'name': trimmedName, if (parsedPrice != null) 'price_taka': parsedPrice, if (desc.text.trim().isNotEmpty) 'description': desc.text.trim()};
                 try {
                   if (existing == null) {
-                    final vendorId = ref.read(authProvider).valueOrNull?.vendorId;
+                    final vendorId = ref.read(authProvider).value?.vendorId;
                     final resolvedVendorId = vendorId ?? (await dio.get('/auth/me')).data['vendor_id'] as String?;
                     if (resolvedVendorId == null) throw Exception('No vendor linked to this account');
                     await dio.post('/vendors/$resolvedVendorId/menu-items', data: body);

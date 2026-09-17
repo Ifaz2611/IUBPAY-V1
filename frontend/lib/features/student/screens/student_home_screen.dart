@@ -33,14 +33,14 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProvider).valueOrNull;
+    final user = ref.watch(authProvider).value;
     final first = user?.name.split(' ').first ?? 'there';
     final vendorsAsync = ref.watch(vendorListProvider);
     final ordersAsync = ref.watch(myOrdersProvider);
     final cart = ref.watch(cartProvider);
 
-    final vendorCount = vendorsAsync.valueOrNull?.length;
-    final orders = ordersAsync.valueOrNull ?? [];
+    final vendorCount = vendorsAsync.value?.length;
+    final orders = ordersAsync.value ?? [];
     final activeOrder = orders.where((o) => ['PAID', 'ACCEPTED', 'PREPARING', 'READY'].contains(o.status)).isNotEmpty
         ? orders.firstWhere((o) => ['PAID', 'ACCEPTED', 'PREPARING', 'READY'].contains(o.status))
         : null;

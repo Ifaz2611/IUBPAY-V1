@@ -44,6 +44,7 @@ Test accounts (Passw0rd!Dev): student@iub.test, vendor@iub.test, admin@iub.test.
 A. Restart backend with external bind: Stop current terminal (Ctrl+C) and restart:
 cd backend
 .venv\Scripts\activate
+
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Verify: curl.exe http://192.168.0.103:8000/health should now return ok (currently fails). Allow Windows Firewall prompt if shown.
 

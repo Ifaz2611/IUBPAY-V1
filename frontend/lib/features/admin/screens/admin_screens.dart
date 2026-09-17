@@ -85,7 +85,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           ),
           SizedBox(width: 4),
           Consumer(builder: (context, ref, _) {
-            final user = ref.watch(authProvider).valueOrNull;
+            final user = ref.watch(authProvider).value;
             return Padding(
               padding: EdgeInsets.only(right: 8),
               child: InkWell(
@@ -178,14 +178,14 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                   loading: () => _KpiSkeleton(isTablet: isTablet),
                   error: (e, _) => _ErrorCard(message: apiErrorMessage(e), onRetry: () => ref.invalidate(adminSummaryProvider)),
                   data: (s) {
-                    final pendingVendors = vendorsAsync.valueOrNull?.where((v) => v['status'] != 'APPROVED').length ?? 0;
-                    final totalUsers = usersAsync.valueOrNull?.length ?? s['registered_students'] ?? 0;
+                    final pendingVendors = vendorsAsync.value?.where((v) => v['status'] != 'APPROVED').length ?? 0;
+                    final totalUsers = usersAsync.value?.length ?? s['registered_students'] ?? 0;
                     return _KpiGrid(
                       s: s,
                       pendingVendors: pendingVendors,
                       totalUsers: totalUsers,
                       isTablet: isTablet,
-                      daily: dailyAsync.valueOrNull,
+                      daily: dailyAsync.value,
                     );
                   },
                 ),
@@ -264,17 +264,17 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
 
   String? _badgeFor(String label, AsyncValue<Map<String, dynamic>> summary, AsyncValue<List<dynamic>> vendors, AsyncValue<Map<String, dynamic>> txns) {
     if (label == 'Vendors') {
-      final pending = vendors.valueOrNull?.where((v) => v['status'] != 'APPROVED').length;
+      final pending = vendors.value?.where((v) => v['status'] != 'APPROVED').length;
       if (pending != null && pending > 0) return '$pending pending';
     }
     if (label == 'Transactions') {
-      final failed = summary.valueOrNull?['failed_payments'];
+      final failed = summary.value?['failed_payments'];
       if (failed is int && failed > 0) return '$failed failed';
     }
     if (label == 'Users') {
-      final total = vendors.valueOrNull?.length ?? 0;
+      final total = vendors.value?.length ?? 0;
       // show total users if available
-      final users = summary.valueOrNull?['registered_students'];
+      final users = summary.value?['registered_students'];
       if (users is int && users > 0) return '$users students';
     }
     return null;

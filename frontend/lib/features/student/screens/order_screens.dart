@@ -101,7 +101,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> with 
   @override
   Widget build(BuildContext context) {
     final order = ref.watch(orderDetailProvider(widget.orderId));
-    final active = order.valueOrNull;
+    final active = order.value;
     final stepIndex = active == null ? -1 : _steps.indexOf(active.status);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

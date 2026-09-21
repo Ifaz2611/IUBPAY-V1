@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../../../shared/api/api_client.dart';
 import '../../../shared/models/models.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -28,7 +29,7 @@ class MenuManagementScreen extends ConsumerWidget {
         ),
       ),
       body: menu.when(
-        loading: () => const LoadingView(),
+        loading: () => const MenuListSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(myVendorMenuProvider)),
         data: (items) => items.isEmpty
             ? EmptyView(icon: Icons.no_meals_rounded, message: 'No items yet. Add your first menu item.')
@@ -129,7 +130,7 @@ class SalesSummaryScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(title: 'Sales', subtitle: 'Collected and live totals', onBack: () => context.go('/vendor')),
       body: orders.when(
-        loading: () => const LoadingView(),
+        loading: () => const OrderListSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(myVendorOrdersProvider)),
         data: (list) {
           final collected = list.where((o) => o.status == 'COLLECTED').toList();

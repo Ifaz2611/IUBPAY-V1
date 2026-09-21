@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../../../shared/api/api_client.dart';
 import '../../../shared/models/models.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -343,7 +344,7 @@ class _VendorKpiSkeleton extends StatelessWidget {
   final bool isTablet;
   _VendorKpiSkeleton({required this.isTablet});
   @override
-  Widget build(BuildContext context) => GridView.count(shrinkWrap: true, physics: NeverScrollableScrollPhysics(), crossAxisCount: isTablet ? 4 : 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: isTablet ? 1.65 : 1.45, children: List.generate(8, (_) => AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(height: 32, width: 32, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8))), Spacer(), Container(height: 10, width: 60, color: AppColors.surfaceMuted), SizedBox(height: 8), Container(height: 18, width: 70, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6)))]))));
+  Widget build(BuildContext context) => GridView.count(shrinkWrap: true, physics: NeverScrollableScrollPhysics(), crossAxisCount: isTablet ? 4 : 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: isTablet ? 1.65 : 1.45, children: List.generate(8, (_) => AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [SkeletonBox(height: 32, width: 32, borderRadius: BorderRadius.circular(8)), Spacer(), SkeletonBox(height: 10, width: 60), SizedBox(height: 8), SkeletonBox(height: 18, width: 70, borderRadius: BorderRadius.circular(6))]))));
 }
 
 class _VendorErrorCard extends StatelessWidget {
@@ -635,7 +636,7 @@ class _LiveQueueCard extends ConsumerWidget {
         ),
         Divider(height: 1),
         ordersAsync.when(
-          loading: () => Padding(padding: EdgeInsets.all(24), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
+          loading: () => const ListSkeleton(count: 3),
           error: (e, _) => Padding(padding: EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: TextStyle(color: AppColors.textTertiary, fontSize: 12))),
           data: (list) {
             var filtered = list.where((o) => ['PAID', 'ACCEPTED', 'PREPARING', 'READY'].contains(o.status)).toList();
@@ -741,7 +742,7 @@ class _MenuHealthCard extends StatelessWidget {
         ),
         Divider(height: 1),
         menuAsync.when(
-          loading: () => Padding(padding: EdgeInsets.all(20), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
+          loading: () => const ListSkeleton(count: 2),
           error: (e, _) => Padding(padding: EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: TextStyle(color: AppColors.textTertiary, fontSize: 12))),
           data: (items) {
             if (items.isEmpty) {
@@ -901,7 +902,7 @@ class IncomingOrdersView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final orders = ref.watch(myVendorOrdersProvider);
     return orders.when(
-      loading: () => LoadingView(),
+      loading: () => const OrderListSkeleton(),
       error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(myVendorOrdersProvider)),
       data: (list) {
         final live = list.where((o) => _liveStatuses.contains(o.status)).toList()
@@ -973,7 +974,7 @@ class VendorOrderDetailScreen extends ConsumerWidget {
             }
           }),
       body: order.when(
-        loading: () => LoadingView(),
+        loading: () => const OrderTrackingSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orderDetailProvider(orderId))),
         data: (o) => ListView(padding: EdgeInsets.all(16), children: [
           AppCard(

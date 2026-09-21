@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../../../shared/api/api_client.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/admin_providers.dart';
@@ -442,7 +443,7 @@ class _KpiSkeleton extends StatelessWidget {
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
       childAspectRatio: isTablet ? 1.7 : 1.45,
-      children: List.generate(8, (_) => AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(height: 32, width: 32, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(8))), Spacer(), Container(height: 10, width: 60, color: AppColors.surfaceMuted), SizedBox(height: 8), Container(height: 18, width: 80, decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(6))), SizedBox(height: 6), Container(height: 10, width: 90, color: AppColors.surfaceMuted)]))),
+      children: List.generate(8, (_) => AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [SkeletonBox(height: 32, width: 32, borderRadius: BorderRadius.circular(8)), Spacer(), SkeletonBox(height: 10, width: 60), SizedBox(height: 8), SkeletonBox(height: 18, width: 80, borderRadius: BorderRadius.circular(6)), SizedBox(height: 6), SkeletonBox(height: 10, width: 90)]))),
     );
   }
 }
@@ -493,7 +494,7 @@ class _DailySalesCard extends StatelessWidget {
         ]),
         SizedBox(height: 16),
         dailyAsync.when(
-          loading: () => SizedBox(height: 160, child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand))),
+          loading: () => Column(children: List.generate(4, (_) => Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Row(children: [SkeletonBox(height: 10, width: 36), SizedBox(width: 8), Expanded(child: SkeletonBox(height: 10)), SizedBox(width: 8), SkeletonBox(height: 10, width: 40)])))),
           error: (e, _) => SizedBox(height: 160, child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [Text(apiErrorMessage(e), style: TextStyle(color: AppColors.textTertiary, fontSize: 12)), SizedBox(height: 8), OutlinedButton(onPressed: onRetry, child: Text('Retry'))]))),
           data: (rows) {
             if (rows.isEmpty) return SizedBox(height: 120, child: Center(child: Text('No data', style: TextStyle(color: AppColors.textTertiary))));
@@ -754,7 +755,7 @@ class _PendingVendorsCard extends StatelessWidget {
         ),
         Divider(height: 1),
         vendorsAsync.when(
-          loading: () => Padding(padding: EdgeInsets.all(24), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
+          loading: () => const ListSkeleton(count: 3),
           error: (e, _) => Padding(padding: EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: TextStyle(color: AppColors.textTertiary, fontSize: 12))),
           data: (list) {
             final pending = list.where((v) => v['status'] != 'APPROVED').toList();
@@ -808,7 +809,7 @@ class _RecentTransactionsCard extends StatelessWidget {
         ),
         Divider(height: 1),
         txnsAsync.when(
-          loading: () => Padding(padding: EdgeInsets.all(24), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
+          loading: () => const ListSkeleton(count: 3),
           error: (e, _) => Padding(padding: EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: TextStyle(color: AppColors.textTertiary, fontSize: 12))),
           data: (data) {
             final items = List<Map<String, dynamic>>.from(data['items'] ?? data['transactions'] ?? []);
@@ -862,7 +863,7 @@ class _UsersOverviewCard extends StatelessWidget {
         ),
         Divider(height: 1),
         usersAsync.when(
-          loading: () => Padding(padding: EdgeInsets.all(24), child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand)))),
+          loading: () => const ListSkeleton(count: 3),
           error: (e, _) => Padding(padding: EdgeInsets.all(16), child: Text(apiErrorMessage(e), style: TextStyle(color: AppColors.textTertiary, fontSize: 12))),
           data: (list) {
             if (list.isEmpty) return Padding(padding: EdgeInsets.all(20), child: Text('No users.', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)));
@@ -924,7 +925,7 @@ class VendorManagementScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(title: 'Vendors', subtitle: 'Approve or suspend', onBack: () => context.go('/admin')),
       body: vendors.when(
-        loading: () => const LoadingView(),
+        loading: () => const UserListSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(adminVendorsProvider)),
         data: (list) => list.isEmpty
             ? EmptyView(message: 'No vendors registered.')
@@ -966,7 +967,7 @@ class TransactionListScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(title: 'Transactions', subtitle: 'Ledger of all payments', onBack: () => context.go('/admin')),
       body: txns.when(
-        loading: () => const LoadingView(),
+        loading: () => const OrderListSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(transactionsProvider)),
         data: (data) {
           final items = List<Map<String, dynamic>>.from(data['items'] ?? data['transactions'] ?? []);

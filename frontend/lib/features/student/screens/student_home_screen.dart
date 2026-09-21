@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/student_providers.dart';
 
@@ -341,7 +342,7 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen> {
             // ── Featured vendors carousel ──
             const SizedBox(height: 20),
             vendorsAsync.when(
-              loading: () => const SizedBox.shrink(),
+              loading: () => const FeaturedVendorsSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
               data: (list) {
                 if (list.isEmpty) return const SizedBox.shrink();

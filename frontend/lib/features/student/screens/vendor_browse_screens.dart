@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../providers/student_providers.dart';
 
 // ─── Vendor List ─────────────────────────────────────────────
@@ -107,7 +108,7 @@ class _VendorListScreenState extends ConsumerState<VendorListScreen> {
         Container(height: 1, color: AppColors.border),
         Expanded(
           child: vendors.when(
-            loading: () => const LoadingView(message: 'Loading vendors…'),
+            loading: () => _gridMode ? const VendorGridSkeleton() : const VendorListSkeleton(),
             error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(vendorListProvider)),
             data: (list) {
               var filtered = _query.isEmpty ? list : list.where((v) => v.name.toLowerCase().contains(_query) || v.location.toLowerCase().contains(_query)).toList();
@@ -363,7 +364,7 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
             const SizedBox(height: 10),
             // Category chips + filters
             menu.when(
-              loading: () => SizedBox.shrink(),
+              loading: () => Row(children: List.generate(4, (_) => Padding(padding: EdgeInsets.only(right: 8), child: SkeletonBox(height: 28, width: 72, borderRadius: BorderRadius.circular(20))))),
               error: (_, __) => SizedBox.shrink(),
               data: (items) {
                 final cats = <String>{'All', ...items.map((e) => e.category)}.toList();
@@ -473,7 +474,7 @@ class _VendorMenuScreenState extends ConsumerState<VendorMenuScreen> {
         Container(height: 1, color: AppColors.border),
         Expanded(
           child: menu.when(
-            loading: () => const LoadingView(),
+            loading: () => const MenuListSkeleton(),
             error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(vendorMenuProvider(widget.vendorId))),
             data: (items) {
               var filtered = items.where((it) {

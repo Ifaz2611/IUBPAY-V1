@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../../../shared/api/api_client.dart';
 import 'admin_screens.dart' show adminSummaryProvider, dailyReportProvider, adminUsersProvider;
 
@@ -18,7 +19,7 @@ class ReportsScreen extends ConsumerWidget {
       appBar: AppTopBar(title: 'Reports', subtitle: 'Sales and revenue', onBack: () => context.go('/admin')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         summary.when(
-          loading: () => const LoadingView(),
+          loading: () => const KpiGridSkeleton(count: 6, crossAxisCount: 2),
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(adminSummaryProvider)),
           data: (s) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 10, runSpacing: 10, children: [
@@ -51,7 +52,7 @@ class ReportsScreen extends ConsumerWidget {
         SectionHeader(title: 'Daily sales', subtitle: 'Last 14 days'),
         SizedBox(height: 10),
         daily.when(
-          loading: () => LoadingView(),
+          loading: () => const ListSkeleton(count: 6),
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(dailyReportProvider)),
           data: (rows) {
             final maxSales = rows.fold<int>(1, (m, r) => m > (r['sales_taka'] as int) ? m : r['sales_taka'] as int);
@@ -96,7 +97,7 @@ class UserManagementScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(title: 'Users', subtitle: 'Directory', onBack: () => context.go('/admin')),
       body: users.when(
-        loading: () => LoadingView(),
+        loading: () => const UserListSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(adminUsersProvider)),
         data: (list) => list.isEmpty
             ? EmptyView(message: 'No users.')

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../../../shared/api/api_client.dart';
 import '../providers/student_providers.dart';
 
@@ -22,7 +23,7 @@ class OrderHistoryScreen extends ConsumerWidget {
         action: IconButton(icon: Icon(Icons.refresh_rounded, size: 18), tooltip: 'Refresh', onPressed: () => ref.invalidate(myOrdersProvider)),
       ),
       body: orders.when(
-        loading: () => LoadingView(),
+        loading: () => const OrderListSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(myOrdersProvider)),
         data: (list) {
           if (list.isEmpty) {
@@ -119,7 +120,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> with 
         bottom: PreferredSize(preferredSize: Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),
       ),
       body: order.when(
-        loading: () => LoadingView(),
+        loading: () => const OrderTrackingSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orderDetailProvider(widget.orderId))),
         data: (o) => ListView(padding: EdgeInsets.all(16), children: [
           AppCard(
@@ -232,7 +233,7 @@ class ReceiptScreen extends ConsumerWidget {
             }
           }),
       body: order.when(
-        loading: () => LoadingView(),
+        loading: () => const ReceiptSkeleton(),
         error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(orderDetailProvider(orderId))),
         data: (o) => SingleChildScrollView(
           padding: EdgeInsets.all(16),

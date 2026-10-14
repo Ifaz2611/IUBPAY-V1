@@ -102,3 +102,14 @@ def test_vendor_rejection_refunds_student(client, db):
     # No duplicate refund possible.
     r = client.post(f"/api/orders/{order['id']}/cancel", headers=h)
     assert r.status_code == 409
+
+
+def test_vendor_sales_date_filter(client, db):
+    v, vh, h, s, order, payment = _paid_order(client, db)
+    r = client.get("/api/vendors/me/sales?days=7", headers=vh)
+    assert r.status_code == 200
+    data = r.json()
+    assert data["vendor_id"] == v.id
+    assert data["paid_orders"] == 1
+    assert data["total_sales_taka"] == 220
+

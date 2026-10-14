@@ -27,6 +27,10 @@ class AuthController extends AsyncNotifier<User?> {
           data: {'email': email, 'password': password});
       final user = User.fromJson(r.data['user']);
       await ref.read(tokenStoreProvider).save(r.data['access_token']);
+      final refreshToken = r.data['refresh_token'] as String?;
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        await ref.read(tokenStoreProvider).saveRefresh(refreshToken);
+      }
       state = AsyncData(user);
       return null; // success
     } catch (e) {
@@ -36,6 +40,9 @@ class AuthController extends AsyncNotifier<User?> {
   }
 
   Future<void> logout() async {
+    try {
+      await ref.read(dioProvider).post('/auth/logout');
+    } catch (_) {}
     await ref.read(tokenStoreProvider).clear();
     state = const AsyncData(null);
   }

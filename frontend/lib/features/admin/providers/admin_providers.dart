@@ -17,11 +17,17 @@ final transactionsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final r = await ref.read(dioProvider).get('/admin/reports/transactions');
   return Map<String, dynamic>.from(r.data);
 });
+List<dynamic> _extractList(dynamic data) {
+  if (data is List) return List<dynamic>.from(data);
+  if (data is Map && data['items'] is List) return List<dynamic>.from(data['items'] as List);
+  return [];
+}
+
 final adminVendorsProvider = FutureProvider<List<dynamic>>((ref) async {
   final r = await ref.read(dioProvider).get('/vendors?include_all=true');
-  return List<dynamic>.from(r.data);
+  return _extractList(r.data);
 });
 final adminUsersProvider = FutureProvider<List<dynamic>>((ref) async {
   final r = await ref.read(dioProvider).get('/admin/users');
-  return List<dynamic>.from(r.data);
+  return _extractList(r.data);
 });

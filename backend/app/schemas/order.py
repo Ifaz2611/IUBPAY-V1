@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class OrderItemIn(BaseModel):
@@ -28,6 +28,8 @@ class OrderStatusUpdate(BaseModel):
 
 
 class OrderItemOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     menu_item_id: str | None = None
     item_name_snapshot: str
@@ -35,22 +37,20 @@ class OrderItemOut(BaseModel):
     quantity: int
     subtotal_taka: int
 
-    class Config:
-        from_attributes = True
-
 
 class PaymentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     provider: str
     amount_taka: int
     status: str
     failure_reason: str | None = None
 
-    class Config:
-        from_attributes = True
-
 
 class OrderOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     order_number: str
     student_id: str
@@ -64,6 +64,3 @@ class OrderOut(BaseModel):
     created_at: datetime | None = None
     items: list[OrderItemOut] = []
     payments: list[PaymentOut] = []
-
-    class Config:
-        from_attributes = True

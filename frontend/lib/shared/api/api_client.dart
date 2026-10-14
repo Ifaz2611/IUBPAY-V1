@@ -54,8 +54,9 @@ final dioProvider = Provider<Dio>((ref) {
             final newRefresh = r.data['refresh_token'] as String?;
             if (newAccess != null) {
               await ref.read(tokenStoreProvider).save(newAccess);
-              if (newRefresh != null)
+              if (newRefresh != null) {
                 await ref.read(tokenStoreProvider).saveRefresh(newRefresh);
+              }
               e.requestOptions.headers['Authorization'] = 'Bearer $newAccess';
               final retry = await dio.fetch(e.requestOptions);
               return handler.resolve(retry);
@@ -73,7 +74,18 @@ final dioProvider = Provider<Dio>((ref) {
 String apiErrorMessage(Object e) {
   if (e is DioException) {
     final data = e.response?.data;
-    if (data is Map && data['detail'] != null) return data['detail'].toString();
+    if (data is Map && data['detail'] != null) {
+      final detail = data['detail'];
+      if (detail is String) return detail;
+      if (detail is List && detail.isNotEmpty) {
+        final first = detail.first;
+        if (first is Map && first['msg'] != null) {
+          return first['msg'].toString();
+        }
+        return first.toString();
+      }
+      return detail.toString();
+    }
     switch (e.type) {
       case DioExceptionType.connectionError:
       case DioExceptionType.connectionTimeout:

@@ -95,7 +95,30 @@ class _VendorDashboardScreenState extends ConsumerState<VendorDashboardScreen> {
             padding: EdgeInsets.only(right: 8),
             child: InkWell(
               borderRadius: BorderRadius.circular(20),
-              onTap: () => context.go('/student/profile'),
+              onTap: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text(user?.name ?? 'Vendor Account'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Email: ${user?.email ?? "-"}', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                        const SizedBox(height: 4),
+                        Text('Role: Vendor', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                        if (user?.vendorId != null) ...[
+                          const SizedBox(height: 4),
+                          Text('Vendor ID: ${user!.vendorId}', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+                        ],
+                      ],
+                    ),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
+                    ],
+                  ),
+                );
+              },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),

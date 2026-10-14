@@ -35,3 +35,18 @@ def test_disabled_items_hidden_by_default(client, db):
     # Vendor can request unavailable items for management view
     r = client.get(f"/api/vendors/{v.id}/menu?include_unavailable=true", headers=vh)
     assert len(r.json()) == 2
+
+
+def test_menu_item_image_url_rejects_xss_schemes(client, db):
+    from tests.conftest import vendor_pair
+
+    v, _, vh = vendor_pair(db, client)
+    payload = {
+        "name": "Malicious Dish",
+        "price_taka": 100,
+        "category": "MEAL",
+        "image_url": "javascript:alert(1)",
+    }
+    r = client.post(f"/api/vendors/{v.id}/menu-items", headers=vh, json=payload)
+    assert r.status_code == 422
+

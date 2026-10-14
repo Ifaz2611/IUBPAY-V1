@@ -66,15 +66,15 @@
 
 * **Action:**
 * Register a global `IntegrityError` handler in `backend/app/main.py`. — **DONE** (`main.py:80-86`, returns 409 on duplicate)
-* Wrap idempotency checks (`app/services/order_service.py:33`) and double-pay checks (`app/services/payment_service.py:40`) in `try/except IntegrityError` with handle/re-select fallbacks. — **TODO**
-* Wrap vendor suspension loop in `backend/app/api/vendors.py:109` in a single database transaction to prevent partial commits on `create_and_process_refund()`. — **TODO** (service already supports `commit=False`; call-site not yet wrapped)
+* Wrap idempotency checks (`app/services/order_service.py:33`) and double-pay checks (`app/services/payment_service.py:40`) in `try/except IntegrityError` with handle/re-select fallbacks. — **DONE** (`payment_service.py:64-80`, `order_service.py:120-128`)
+* Wrap vendor suspension loop in `backend/app/api/vendors.py:109` in a single database transaction to prevent partial commits on `create_and_process_refund()`. — **DONE** (`vendors.py:144-161`)
 
 * **Rationale:** Prevents unhandled 500 crashes and state corruption during concurrent API requests.
 
 ### 2. Async Execution & Webhook Errors
 
 * **Action:**
-* Replace thread-blocking `time.sleep()` in `backend/app/services/payment_service.py:150` with an async handler (`async def` + `asyncio.sleep`). — **PARTIAL:** `simulate_provider_latency_async` added (`payment_service.py:162`) and `mock_complete` is now `async`; `mock_fail` still needs same change.
+* Replace thread-blocking `time.sleep()` in `backend/app/services/payment_service.py:150` with an async handler (`async def` + `asyncio.sleep`). — **DONE** (`simulate_provider_latency_async` used in both `mock_complete` and `mock_fail`).
 * Change missing header status code in `backend/app/api/payments.py:115` from `422` to `401` using `Header(None)`. — **DONE** (`401` on missing `X-Webhook-Token`)
 
 * **Rationale:** Stops worker pool starvation under load and standardizes HTTP error contracts.
@@ -99,8 +99,8 @@
 ### 5. Frontend State & Resource Management
 
 * **Action:**
-* Make `CartLine.qty` immutable and provide a `copyWith()` method in `frontend/lib/features/student/providers/student_providers.dart:19` to restore Riverpod value equality. — **TODO (next update — high)**
-* Fix memory leak in `frontend/lib/features/student/screens/order_screens.dart:62` by replacing active `Timer.periodic(5s)` with `StreamProvider.autoDispose` paired with a `WidgetsBindingObserver`. — **TODO**
+* Make `CartLine.qty` immutable and provide a `copyWith()` method in `frontend/lib/features/student/providers/student_providers.dart:19` to restore Riverpod value equality. — **DONE** (`CartLine` immutable, value equality tests in `test/widget_test.dart`)
+* Fix memory leak in `frontend/lib/features/student/screens/order_screens.dart:62` by replacing active `Timer.periodic(5s)` with terminal status cancellation and `WidgetsBindingObserver`. — **DONE** (`order_screens.dart:88-112`)
 
 * **Rationale:** Fixes UI re-rendering glitches and eliminates background battery/memory drain.
 
@@ -126,7 +126,7 @@
 * **Action (next update — must land before release):**
 * Keep split entrypoints; **deprecate or gate** `main.dart` — either (a) make it debug-only, or (b) delete it before release, or (c) make it a thin re-export that picks router by role at `/splash`. Document the deprecation in `README.md` / `GETTING_STARTED.md`.
 * Extract dedicated routers fully (no shared imports leaking opposite role screens): `student_router.dart` (routes `/splash`, `/login`, `/student/*`), `vendor_router.dart` (`/vendor/*`), `admin_router.dart` (`/admin/*`). — **DONE** (verify no cross-role imports beyond `splash/login`)
-* Enforce role guards inside each router (`require_role`). If a user logs into the wrong target app, redirect to `/login` with an informational message. — **DONE** (redirect to `/login` when `user.role != expected`); **TODO**: add `SnackBar`/query-param message `?reason=wrong_role`.
+* Enforce role guards inside each router (`require_role`). If a user logs into the wrong target app, redirect to `/login` with an informational message. — **DONE** (redirects to `/login?reason=wrong_role`, displays error message, and clears unauthorized token session).
 * Add build flavors / `--flavor` or at least README section explaining which entrypoint maps to which deployment target (Student=Android/iOS, Vendor/Admin=Web/Desktop).
 
 * **Rationale:** Separates user flows across mobile and desktop web targets while guaranteeing hard route-level access controls. Current unified `main.dart` is intentionally kept for local dev but must not ship as the production artifact if separation is required.

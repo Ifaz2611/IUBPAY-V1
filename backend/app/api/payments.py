@@ -108,7 +108,7 @@ async def mock_complete(
 
 
 @router.post("/mock/fail")
-def mock_fail(
+async def mock_fail(
     body: MockCompleteRequest,
     db: Session = Depends(get_db),
     student: User = Depends(require_role(Role.STUDENT)),
@@ -121,6 +121,9 @@ def mock_fail(
     if order.student_id != student.id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your payment")
 
+    from app.services.payment_service import simulate_provider_latency_async
+
+    await simulate_provider_latency_async(body.delay_seconds)
     result = apply_webhook_event(
         db,
         payment=payment,

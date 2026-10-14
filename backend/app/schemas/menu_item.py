@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class MenuItemCreate(BaseModel):
@@ -15,6 +15,15 @@ class MenuItemCreate(BaseModel):
             raise ValueError("Price must be a positive amount in Taka")
         return v
 
+    @field_validator("image_url")
+    @classmethod
+    def validate_image_url(cls, v: str | None) -> str | None:
+        if v:
+            v_clean = v.strip().lower()
+            if not (v_clean.startswith("http://") or v_clean.startswith("https://") or v_clean.startswith("/")):
+                raise ValueError("Image URL must start with http://, https://, or /")
+        return v
+
 
 class MenuItemUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=2, max_length=160)
@@ -24,8 +33,19 @@ class MenuItemUpdate(BaseModel):
     is_available: bool | None = None
     image_url: str | None = Field(default=None, max_length=500)
 
+    @field_validator("image_url")
+    @classmethod
+    def validate_image_url(cls, v: str | None) -> str | None:
+        if v:
+            v_clean = v.strip().lower()
+            if not (v_clean.startswith("http://") or v_clean.startswith("https://") or v_clean.startswith("/")):
+                raise ValueError("Image URL must start with http://, https://, or /")
+        return v
+
 
 class MenuItemOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     vendor_id: str
     name: str
@@ -34,6 +54,3 @@ class MenuItemOut(BaseModel):
     category: str
     image_url: str | None = None
     is_available: bool
-
-    class Config:
-        from_attributes = True

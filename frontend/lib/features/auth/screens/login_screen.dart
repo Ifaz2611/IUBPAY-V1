@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../providers/auth_provider.dart';
@@ -27,6 +28,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _email.text = 'student@iub.test';
       _password.text = 'Passw0rd!Dev';
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      try {
+        final uri = GoRouterState.of(context).uri;
+        if (uri.queryParameters['reason'] == 'wrong_role') {
+          ref.read(authProvider.notifier).logout();
+          setState(() {
+            _error = 'This account does not have permission for this portal. Please log in with the correct role.';
+          });
+        }
+      } catch (_) {}
+    });
   }
 
   @override

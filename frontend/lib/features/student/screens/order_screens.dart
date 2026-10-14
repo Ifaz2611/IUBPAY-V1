@@ -87,8 +87,21 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> with 
 
   void _startPolling() {
     _timer?.cancel();
+    final current = ref.read(orderDetailProvider(widget.orderId)).value;
+    if (current != null && ['COLLECTED', 'CANCELLED', 'REFUNDED', 'REJECTED'].contains(current.status)) {
+      return;
+    }
     // SSE is preferred; fallback to polling if SSE fails (handled in build)
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) { if (mounted) ref.invalidate(orderDetailProvider(widget.orderId)); });
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      final cur = ref.read(orderDetailProvider(widget.orderId)).value;
+      if (cur != null && ['COLLECTED', 'CANCELLED', 'REFUNDED', 'REJECTED'].contains(cur.status)) {
+        _timer?.cancel();
+        _timer = null;
+        return;
+      }
+      ref.invalidate(orderDetailProvider(widget.orderId));
+    });
   }
 
   @override
@@ -103,6 +116,10 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> with 
   Widget build(BuildContext context) {
     final order = ref.watch(orderDetailProvider(widget.orderId));
     final active = order.value;
+    if (active != null && ['COLLECTED', 'CANCELLED', 'REFUNDED', 'REJECTED'].contains(active.status)) {
+      _timer?.cancel();
+      _timer = null;
+    }
     final stepIndex = active == null ? -1 : _steps.indexOf(active.status);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

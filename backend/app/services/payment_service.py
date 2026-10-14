@@ -6,6 +6,7 @@ import time
 from datetime import UTC
 
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.ledger import LedgerEntry
@@ -63,7 +64,22 @@ def create_payment(db: Session, order: Order) -> Payment:
     )
     db.add(payment)
     transition_order(db, order, OrderStatus.PAYMENT_PROCESSING)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        db.refresh(order)
+        active = next(
+            (
+                p
+                for p in order.payments
+                if p.status in (PaymentStatus.CREATED, PaymentStatus.PROCESSING, PaymentStatus.SUCCEEDED)
+            ),
+            None,
+        )
+        if active is not None:
+            return active
+        raise
     db.refresh(payment)
     return payment
 
@@ -158,8 +174,7 @@ def create_and_process_refund(
     # Mock provider processes instantly; a real integration would await the callback.
     refund.status = RefundStatus.PROCESSED
     if order is not None and order.status == OrderStatus.REFUND_PENDING:
-        order.status = OrderStatus.REFUNDED
-        audit(db, processed_by, "order.refunded", "order", order.id, {})
+        transition_order(db, order, OrderStatus.REFUNDED, actor_id=processed_by)
 
     if commit:
         db.commit()

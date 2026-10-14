@@ -717,6 +717,13 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   bool _busy = false;
   String? _error;
+  late final String _idempotencyKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _idempotencyKey = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+  }
 
   Future<void> _placeOrder() async {
     final cart = ref.read(cartProvider);
@@ -732,8 +739,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         'items': cart.lines.values
             .map((l) => {'menu_item_id': l.item.id, 'quantity': l.qty})
             .toList(),
-        'idempotency_key':
-            DateTime.now().microsecondsSinceEpoch.toRadixString(36),
+        'idempotency_key': _idempotencyKey,
       });
       if (!mounted) return;
       ref.read(cartProvider.notifier).reset();

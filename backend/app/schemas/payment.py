@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PaymentCreate(BaseModel):
@@ -19,6 +19,8 @@ class WebhookPayload(BaseModel):
 
 
 class PaymentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     order_id: str
     provider: str
@@ -27,6 +29,3 @@ class PaymentOut(BaseModel):
     status: str
     failure_reason: str | None = None
     verified_at: str | None = None
-
-    class Config:
-        from_attributes = True

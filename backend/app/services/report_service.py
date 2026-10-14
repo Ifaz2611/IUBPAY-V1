@@ -168,27 +168,23 @@ def vendor_sales(db: Session, vendor_id: str, since: date | None = None) -> dict
             ),
         )
     )
+    cnt_q = select(func.count(Order.id)).where(
+        Order.vendor_id == vendor_id,
+        Order.status.in_(
+            [
+                OrderStatus.PAID,
+                OrderStatus.ACCEPTED,
+                OrderStatus.PREPARING,
+                OrderStatus.READY,
+                OrderStatus.COLLECTED,
+            ]
+        ),
+    )
     if since:
         q = q.where(Order.created_at >= since)
+        cnt_q = cnt_q.where(Order.created_at >= since)
     total = db.scalar(q) or 0
-    # also count
-    cnt = (
-        db.scalar(
-            select(func.count(Order.id)).where(
-                Order.vendor_id == vendor_id,
-                Order.status.in_(
-                    [
-                        OrderStatus.PAID,
-                        OrderStatus.ACCEPTED,
-                        OrderStatus.PREPARING,
-                        OrderStatus.READY,
-                        OrderStatus.COLLECTED,
-                    ]
-                ),
-            )
-        )
-        or 0
-    )
+    cnt = db.scalar(cnt_q) or 0
     return {"vendor_id": vendor_id, "total_sales_taka": int(total), "paid_orders": int(cnt)}
 
 

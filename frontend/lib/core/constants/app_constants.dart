@@ -21,7 +21,10 @@ String get kApiBaseUrl {
     // Fallback enforces https scheme
     return 'https://api.iub-pay.example.com/api';
   }
-  return kIsWeb ? 'http://localhost:8000/api' : 'http://10.0.2.2:8000/api';
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    return 'http://10.0.2.2:8000/api';
+  }
+  return 'http://localhost:8000/api';
 }
 
 const String kAppName = 'IUB PAY v1';

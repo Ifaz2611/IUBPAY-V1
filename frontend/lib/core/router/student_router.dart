@@ -26,7 +26,7 @@ final studentRouterProvider = Provider<GoRouter>((ref) {
       if (loading) return loc == '/splash' ? '/splash' : null;
       final loggingIn = loc == '/login' || loc == '/splash';
       if (user == null) return loggingIn ? null : '/login';
-      if (user.role != 'student') return '/login';
+      if (user.role != 'student') return '/login?reason=wrong_role';
       if (loggingIn) return '/student';
       return null;
     },

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class VendorCreate(BaseModel):
@@ -18,6 +18,8 @@ class VendorUpdate(BaseModel):
 
 
 class VendorOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     description: str | None = None
@@ -25,6 +27,3 @@ class VendorOut(BaseModel):
     contact_phone: str | None = None
     status: str
     service_fee_taka: int | None = None
-
-    class Config:
-        from_attributes = True

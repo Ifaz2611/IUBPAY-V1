@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
@@ -22,4 +23,6 @@ class LedgerEntry(Base):
     entry_type: Mapped[LedgerEntryType] = mapped_column(sa_enum(LedgerEntryType))
     amount_taka: Mapped[int] = mapped_column(Integer)  # positive = inflow, negative = outflow
     reference: Mapped[str] = mapped_column(String(120))
-    created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )

@@ -49,4 +49,3 @@ def test_menu_item_image_url_rejects_xss_schemes(client, db):
     }
     r = client.post(f"/api/vendors/{v.id}/menu-items", headers=vh, json=payload)
     assert r.status_code == 422
-

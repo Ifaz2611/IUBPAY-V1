@@ -1,10 +1,15 @@
 import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.utils.enums import Role, UserStatus, sa_enum
+
+if TYPE_CHECKING:
+    from app.models.vendor import Vendor
 
 
 def gen_uuid() -> str:
@@ -28,11 +33,11 @@ class User(Base):
         ForeignKey("vendors.id", use_alter=True), nullable=True
     )
 
-    created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[object] = mapped_column(
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    vendor: Mapped["Vendor"] = relationship(
-        back_populates="staff", foreign_keys=[vendor_id]
-    )  # noqa: F821
+    vendor: Mapped["Vendor"] = relationship(back_populates="staff", foreign_keys=[vendor_id])

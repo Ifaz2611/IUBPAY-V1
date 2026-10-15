@@ -63,6 +63,8 @@ def get_payment(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Payment not found")
     if user.role == Role.STUDENT:
         order = db.get(Order, p.order_id)
+        if order is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Order not found")
         if order.student_id != user.id:
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your payment")
     return {
@@ -91,6 +93,8 @@ async def mock_complete(
     if payment is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Payment not found")
     order = db.get(Order, payment.order_id)
+    if order is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Order not found")
     if order.student_id != student.id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your payment")
 
@@ -118,6 +122,8 @@ async def mock_fail(
     if payment is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Payment not found")
     order = db.get(Order, payment.order_id)
+    if order is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Order not found")
     if order.student_id != student.id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your payment")
 

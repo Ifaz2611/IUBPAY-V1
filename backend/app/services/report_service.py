@@ -44,8 +44,8 @@ def summary(db: Session) -> dict:
         )
         or 0
     )
-    refunds = (
-        -db.scalar(
+    refunds = -(
+        db.scalar(
             select(func.coalesce(func.sum(LedgerEntry.amount_taka), 0)).where(
                 LedgerEntry.entry_type == LedgerEntryType.REFUND
             )
@@ -137,13 +137,13 @@ def daily(db: Session, days: int = 30) -> list[dict]:
         rows = []
         for i in range(days):
             d = (since + timedelta(days=i)).isoformat()
-            b = buckets.get(d)
+            day_bucket = buckets.get(d)
             rows.append(
                 {
                     "date": d,
-                    "orders": len(b["orders"]) if b else 0,
-                    "sales_taka": b["sales_taka"] if b else 0,
-                    "refunds_taka": b["refunds_taka"] if b else 0,
+                    "orders": len(day_bucket["orders"]) if day_bucket else 0,
+                    "sales_taka": day_bucket["sales_taka"] if day_bucket else 0,
+                    "refunds_taka": day_bucket["refunds_taka"] if day_bucket else 0,
                 }
             )
         return rows

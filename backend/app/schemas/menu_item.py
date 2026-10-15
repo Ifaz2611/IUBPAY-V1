@@ -20,7 +20,11 @@ class MenuItemCreate(BaseModel):
     def validate_image_url(cls, v: str | None) -> str | None:
         if v:
             v_clean = v.strip().lower()
-            if not (v_clean.startswith("http://") or v_clean.startswith("https://") or v_clean.startswith("/")):
+            if not (
+                v_clean.startswith("http://")
+                or v_clean.startswith("https://")
+                or v_clean.startswith("/")
+            ):
                 raise ValueError("Image URL must start with http://, https://, or /")
         return v
 
@@ -38,7 +42,11 @@ class MenuItemUpdate(BaseModel):
     def validate_image_url(cls, v: str | None) -> str | None:
         if v:
             v_clean = v.strip().lower()
-            if not (v_clean.startswith("http://") or v_clean.startswith("https://") or v_clean.startswith("/")):
+            if not (
+                v_clean.startswith("http://")
+                or v_clean.startswith("https://")
+                or v_clean.startswith("/")
+            ):
                 raise ValueError("Image URL must start with http://, https://, or /")
         return v
 

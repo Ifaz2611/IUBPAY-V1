@@ -18,7 +18,7 @@ jobs:
         working-directory: backend
         run: |
           pip install -r requirements.txt
-          pip install pytest httpx ruff black mypy
+          pip install pytest pytest-cov httpx ruff black mypy
       - name: Lint (ruff)
         working-directory: backend
         run: ruff check .
@@ -27,7 +27,7 @@ jobs:
         run: black --check .
       - name: Type check (mypy)
         working-directory: backend
-        run: mypy app --ignore-missing-imports || true
+        run: mypy app --ignore-missing-imports
       - name: Run tests
         working-directory: backend
         run: pytest -v

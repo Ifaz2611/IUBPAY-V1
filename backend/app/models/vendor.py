@@ -1,9 +1,15 @@
+from datetime import datetime
+from typing import TYPE_CHECKING
+
 from sqlalchemy import DateTime, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.models.user import gen_uuid
 from app.utils.enums import VendorStatus, sa_enum
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class Vendor(Base):
@@ -19,6 +25,8 @@ class Vendor(Base):
         sa_enum(VendorStatus), default=VendorStatus.PENDING
     )
     service_fee_taka: Mapped[int | None] = mapped_column(default=None, nullable=True)
-    created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
-    staff: Mapped[list["User"]] = relationship(back_populates="vendor")  # noqa: F821
+    staff: Mapped[list["User"]] = relationship(back_populates="vendor")

@@ -73,7 +73,8 @@ def create_payment(db: Session, order: Order) -> Payment:
             (
                 p
                 for p in order.payments
-                if p.status in (PaymentStatus.CREATED, PaymentStatus.PROCESSING, PaymentStatus.SUCCEEDED)
+                if p.status
+                in (PaymentStatus.CREATED, PaymentStatus.PROCESSING, PaymentStatus.SUCCEEDED)
             ),
             None,
         )
@@ -111,6 +112,8 @@ def apply_webhook_event(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Webhook amount mismatch")
 
     order = db.get(Order, payment.order_id)
+    if order is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Order not found")
 
     if event == "payment.succeeded":
         payment.status = PaymentStatus.SUCCEEDED

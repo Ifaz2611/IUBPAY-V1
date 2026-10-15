@@ -16,7 +16,7 @@ from app.core.config import settings
 async def lifespan(app: FastAPI):
     # Dev convenience: create tables automatically when using SQLite.
     if settings.DATABASE_URL.startswith("sqlite"):
-        import app.models  # noqa: F401
+        from app import models as _models  # noqa: F401
         from app.db.base import Base
         from app.db.session import engine
 

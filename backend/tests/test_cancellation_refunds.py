@@ -112,4 +112,3 @@ def test_vendor_sales_date_filter(client, db):
     assert data["vendor_id"] == v.id
     assert data["paid_orders"] == 1
     assert data["total_sales_taka"] == 220
-

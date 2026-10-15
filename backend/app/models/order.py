@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -6,6 +7,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.models.user import gen_uuid
 from app.utils.enums import OrderStatus, sa_enum
+
+if TYPE_CHECKING:
+    from app.models.payment import Payment
 
 
 class Order(Base):
@@ -35,10 +39,10 @@ class Order(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    items: Mapped[list["OrderItem"]] = relationship(  # noqa: F821
+    items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order", cascade="all, delete-orphan"
     )
-    payments: Mapped[list["Payment"]] = relationship(  # noqa: F821
+    payments: Mapped[list["Payment"]] = relationship(
         "Payment", primaryjoin="Order.id==Payment.order_id", viewonly=True
     )
 

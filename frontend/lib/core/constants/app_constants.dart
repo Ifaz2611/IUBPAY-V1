@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 /// Backend base URL.
 /// Android emulator reaches host machine via 10.0.2.2; web/desktop uses localhost.
 /// In release builds HTTPS is enforced unless an explicit HTTPS override is provided.
-const String _kApiBaseUrlEnv = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+const String _kApiBaseUrlEnv =
+    String.fromEnvironment('API_BASE_URL', defaultValue: '');
 
 String get kApiBaseUrl {
   final envUrl = _kApiBaseUrlEnv;

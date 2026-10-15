@@ -9,7 +9,8 @@ final dailyReportProvider = FutureProvider<List<dynamic>>((ref) async {
   final r = await ref.read(dioProvider).get('/admin/reports/daily?days=14');
   return List<dynamic>.from(r.data);
 });
-final dailyReportFamilyProvider = FutureProvider.family<List<dynamic>, int>((ref, days) async {
+final dailyReportFamilyProvider =
+    FutureProvider.family<List<dynamic>, int>((ref, days) async {
   final r = await ref.read(dioProvider).get('/admin/reports/daily?days=$days');
   return List<dynamic>.from(r.data);
 });
@@ -19,7 +20,8 @@ final transactionsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 });
 List<dynamic> _extractList(dynamic data) {
   if (data is List) return List<dynamic>.from(data);
-  if (data is Map && data['items'] is List) return List<dynamic>.from(data['items'] as List);
+  if (data is Map && data['items'] is List)
+    return List<dynamic>.from(data['items'] as List);
   return [];
 }
 

@@ -18,14 +18,17 @@ class AdminApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final isDark = themeMode == ThemeMode.dark ||
         (themeMode == ThemeMode.system &&
-            WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
+            WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+                Brightness.dark);
     AppThemeState.setDark(isDark);
     final overlay = SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-      systemNavigationBarColor: isDark ? AppColors.backgroundDark : AppColors.background,
-      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarColor:
+          isDark ? AppColors.backgroundDark : AppColors.background,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
     );
     SystemChrome.setSystemUIOverlayStyle(overlay);
     return MaterialApp.router(

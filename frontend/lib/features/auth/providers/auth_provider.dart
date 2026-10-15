@@ -23,8 +23,8 @@ class AuthController extends AsyncNotifier<User?> {
     state = const AsyncLoading();
     try {
       final dio = ref.read(dioProvider);
-      final r = await dio.post('/auth/login',
-          data: {'email': email, 'password': password});
+      final r = await dio
+          .post('/auth/login', data: {'email': email, 'password': password});
       final user = User.fromJson(r.data['user']);
       await ref.read(tokenStoreProvider).save(r.data['access_token']);
       final refreshToken = r.data['refresh_token'] as String?;
@@ -52,5 +52,5 @@ final authProvider =
     AsyncNotifierProvider<AuthController, User?>(() => AuthController());
 
 /// True while the initial token check is still running.
-final authLoadingProvider = Provider<bool>(
-    (ref) => ref.watch(authProvider).isLoading && !ref.watch(authProvider).hasValue);
+final authLoadingProvider = Provider<bool>((ref) =>
+    ref.watch(authProvider).isLoading && !ref.watch(authProvider).hasValue);

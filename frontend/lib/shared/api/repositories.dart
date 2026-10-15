@@ -12,7 +12,10 @@ class OrderRepository {
   final Dio _dio;
   OrderRepository(this._dio);
 
-  Future<Order> createOrder({required String vendorId, required List<Map<String, dynamic>> items, required String idempotencyKey}) async {
+  Future<Order> createOrder(
+      {required String vendorId,
+      required List<Map<String, dynamic>> items,
+      required String idempotencyKey}) async {
     final r = await _dio.post('/orders', data: {
       'vendor_id': vendorId,
       'items': items,
@@ -50,7 +53,8 @@ class VendorRepository {
   final Dio _dio;
   VendorRepository(this._dio);
 
-  Future<List<Vendor>> listVendors({int? limit, int? offset, bool includeAll = false}) async {
+  Future<List<Vendor>> listVendors(
+      {int? limit, int? offset, bool includeAll = false}) async {
     final r = await _dio.get('/vendors', queryParameters: {
       if (limit != null) 'limit': limit,
       if (offset != null) 'offset': offset,
@@ -101,7 +105,8 @@ class MenuRepository {
   }
 }
 
-final menuRepositoryProvider = Provider<MenuRepository>((ref) => MenuRepository(ref.read(dioProvider)));
+final menuRepositoryProvider =
+    Provider<MenuRepository>((ref) => MenuRepository(ref.read(dioProvider)));
 
 // ---------- Payment Repository ----------
 
@@ -114,25 +119,36 @@ class PaymentRepository {
     return Map<String, dynamic>.from(r.data as Map);
   }
 
-  Future<Map<String, dynamic>> mockComplete(String paymentId, {int delaySeconds = 0}) async {
-    final r = await _dio.post('/payments/mock/complete', data: {'payment_id': paymentId, 'delay_seconds': delaySeconds});
+  Future<Map<String, dynamic>> mockComplete(String paymentId,
+      {int delaySeconds = 0}) async {
+    final r = await _dio.post('/payments/mock/complete',
+        data: {'payment_id': paymentId, 'delay_seconds': delaySeconds});
     return Map<String, dynamic>.from(r.data as Map);
   }
 
-  Future<Map<String, dynamic>> mockFail(String paymentId, {int delaySeconds = 0}) async {
-    final r = await _dio.post('/payments/mock/fail', data: {'payment_id': paymentId, 'delay_seconds': delaySeconds});
+  Future<Map<String, dynamic>> mockFail(String paymentId,
+      {int delaySeconds = 0}) async {
+    final r = await _dio.post('/payments/mock/fail',
+        data: {'payment_id': paymentId, 'delay_seconds': delaySeconds});
     return Map<String, dynamic>.from(r.data as Map);
   }
 }
 
-final paymentRepositoryProvider = Provider<PaymentRepository>((ref) => PaymentRepository(ref.read(dioProvider)));
+final paymentRepositoryProvider = Provider<PaymentRepository>(
+    (ref) => PaymentRepository(ref.read(dioProvider)));
 
 // ---------- helpers ----------
 
-List<T> _parsePaginated<T>(dynamic data, T Function(Map<String, dynamic>) fromJson) {
-  if (data is List) return data.map((e) => fromJson(Map<String, dynamic>.from(e as Map))).toList();
+List<T> _parsePaginated<T>(
+    dynamic data, T Function(Map<String, dynamic>) fromJson) {
+  if (data is List)
+    return data
+        .map((e) => fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
   if (data is Map && data['items'] is List) {
-    return (data['items'] as List).map((e) => fromJson(Map<String, dynamic>.from(e as Map))).toList();
+    return (data['items'] as List)
+        .map((e) => fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
   }
   return [];
 }

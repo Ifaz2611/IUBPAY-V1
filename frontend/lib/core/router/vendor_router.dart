@@ -28,11 +28,21 @@ final vendorRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/vendor', builder: (_, __) => const VendorDashboardScreen()),
-      GoRoute(path: '/vendor/orders', builder: (_, __) => const IncomingOrdersScreen()),
-      GoRoute(path: '/vendor/orders/:id', builder: (_, s) => VendorOrderDetailScreen(orderId: s.pathParameters['id']!)),
-      GoRoute(path: '/vendor/menu', builder: (_, __) => const MenuManagementScreen()),
-      GoRoute(path: '/vendor/sales', builder: (_, __) => const SalesSummaryScreen()),
+      GoRoute(
+          path: '/vendor', builder: (_, __) => const VendorDashboardScreen()),
+      GoRoute(
+          path: '/vendor/orders',
+          builder: (_, __) => const IncomingOrdersScreen()),
+      GoRoute(
+          path: '/vendor/orders/:id',
+          builder: (_, s) =>
+              VendorOrderDetailScreen(orderId: s.pathParameters['id']!)),
+      GoRoute(
+          path: '/vendor/menu',
+          builder: (_, __) => const MenuManagementScreen()),
+      GoRoute(
+          path: '/vendor/sales',
+          builder: (_, __) => const SalesSummaryScreen()),
     ],
   );
 });

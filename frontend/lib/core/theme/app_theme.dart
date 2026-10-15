@@ -13,60 +13,81 @@ class AppThemeState {
 class AppColors {
   // ── Core palette — LIGHT (private) + dynamic getters ──
   static const _backgroundLight = Color(0xFFF6F5F2);
-  static Color get background => AppThemeState.isDark ? backgroundDark : _backgroundLight;
+  static Color get background =>
+      AppThemeState.isDark ? backgroundDark : _backgroundLight;
   static const _surfaceLight = Color(0xFFFFFFFF);
-  static Color get surface => AppThemeState.isDark ? surfaceDark : _surfaceLight;
+  static Color get surface =>
+      AppThemeState.isDark ? surfaceDark : _surfaceLight;
   static const _surfaceMutedLight = Color(0xFFF1F0EC);
-  static Color get surfaceMuted => AppThemeState.isDark ? surfaceMutedDark : _surfaceMutedLight;
+  static Color get surfaceMuted =>
+      AppThemeState.isDark ? surfaceMutedDark : _surfaceMutedLight;
   static const _surfaceHoverLight = Color(0xFFEBE9E5);
-  static Color get surfaceHover => AppThemeState.isDark ? surfaceHoverDark : _surfaceHoverLight;
+  static Color get surfaceHover =>
+      AppThemeState.isDark ? surfaceHoverDark : _surfaceHoverLight;
 
   static const _borderLight = Color(0xFFE8E6E1);
   static Color get border => AppThemeState.isDark ? borderDark : _borderLight;
   static const _borderStrongLight = Color(0xFFD9D6D0);
-  static Color get borderStrong => AppThemeState.isDark ? borderStrongDark : _borderStrongLight;
+  static Color get borderStrong =>
+      AppThemeState.isDark ? borderStrongDark : _borderStrongLight;
 
   static const _textPrimaryLight = Color(0xFF14181F);
-  static Color get textPrimary => AppThemeState.isDark ? textPrimaryDark : _textPrimaryLight;
+  static Color get textPrimary =>
+      AppThemeState.isDark ? textPrimaryDark : _textPrimaryLight;
   static const _textSecondaryLight = Color(0xFF5E6166);
-  static Color get textSecondary => AppThemeState.isDark ? textSecondaryDark : _textSecondaryLight;
+  static Color get textSecondary =>
+      AppThemeState.isDark ? textSecondaryDark : _textSecondaryLight;
   static const _textTertiaryLight = Color(0xFF8A8D93);
-  static Color get textTertiary => AppThemeState.isDark ? textTertiaryDark : _textTertiaryLight;
+  static Color get textTertiary =>
+      AppThemeState.isDark ? textTertiaryDark : _textTertiaryLight;
   static const _textInverseLight = Color(0xFFFFFFFF);
-  static Color get textInverse => AppThemeState.isDark ? textInverseDark : _textInverseLight;
+  static Color get textInverse =>
+      AppThemeState.isDark ? textInverseDark : _textInverseLight;
 
   static const _brandLight = Color(0xFF0F5B4A);
   static Color get brand => AppThemeState.isDark ? brandDark : _brandLight;
   static const _brandHoverLight = Color(0xFF0D4E3F);
-  static Color get brandHover => AppThemeState.isDark ? brandHoverDark : _brandHoverLight;
+  static Color get brandHover =>
+      AppThemeState.isDark ? brandHoverDark : _brandHoverLight;
   static const _brandPressedLight = Color(0xFF0A4235);
-  static Color get brandPressed => AppThemeState.isDark ? brandPressedDark : _brandPressedLight;
+  static Color get brandPressed =>
+      AppThemeState.isDark ? brandPressedDark : _brandPressedLight;
   static const _brandSubtleLight = Color(0xFFEEF6F3);
-  static Color get brandSubtle => AppThemeState.isDark ? brandSubtleDark : _brandSubtleLight;
+  static Color get brandSubtle =>
+      AppThemeState.isDark ? brandSubtleDark : _brandSubtleLight;
 
   static const _accentAmberLight = Color(0xFF9A5B11);
-  static Color get accentAmber => AppThemeState.isDark ? accentAmberDark : _accentAmberLight;
+  static Color get accentAmber =>
+      AppThemeState.isDark ? accentAmberDark : _accentAmberLight;
   static const _accentAmberBgLight = Color(0xFFFFF7ED);
-  static Color get accentAmberBg => AppThemeState.isDark ? accentAmberBgDark : _accentAmberBgLight;
+  static Color get accentAmberBg =>
+      AppThemeState.isDark ? accentAmberBgDark : _accentAmberBgLight;
 
   static const _successLight = Color(0xFF15803D);
-  static Color get success => AppThemeState.isDark ? successDark : _successLight;
+  static Color get success =>
+      AppThemeState.isDark ? successDark : _successLight;
   static const _successBgLight = Color(0xFFF0FDF4);
-  static Color get successBg => AppThemeState.isDark ? successBgDark : _successBgLight;
+  static Color get successBg =>
+      AppThemeState.isDark ? successBgDark : _successBgLight;
   static const _successBorderLight = Color(0xFFBBF7D0);
-  static Color get successBorder => AppThemeState.isDark ? successBorderDark : _successBorderLight;
+  static Color get successBorder =>
+      AppThemeState.isDark ? successBorderDark : _successBorderLight;
 
   static const _warningLight = Color(0xFFB45309);
-  static Color get warning => AppThemeState.isDark ? warningDark : _warningLight;
+  static Color get warning =>
+      AppThemeState.isDark ? warningDark : _warningLight;
   static const _warningBgLight = Color(0xFFFFFBEB);
-  static Color get warningBg => AppThemeState.isDark ? warningBgDark : _warningBgLight;
+  static Color get warningBg =>
+      AppThemeState.isDark ? warningBgDark : _warningBgLight;
 
   static const _errorLight = Color(0xFFDC2626);
   static Color get error => AppThemeState.isDark ? errorDark : _errorLight;
   static const _errorBgLight = Color(0xFFFEF2F2);
-  static Color get errorBg => AppThemeState.isDark ? errorBgDark : _errorBgLight;
+  static Color get errorBg =>
+      AppThemeState.isDark ? errorBgDark : _errorBgLight;
   static const _errorBorderLight = Color(0xFFFECACA);
-  static Color get errorBorder => AppThemeState.isDark ? errorBorderDark : _errorBorderLight;
+  static Color get errorBorder =>
+      AppThemeState.isDark ? errorBorderDark : _errorBorderLight;
 
   static const _infoLight = Color(0xFF0E7490);
   static Color get info => AppThemeState.isDark ? infoDark : _infoLight;
@@ -134,15 +155,21 @@ class AppColors {
   static const bgCardHover = _surfaceHoverLight;
 
   // Deprecated gradients — neutralized
-  static const primaryGradient = LinearGradient(colors: [_brandLight, _brandLight]);
-  static const cardGradient = LinearGradient(colors: [_surfaceLight, _surfaceMutedLight]);
-  static const bgGradient = LinearGradient(colors: [_backgroundLight, _backgroundLight]);
-  static const cyanGlow = LinearGradient(colors: [Colors.transparent, Colors.transparent]);
-  static const purpleGlow = LinearGradient(colors: [Colors.transparent, Colors.transparent]);
+  static const primaryGradient =
+      LinearGradient(colors: [_brandLight, _brandLight]);
+  static const cardGradient =
+      LinearGradient(colors: [_surfaceLight, _surfaceMutedLight]);
+  static const bgGradient =
+      LinearGradient(colors: [_backgroundLight, _backgroundLight]);
+  static const cyanGlow =
+      LinearGradient(colors: [Colors.transparent, Colors.transparent]);
+  static const purpleGlow =
+      LinearGradient(colors: [Colors.transparent, Colors.transparent]);
   static const neonCyanDim = _brandHoverLight;
 
   /// Helper: resolve correct color set based on brightness.
-  static bool isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  static bool isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
 }
 
 /// ThemeExtension carrying all tokens so widgets can be brightness-aware
@@ -357,7 +384,8 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
 }
 
 extension AppColorsContext on BuildContext {
-  AppColorExtension get appColors => Theme.of(this).extension<AppColorExtension>()!;
+  AppColorExtension get appColors =>
+      Theme.of(this).extension<AppColorExtension>()!;
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 }
 
@@ -384,42 +412,57 @@ class AppRadii {
 /// Soft elevation
 class AppShadows {
   static List<BoxShadow> get card => [
-        BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 16, offset: const Offset(0, 4)),
-        BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 1, offset: const Offset(0, 1)),
+        BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4)),
+        BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 1,
+            offset: const Offset(0, 1)),
       ];
   static List<BoxShadow> get cardHover => [
-        BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 6)),
+        BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 6)),
       ];
   static List<BoxShadow> get cardDark => [
-        BoxShadow(color: Colors.black.withOpacity(0.30), blurRadius: 16, offset: const Offset(0, 4)),
-        BoxShadow(color: Colors.black.withOpacity(0.22), blurRadius: 1, offset: const Offset(0, 1)),
+        BoxShadow(
+            color: Colors.black.withValues(alpha: 0.30),
+            blurRadius: 16,
+            offset: const Offset(0, 4)),
+        BoxShadow(
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 1,
+            offset: const Offset(0, 1)),
       ];
 }
 
 class AppTheme {
   static final lightScheme = ColorScheme.fromSeed(
-    seedColor: Color(0xFF0F5B4A),
-    primary: Color(0xFF0F5B4A),
+    seedColor: const Color(0xFF0F5B4A),
+    primary: const Color(0xFF0F5B4A),
     onPrimary: Colors.white,
-    secondary: Color(0xFF5E6166),
-    surface: Color(0xFFFFFFFF),
-    error: Color(0xFFDC2626),
+    secondary: const Color(0xFF5E6166),
+    surface: const Color(0xFFFFFFFF),
+    error: const Color(0xFFDC2626),
     brightness: Brightness.light,
   );
 
   static final darkScheme = ColorScheme.fromSeed(
-    seedColor: Color(0xFF1FAA8A),
-    primary: Color(0xFF1FAA8A),
+    seedColor: const Color(0xFF1FAA8A),
+    primary: const Color(0xFF1FAA8A),
     onPrimary: Colors.black,
-    secondary: Color(0xFFB0B3B8),
-    surface: Color(0xFF1C1E21),
-    error: Color(0xFFEF4444),
+    secondary: const Color(0xFFB0B3B8),
+    surface: const Color(0xFF1C1E21),
+    error: const Color(0xFFEF4444),
     brightness: Brightness.dark,
   ).copyWith(
-    surface: Color(0xFF1C1E21),
-    error: Color(0xFFEF4444),
-    onSurface: Color(0xFFF1F1F1),
-    primary: Color(0xFF1FAA8A),
+    surface: const Color(0xFF1C1E21),
+    error: const Color(0xFFEF4444),
+    onSurface: const Color(0xFFF1F1F1),
+    primary: const Color(0xFF1FAA8A),
     onPrimary: Colors.white,
   );
 
@@ -431,7 +474,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: scheme,
-      scaffoldBackgroundColor: Color(0xFFF6F5F2),
+      scaffoldBackgroundColor: const Color(0xFFF6F5F2),
       extensions: const [ext],
       fontFamily: null,
       appBarTheme: const AppBarTheme(
@@ -451,41 +494,46 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: Color(0xFFFFFFFF),
+        color: const Color(0xFFFFFFFF),
         shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.lg),
-          side: BorderSide(color: Color(0xFFE8E6E1), width: 1),
+          side: const BorderSide(color: Color(0xFFE8E6E1), width: 1),
         ),
         margin: EdgeInsets.zero,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: Color(0xFF0F5B4A),
+          backgroundColor: const Color(0xFF0F5B4A),
           foregroundColor: Colors.white,
-          disabledBackgroundColor: Color(0xFF8A8D93).withOpacity(0.12),
-          disabledForegroundColor: Color(0xFF8A8D93),
+          disabledBackgroundColor:
+              const Color(0xFF8A8D93).withValues(alpha: 0.12),
+          disabledForegroundColor: const Color(0xFF8A8D93),
           minimumSize: const Size.fromHeight(48),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.md)),
+          textStyle: const TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.1),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.md)),
           elevation: 0,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: Color(0xFF14181F),
+          foregroundColor: const Color(0xFF14181F),
           side: const BorderSide(color: Color(0xFFD9D6D0), width: 1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.md)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.md)),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: Color(0xFF0F5B4A),
+          foregroundColor: const Color(0xFF0F5B4A),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.sm)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.sm)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -510,53 +558,100 @@ class AppTheme {
           borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.6),
         ),
         filled: true,
-        fillColor: Color(0xFFFFFFFF),
+        fillColor: const Color(0xFFFFFFFF),
         hintStyle: const TextStyle(color: Color(0xFF8A8D93), fontSize: 14),
         labelStyle: const TextStyle(color: Color(0xFF5E6166), fontSize: 14),
-        floatingLabelStyle: const TextStyle(color: Color(0xFF0F5B4A), fontSize: 13, fontWeight: FontWeight.w500),
-        prefixIconColor: Color(0xFF8A8D93),
-        suffixIconColor: Color(0xFF8A8D93),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        floatingLabelStyle: const TextStyle(
+            color: Color(0xFF0F5B4A),
+            fontSize: 13,
+            fontWeight: FontWeight.w500),
+        prefixIconColor: const Color(0xFF8A8D93),
+        suffixIconColor: const Color(0xFF8A8D93),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         isDense: false,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: Color(0xFFF1F0EC),
+        backgroundColor: const Color(0xFFF1F0EC),
         side: const BorderSide(color: Color(0xFFE8E6E1)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
-        labelStyle: const TextStyle(color: Color(0xFF14181F), fontSize: 13, fontWeight: FontWeight.w500),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.pill)),
+        labelStyle: const TextStyle(
+            color: Color(0xFF14181F),
+            fontSize: 13,
+            fontWeight: FontWeight.w500),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
-      dividerTheme: const DividerThemeData(color: Color(0xFFE8E6E1), thickness: 1, space: 1),
+      dividerTheme: const DividerThemeData(
+          color: Color(0xFFE8E6E1), thickness: 1, space: 1),
       iconTheme: const IconThemeData(color: Color(0xFF5E6166), size: 20),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: Color(0xFF14181F),
+        backgroundColor: const Color(0xFF14181F),
         contentTextStyle: const TextStyle(color: Colors.white, fontSize: 13),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.md)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.md)),
         behavior: SnackBarBehavior.floating,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: Color(0xFFFFFFFF),
+        backgroundColor: const Color(0xFFFFFFFF),
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.lg)),
-        titleTextStyle: const TextStyle(color: Color(0xFF14181F), fontSize: 17, fontWeight: FontWeight.w600),
-        contentTextStyle: const TextStyle(color: Color(0xFF5E6166), fontSize: 14, height: 1.4),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.lg)),
+        titleTextStyle: const TextStyle(
+            color: Color(0xFF14181F),
+            fontSize: 17,
+            fontWeight: FontWeight.w600),
+        contentTextStyle: const TextStyle(
+            color: Color(0xFF5E6166), fontSize: 14, height: 1.4),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: Color(0xFFFFFFFF),
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.lg))),
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(AppRadii.lg))),
       ),
       textTheme: const TextTheme(
-        displayLarge: TextStyle(color: Color(0xFF14181F), fontWeight: FontWeight.w700, fontSize: 28, letterSpacing: -0.8, height: 1.1),
-        headlineSmall: TextStyle(color: Color(0xFF14181F), fontWeight: FontWeight.w600, fontSize: 20, letterSpacing: -0.4),
-        titleLarge: TextStyle(color: Color(0xFF14181F), fontWeight: FontWeight.w600, fontSize: 17, letterSpacing: -0.2),
-        titleMedium: TextStyle(color: Color(0xFF14181F), fontWeight: FontWeight.w600, fontSize: 15),
-        titleSmall: TextStyle(color: Color(0xFF5E6166), fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 0.2),
-        bodyLarge: TextStyle(color: Color(0xFF14181F), fontSize: 15, height: 1.45),
-        bodyMedium: TextStyle(color: Color(0xFF5E6166), fontSize: 14, height: 1.45),
-        bodySmall: TextStyle(color: Color(0xFF8A8D93), fontSize: 12, height: 1.4),
-        labelLarge: TextStyle(color: Color(0xFF14181F), fontSize: 14, fontWeight: FontWeight.w600),
-        labelSmall: TextStyle(color: Color(0xFF8A8D93), fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.4),
+        displayLarge: TextStyle(
+            color: Color(0xFF14181F),
+            fontWeight: FontWeight.w700,
+            fontSize: 28,
+            letterSpacing: -0.8,
+            height: 1.1),
+        headlineSmall: TextStyle(
+            color: Color(0xFF14181F),
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            letterSpacing: -0.4),
+        titleLarge: TextStyle(
+            color: Color(0xFF14181F),
+            fontWeight: FontWeight.w600,
+            fontSize: 17,
+            letterSpacing: -0.2),
+        titleMedium: TextStyle(
+            color: Color(0xFF14181F),
+            fontWeight: FontWeight.w600,
+            fontSize: 15),
+        titleSmall: TextStyle(
+            color: Color(0xFF5E6166),
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            letterSpacing: 0.2),
+        bodyLarge:
+            TextStyle(color: Color(0xFF14181F), fontSize: 15, height: 1.45),
+        bodyMedium:
+            TextStyle(color: Color(0xFF5E6166), fontSize: 14, height: 1.45),
+        bodySmall:
+            TextStyle(color: Color(0xFF8A8D93), fontSize: 12, height: 1.4),
+        labelLarge: TextStyle(
+            color: Color(0xFF14181F),
+            fontSize: 14,
+            fontWeight: FontWeight.w600),
+        labelSmall: TextStyle(
+            color: Color(0xFF8A8D93),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.4),
       ),
     );
   }
@@ -569,7 +664,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: scheme,
-      scaffoldBackgroundColor: Color(0xFF121416),
+      scaffoldBackgroundColor: const Color(0xFF121416),
       extensions: const [ext],
       fontFamily: null,
       appBarTheme: const AppBarTheme(
@@ -589,41 +684,46 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: Color(0xFF1C1E21),
+        color: const Color(0xFF1C1E21),
         shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.lg),
-          side: BorderSide(color: Color(0xFF2A2E33), width: 1),
+          side: const BorderSide(color: Color(0xFF2A2E33), width: 1),
         ),
         margin: EdgeInsets.zero,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: Color(0xFF1FAA8A),
+          backgroundColor: const Color(0xFF1FAA8A),
           foregroundColor: Colors.white,
-          disabledBackgroundColor: Color(0xFF8A8D93).withOpacity(0.14),
-          disabledForegroundColor: Color(0xFF8A8D93),
+          disabledBackgroundColor:
+              const Color(0xFF8A8D93).withValues(alpha: 0.14),
+          disabledForegroundColor: const Color(0xFF8A8D93),
           minimumSize: const Size.fromHeight(48),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.md)),
+          textStyle: const TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.1),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.md)),
           elevation: 0,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: Color(0xFFF1F1F1),
+          foregroundColor: const Color(0xFFF1F1F1),
           side: const BorderSide(color: Color(0xFF363A40), width: 1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.md)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.md)),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: Color(0xFF1FAA8A),
+          foregroundColor: const Color(0xFF1FAA8A),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.sm)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.sm)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -648,53 +748,101 @@ class AppTheme {
           borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.6),
         ),
         filled: true,
-        fillColor: Color(0xFF1C1E21),
+        fillColor: const Color(0xFF1C1E21),
         hintStyle: const TextStyle(color: Color(0xFF8A8D93), fontSize: 14),
         labelStyle: const TextStyle(color: Color(0xFFB0B3B8), fontSize: 14),
-        floatingLabelStyle: const TextStyle(color: Color(0xFF1FAA8A), fontSize: 13, fontWeight: FontWeight.w500),
-        prefixIconColor: Color(0xFF8A8D93),
-        suffixIconColor: Color(0xFF8A8D93),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        floatingLabelStyle: const TextStyle(
+            color: Color(0xFF1FAA8A),
+            fontSize: 13,
+            fontWeight: FontWeight.w500),
+        prefixIconColor: const Color(0xFF8A8D93),
+        suffixIconColor: const Color(0xFF8A8D93),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         isDense: false,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: Color(0xFF25282C),
+        backgroundColor: const Color(0xFF25282C),
         side: const BorderSide(color: Color(0xFF2A2E33)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
-        labelStyle: const TextStyle(color: Color(0xFFF1F1F1), fontSize: 13, fontWeight: FontWeight.w500),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.pill)),
+        labelStyle: const TextStyle(
+            color: Color(0xFFF1F1F1),
+            fontSize: 13,
+            fontWeight: FontWeight.w500),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
-      dividerTheme: const DividerThemeData(color: Color(0xFF2A2E33), thickness: 1, space: 1),
+      dividerTheme: const DividerThemeData(
+          color: Color(0xFF2A2E33), thickness: 1, space: 1),
       iconTheme: const IconThemeData(color: Color(0xFFB0B3B8), size: 20),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: Color(0xFF25282C),
-        contentTextStyle: const TextStyle(color: Color(0xFFF1F1F1), fontSize: 13),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.md)),
+        backgroundColor: const Color(0xFF25282C),
+        contentTextStyle:
+            const TextStyle(color: Color(0xFFF1F1F1), fontSize: 13),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.md)),
         behavior: SnackBarBehavior.floating,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: Color(0xFF1C1E21),
+        backgroundColor: const Color(0xFF1C1E21),
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.lg)),
-        titleTextStyle: const TextStyle(color: Color(0xFFF1F1F1), fontSize: 17, fontWeight: FontWeight.w600),
-        contentTextStyle: const TextStyle(color: Color(0xFFB0B3B8), fontSize: 14, height: 1.4),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.lg)),
+        titleTextStyle: const TextStyle(
+            color: Color(0xFFF1F1F1),
+            fontSize: 17,
+            fontWeight: FontWeight.w600),
+        contentTextStyle: const TextStyle(
+            color: Color(0xFFB0B3B8), fontSize: 14, height: 1.4),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: Color(0xFF1C1E21),
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.lg))),
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(AppRadii.lg))),
       ),
       textTheme: const TextTheme(
-        displayLarge: TextStyle(color: Color(0xFFF1F1F1), fontWeight: FontWeight.w700, fontSize: 28, letterSpacing: -0.8, height: 1.1),
-        headlineSmall: TextStyle(color: Color(0xFFF1F1F1), fontWeight: FontWeight.w600, fontSize: 20, letterSpacing: -0.4),
-        titleLarge: TextStyle(color: Color(0xFFF1F1F1), fontWeight: FontWeight.w600, fontSize: 17, letterSpacing: -0.2),
-        titleMedium: TextStyle(color: Color(0xFFF1F1F1), fontWeight: FontWeight.w600, fontSize: 15),
-        titleSmall: TextStyle(color: Color(0xFFB0B3B8), fontWeight: FontWeight.w600, fontSize: 13, letterSpacing: 0.2),
-        bodyLarge: TextStyle(color: Color(0xFFF1F1F1), fontSize: 15, height: 1.45),
-        bodyMedium: TextStyle(color: Color(0xFFB0B3B8), fontSize: 14, height: 1.45),
-        bodySmall: TextStyle(color: Color(0xFF8A8D93), fontSize: 12, height: 1.4),
-        labelLarge: TextStyle(color: Color(0xFFF1F1F1), fontSize: 14, fontWeight: FontWeight.w600),
-        labelSmall: TextStyle(color: Color(0xFF8A8D93), fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.4),
+        displayLarge: TextStyle(
+            color: Color(0xFFF1F1F1),
+            fontWeight: FontWeight.w700,
+            fontSize: 28,
+            letterSpacing: -0.8,
+            height: 1.1),
+        headlineSmall: TextStyle(
+            color: Color(0xFFF1F1F1),
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            letterSpacing: -0.4),
+        titleLarge: TextStyle(
+            color: Color(0xFFF1F1F1),
+            fontWeight: FontWeight.w600,
+            fontSize: 17,
+            letterSpacing: -0.2),
+        titleMedium: TextStyle(
+            color: Color(0xFFF1F1F1),
+            fontWeight: FontWeight.w600,
+            fontSize: 15),
+        titleSmall: TextStyle(
+            color: Color(0xFFB0B3B8),
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            letterSpacing: 0.2),
+        bodyLarge:
+            TextStyle(color: Color(0xFFF1F1F1), fontSize: 15, height: 1.45),
+        bodyMedium:
+            TextStyle(color: Color(0xFFB0B3B8), fontSize: 14, height: 1.45),
+        bodySmall:
+            TextStyle(color: Color(0xFF8A8D93), fontSize: 12, height: 1.4),
+        labelLarge: TextStyle(
+            color: Color(0xFFF1F1F1),
+            fontSize: 14,
+            fontWeight: FontWeight.w600),
+        labelSmall: TextStyle(
+            color: Color(0xFF8A8D93),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.4),
       ),
     );
   }

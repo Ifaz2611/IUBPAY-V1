@@ -29,10 +29,17 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/admin', builder: (_, __) => const AdminDashboardScreen()),
-      GoRoute(path: '/admin/vendors', builder: (_, __) => const VendorManagementScreen()),
-      GoRoute(path: '/admin/transactions', builder: (_, __) => const TransactionListScreen()),
-      GoRoute(path: '/admin/reports', builder: (_, __) => const ReportsScreen()),
-      GoRoute(path: '/admin/users', builder: (_, __) => const UserManagementScreen()),
+      GoRoute(
+          path: '/admin/vendors',
+          builder: (_, __) => const VendorManagementScreen()),
+      GoRoute(
+          path: '/admin/transactions',
+          builder: (_, __) => const TransactionListScreen()),
+      GoRoute(
+          path: '/admin/reports', builder: (_, __) => const ReportsScreen()),
+      GoRoute(
+          path: '/admin/users',
+          builder: (_, __) => const UserManagementScreen()),
     ],
   );
 });

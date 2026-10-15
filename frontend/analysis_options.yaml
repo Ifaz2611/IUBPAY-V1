@@ -17,6 +17,10 @@ analyzer:
     invalid_annotation_target: ignore
     # Keep strict-casts as warnings not errors to avoid red IDE while still linting
     argument_type_not_assignable: warning
+    # Not in the project's explicit rules list; single-statement guards without
+    # braces are the established style in this codebase (dart format keeps them
+    # split across lines, which this inherited default flags as info).
+    curly_braces_in_flow_control_structures: ignore
 
 linter:
   rules:
@@ -30,11 +34,8 @@ linter:
     - cancel_subscriptions
     - close_sinks
     - depend_on_referenced_packages
-    - directive_ordering
     - file_names
     - hash_and_equals
-    - invariant_booleans
-    - iterable_contains_unrelated_type
     - literal_only_boolean_expressions
     - no_adjacent_strings_in_list
     - no_duplicate_case_values

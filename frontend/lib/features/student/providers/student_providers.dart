@@ -4,10 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/api/api_client.dart';
 import '../../../shared/models/models.dart';
 
-List<T> _parsePaginatedList<T>(dynamic data, T Function(Map<String, dynamic>) fromJson) {
-  if (data is List) return data.map((e) => fromJson(Map<String, dynamic>.from(e as Map))).toList();
+List<T> _parsePaginatedList<T>(
+    dynamic data, T Function(Map<String, dynamic>) fromJson) {
+  if (data is List)
+    return data
+        .map((e) => fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
   if (data is Map && data['items'] is List) {
-    return (data['items'] as List).map((e) => fromJson(Map<String, dynamic>.from(e as Map))).toList();
+    return (data['items'] as List)
+        .map((e) => fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
   }
   return [];
 }
@@ -37,7 +43,8 @@ class CartState {
   final Map<String, CartLine> lines;
   const CartState({this.vendorId, this.lines = const {}});
 
-  int get subtotal => lines.values.fold(0, (s, l) => s + l.item.priceTaka * l.qty);
+  int get subtotal =>
+      lines.values.fold(0, (s, l) => s + l.item.priceTaka * l.qty);
   bool get isEmpty => lines.isEmpty;
 
   CartState clear() => const CartState();
@@ -50,7 +57,8 @@ class CartController extends Notifier<CartState> {
   /// Returns true if item was added/incremented, false if at max quantity.
   bool add(MenuItem item) {
     final current = state;
-    if (current.vendorId != null && current.vendorId != item.vendorId) return false;
+    if (current.vendorId != null && current.vendorId != item.vendorId)
+      return false;
     final lines = Map<String, CartLine>.from(current.lines);
     final line = lines[item.id];
     if (line == null) {
@@ -74,14 +82,16 @@ class CartController extends Notifier<CartState> {
     } else {
       lines[itemId] = line.copyWith(qty: line.qty - 1);
     }
-    state =
-        lines.isEmpty ? const CartState() : CartState(vendorId: current.vendorId, lines: lines);
+    state = lines.isEmpty
+        ? const CartState()
+        : CartState(vendorId: current.vendorId, lines: lines);
   }
 
   void reset() => state = const CartState();
 }
 
-final cartProvider = NotifierProvider<CartController, CartState>(CartController.new);
+final cartProvider =
+    NotifierProvider<CartController, CartState>(CartController.new);
 
 final myOrdersProvider = FutureProvider<List<Order>>((ref) async {
   final r = await ref.read(dioProvider).get('/students/me/orders');

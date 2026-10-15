@@ -3,8 +3,12 @@ import '../../../shared/api/api_client.dart';
 import '../../../shared/models/models.dart';
 
 List<T> _parsePaginated<T>(dynamic data, T Function(Map<String, dynamic>) f) {
-  if (data is List) return data.map((e) => f(Map<String, dynamic>.from(e as Map))).toList();
-  if (data is Map && data['items'] is List) return (data['items'] as List).map((e) => f(Map<String, dynamic>.from(e as Map))).toList();
+  if (data is List)
+    return data.map((e) => f(Map<String, dynamic>.from(e as Map))).toList();
+  if (data is Map && data['items'] is List)
+    return (data['items'] as List)
+        .map((e) => f(Map<String, dynamic>.from(e as Map)))
+        .toList();
   return [];
 }
 

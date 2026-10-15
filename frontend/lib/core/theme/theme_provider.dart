@@ -5,7 +5,8 @@ import 'app_theme.dart';
 
 const _kThemeKey = 'iub_theme_mode';
 
-final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+final themeModeProvider =
+    NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
 
 class ThemeModeNotifier extends Notifier<ThemeMode> {
   @override
@@ -19,9 +20,15 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kThemeKey);
-      if (raw == 'dark') { state = ThemeMode.dark; AppThemeState.setDark(true); }
-      else if (raw == 'light') { state = ThemeMode.light; AppThemeState.setDark(false); }
-      else if (raw == 'system') state = ThemeMode.system;
+      if (raw == 'dark') {
+        state = ThemeMode.dark;
+        AppThemeState.setDark(true);
+      } else if (raw == 'light') {
+        state = ThemeMode.light;
+        AppThemeState.setDark(false);
+      } else if (raw == 'system') {
+        state = ThemeMode.system;
+      }
     } catch (_) {}
   }
 
@@ -42,7 +49,9 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   Future<void> toggle() async {
     // ensure AppThemeState updated via setTheme
     final isDark = state == ThemeMode.dark ||
-        (state == ThemeMode.system && WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
+        (state == ThemeMode.system &&
+            WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+                Brightness.dark);
     // Simple light <-> dark toggle; system resolves to opposite of current effective
     await setTheme(isDark ? ThemeMode.light : ThemeMode.dark);
   }

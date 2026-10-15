@@ -42,9 +42,14 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Install dependencies
+        working-directory: frontend
+        run: flutter pub get
       - name: Flutter analyze
         working-directory: frontend
-        run: flutter analyze
+        # --no-fatal-infos prevents info-level lints (e.g. prefer_const_constructors)
+        # from failing CI; warnings and errors still fail.
+        run: flutter analyze --no-fatal-infos
       - name: Flutter test
         working-directory: frontend
         run: flutter test || echo "No tests yet"

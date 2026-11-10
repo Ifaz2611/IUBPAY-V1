@@ -90,7 +90,7 @@ def revoke_token(token: str) -> None:
             token,
             settings.SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
-            options={"verify_exp": False},
+            options={"verify_exp": False, "verify_aud": False, "verify_iss": False},
         )
         jti = payload.get("jti")
         exp = payload.get("exp")

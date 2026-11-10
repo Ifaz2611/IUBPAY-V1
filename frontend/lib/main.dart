@@ -5,6 +5,12 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 
+/// @deprecated Unified development/demo entrypoint.
+///
+/// For separated target builds, use the role-specific entrypoints:
+/// - Student (iOS / Android): `lib/main_student.dart`
+/// - Vendor (Web / Desktop): `lib/main_vendor.dart`
+/// - Admin (Web / Desktop): `lib/main_admin.dart`
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: IubCafeteriaApp()));

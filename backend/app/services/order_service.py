@@ -75,14 +75,14 @@ def create_order(
     missing = set(menu_ids) - set(items)
     if missing:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             f"Menu item(s) unavailable: {', '.join(sorted(missing))}",
         )
 
     wrong_vendor = [i.id for i in items.values() if i.vendor_id != vendor_id]
     if wrong_vendor:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY, "All items must belong to the selected vendor"
+            status.HTTP_422_UNPROCESSABLE_CONTENT, "All items must belong to the selected vendor"
         )
 
     order = Order(

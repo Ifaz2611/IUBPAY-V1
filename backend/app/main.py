@@ -56,6 +56,15 @@ def create_app() -> FastAPI:
     )
     if settings.is_prod() and _origins == ["*"]:
         raise RuntimeError("CORS_ORIGINS='*' not allowed in production")
+    for origin in _origins:
+        if origin != "*":
+            import urllib.parse
+
+            parsed = urllib.parse.urlsplit(origin)
+            if parsed.scheme not in ("http", "https") or not parsed.netloc:
+                raise RuntimeError(
+                    f"CORS origin '{origin}' is invalid: must be an http or https URL"
+                )
     if _origins == ["*"]:
         app.add_middleware(
             CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]

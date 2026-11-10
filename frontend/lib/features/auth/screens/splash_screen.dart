@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +16,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _c;
   late Animation<double> _fade;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -22,13 +25,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         vsync: this, duration: const Duration(milliseconds: 900));
     _fade = CurvedAnimation(parent: _c, curve: Curves.easeOut);
     _c.forward();
-    Future.delayed(const Duration(milliseconds: 1100), () {
+    _timer = Timer(const Duration(milliseconds: 1100), () {
       if (mounted) context.go('/');
     });
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _c.dispose();
     super.dispose();
   }

@@ -54,6 +54,9 @@ def setup_db():
 
         _login_attempts.clear()
         _lockouts.clear()
+        from app.core.security import _revoked_jtis
+
+        _revoked_jtis.clear()
     except Exception:  # noqa: S110
         pass
     yield
@@ -113,6 +116,11 @@ def login_headers(client, email, password=TEST_PASSWORD) -> dict:
 
 def student_client(db, client, suffix="a") -> tuple[dict, User]:
     user = make_user(db, f"student{suffix}@test.bd", name=f"Student {suffix.upper()}")
+    return login_headers(client, user.email), user
+
+
+def admin_client(db, client, suffix="a") -> tuple[dict, User]:
+    user = make_user(db, f"admin{suffix}@test.bd", role="admin", name=f"Admin {suffix.upper()}")
     return login_headers(client, user.email), user
 
 

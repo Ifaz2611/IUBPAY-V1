@@ -28,6 +28,11 @@ final signalerProvider = Provider<Signaler>((ref) {
   return s;
 });
 
+/// @deprecated Unified router for development/demo mode only.
+/// Role-specific separated routers:
+/// - `student_router.dart`
+/// - `vendor_router.dart`
+/// - `admin_router.dart`
 final appRouterProvider = Provider<GoRouter>((ref) {
   final signaler = ref.watch(signalerProvider);
   ref.listen(authProvider, (_, __) => signaler.ping());

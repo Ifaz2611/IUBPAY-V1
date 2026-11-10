@@ -643,7 +643,7 @@ class _KpiCardState extends State<_KpiCard> {
             borderRadius: BorderRadius.circular(AppRadii.lg),
             onTap: widget.onTap,
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -785,6 +785,7 @@ class _KpiSkeleton extends StatelessWidget {
       children: List.generate(
           8,
           (_) => AppCard(
+                  padding: const EdgeInsets.all(10),
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1380,7 +1381,7 @@ class _ManageTileState extends State<_ManageTile> {
             borderRadius: BorderRadius.circular(AppRadii.lg),
             onTap: () => context.go(widget.route),
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

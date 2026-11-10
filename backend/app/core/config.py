@@ -1,3 +1,5 @@
+import urllib.parse
+
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -36,6 +38,31 @@ class Settings(BaseSettings):
     ACCOUNT_LOCKOUT_ATTEMPTS: int = 5
     ACCOUNT_LOCKOUT_MINUTES: int = 15
 
+    @field_validator("CORS_ORIGINS")
+    @classmethod
+    def _validate_cors_origins(cls, v: str) -> str:
+        trimmed = v.strip()
+        if trimmed == "*":
+            return trimmed
+        origins = [o.strip() for o in trimmed.split(",") if o.strip()]
+        if not origins:
+            raise ValueError("CORS_ORIGINS cannot be empty")
+        for origin in origins:
+            parsed = urllib.parse.urlsplit(origin)
+            if parsed.scheme not in ("http", "https") or not parsed.netloc:
+                raise ValueError(
+                    f"Invalid CORS origin '{origin}': must be a valid URL with http or https scheme"
+                )
+            if parsed.path and parsed.path != "/":
+                raise ValueError(
+                    f"Invalid CORS origin '{origin}': origins must not include a path"
+                )
+            if parsed.query or parsed.fragment:
+                raise ValueError(
+                    f"Invalid CORS origin '{origin}': origins must not include query or fragment"
+                )
+        return v
+
     @field_validator("SECRET_KEY", "MOCK_PAYMENT_WEBHOOK_TOKEN")
     @classmethod
     def _not_default_in_prod(cls, v: str, info) -> str:
@@ -45,15 +72,23 @@ class Settings(BaseSettings):
     def _validate_prod_secrets(self):
         weak_defaults = {
             "dev-only-secret-change-me",
+            "dev-only-secret-change-me-32-chars-long!!",
             "mock-webhook-token-dev",
+            "mock-webhook-token-dev-32-chars-long!!",
             "change-me-in-real-deployments",
         }
         if self.ENV.lower() in ("prod", "production"):
-            if self.SECRET_KEY in weak_defaults or len(self.SECRET_KEY) < 32:
+            if (
+                self.SECRET_KEY in weak_defaults
+                or len(self.SECRET_KEY) < 32
+                or "dev-only" in self.SECRET_KEY
+                or "change-me" in self.SECRET_KEY
+            ):
                 raise ValueError("SECRET_KEY must be strong (>=32 chars) in production")
             if (
                 self.MOCK_PAYMENT_WEBHOOK_TOKEN in weak_defaults
                 or len(self.MOCK_PAYMENT_WEBHOOK_TOKEN) < 32
+                or "mock-webhook-token-dev" in self.MOCK_PAYMENT_WEBHOOK_TOKEN
             ):
                 raise ValueError("MOCK_PAYMENT_WEBHOOK_TOKEN must be strong in production")
             if self.CORS_ORIGINS.strip() == "*":

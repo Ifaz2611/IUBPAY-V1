@@ -164,7 +164,7 @@ def update_order_status(
         new_status = OrderStatus(body.status)
     except ValueError as err:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY, f"Unknown status '{body.status}'"
+            status.HTTP_422_UNPROCESSABLE_CONTENT, f"Unknown status '{body.status}'"
         ) from err
 
     if user.role == Role.VENDOR:

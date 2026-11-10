@@ -6,7 +6,8 @@ services:
       POSTGRES_PASSWORD: iub_cafe_dev_pw   # dev only — override in real deployments
       POSTGRES_DB: iub_cafeteria
     ports:
-      - "5432:5432"
+      # Loopback-only: the DB must never be reachable from other hosts.
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -26,7 +27,10 @@ services:
       DATABASE_URL: postgresql+psycopg://iub_cafe:iub_cafe_dev_pw@db:5432/iub_cafeteria
       SECRET_KEY: ${SECRET_KEY:-change-me-in-real-deployments-generate-32-chars-min!!}
       MOCK_PAYMENT_WEBHOOK_TOKEN: ${MOCK_PAYMENT_WEBHOOK_TOKEN:-mock-webhook-token-dev-32-chars-long!!}
-      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      # Dev default allows the Flutter web dev server origins only.
+      # PRODUCTION MUST OVERRIDE with an explicit comma-separated origin list —
+      # the backend fails fast if ENV=prod while CORS_ORIGINS='*'.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8000,http://127.0.0.1:8000,http://localhost:3000}
       ENV: ${ENV:-docker-dev}
     ports:
       - "127.0.0.1:8000:8000"

@@ -16,9 +16,9 @@ jobs:
           python-version: '3.12'
       - name: Install backend deps
         working-directory: backend
-        run: |
-          pip install -r requirements.txt
-          pip install pytest pytest-cov httpx ruff black mypy
+        # requirements-dev.txt includes requirements.txt and mirrors
+        # pyproject.toml [project.optional-dependencies].dev
+        run: pip install -r requirements-dev.txt
       - name: Lint (ruff)
         working-directory: backend
         run: ruff check .

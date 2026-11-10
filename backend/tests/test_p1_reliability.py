@@ -160,9 +160,7 @@ def test_pickup_code_unique_among_active_orders(client, db):
         order = place_order(client, h, v.id, [{"menu_item_id": mi.id, "quantity": 1}])
 
     active_now = db.scalars(
-        select(Order.pickup_code).where(
-            Order.status.notin_(["COLLECTED", "CANCELLED", "REFUNDED"])
-        )
+        select(Order.pickup_code).where(Order.status.notin_(["COLLECTED", "CANCELLED", "REFUNDED"]))
     ).all()
     assert len(active_now) == len(set(active_now)), "duplicate active pickup codes in DB"
 

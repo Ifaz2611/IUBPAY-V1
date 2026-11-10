@@ -96,4 +96,3 @@ def test_stream_unknown_order_404(client, db):
     sh, _ = student_client(db, client)
     r = client.get("/api/payments/nonexistent/stream", headers=sh)
     assert r.status_code == 404
-

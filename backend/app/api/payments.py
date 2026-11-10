@@ -207,9 +207,7 @@ async def order_stream(
     try:
         payload = decode_access_token(token)
     except Exception as err:
-        raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED, "Invalid or expired token"
-        ) from err
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token") from err
 
     # Resolve the user from a short-lived session; the streaming generator opens
     # its own sessions per tick, so we do not depend on the request-scoped one.

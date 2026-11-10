@@ -140,13 +140,13 @@ Done:
 
 Remaining:
 
-- [ ] **Deprecate or remove `main.dart` + `app_router.dart` before release** —
+- [x] **Deprecate or remove `main.dart` + `app_router.dart` before release** —
       either make it debug-only, delete it, or turn it into a thin splash-based
       role redirect. This is the last step for "hard separation".
-- [ ] Document entrypoint → target mapping in `README.md` / `GETTING_STARTED.md`
+- [x] Document entrypoint → target mapping in `README.md` / `GETTING_STARTED.md`
       (Student = Android/iOS, Vendor/Admin = Web/Desktop) and/or add
       `--flavor` build configs.
-- [ ] Final check: no cross-role screen imports leak between the split
+- [x] Final check: no cross-role screen imports leak between the split
       routers (shared `splash`/`login` are fine).
 
 **Testing the split apps:**
@@ -174,13 +174,13 @@ Done:
 
 Remaining:
 
-- [ ] Move fat-router business logic (e.g. `suspend_vendor`, order status
+- [x] Move fat-router business logic (e.g. `suspend_vendor`, order status
       transitions) from `api/*.py` into `services/`.
-- [ ] Consolidate duplicated helpers (`require_vendor_or_admin`,
+- [x] Consolidate duplicated helpers (`require_vendor_or_admin`,
       `_get_or_404`, status-transition checks).
-- [ ] Audit for remaining direct `dioProvider` calls in screens that should go
+- [x] Audit for remaining direct `dioProvider` calls in screens that should go
       through repositories.
-- [ ] Verify `ColorScheme`/theme objects are `static final` (no per-build
+- [x] Verify `ColorScheme`/theme objects are `static final` (no per-build
       allocation) in `core/theme/app_theme.dart`.
 
 ### 3. API hardening — done
@@ -194,7 +194,7 @@ Remaining:
 
 ## P3 — Tooling, Quality & Testing
 
-### 1. Developer tooling — 
+### 1. Developer tooling — done
 
 Done:
 
@@ -202,25 +202,27 @@ Done:
 - Strict lint rules in `frontend/analysis_options.yaml`.
 - `.pre-commit-config.yaml`, `.editorconfig`, `.dockerignore`,
   `.github/workflows/ci.yml` exist.
+- `mypy` verified: `mypy app` passes clean (42 source files).
+- Dependency sync audited: runtime deps identical in `requirements.txt` and
+  `pyproject.toml`; dev tools (`ruff`/`black`/`mypy`/`pytest*`/`httpx`) moved
+  to `backend/requirements-dev.txt` (mirrors `pyproject.toml` dev extras,
+  `-r requirements.txt` included) so the production Docker image stays lean.
+- `.github/dependabot.yml` present and extended: pip / docker / pub /
+  github-actions ecosystems, weekly, commit-message prefixes, dev-dep
+  grouping, open-PR limits.
 
-Remaining:
-
-- [ ] `requirements.txt` ↔ `pyproject.toml` dependency sync — spot-check for
-      drift (both now list psycopg/email-validator, but audit the rest).
-- [ ] `.github/dependabot.yml` for automated dependency updates.
-
-### 2. CI/CD & infra — 
+### 2. CI/CD & infra — done
 
 Done:
 
 - CI workflow runs backend pytest + frontend analyze/test + docker build.
 - Dockerfile pinned digest, multi-stage, non-root, healthcheck.
 - Compose has `env_file`, `${VAR:-default}` expansion, `restart: unless-stopped`.
-
-Remaining:
-
-- [ ] Postgres port binding → `127.0.0.1:5432:5432` (see P0.4).
-- [ ] Tighten/document the `CORS_ORIGINS:-*` compose default.
+- CI installs `requirements-dev.txt` (single source; no ad-hoc pip install).
+- Postgres port binding restricted to `127.0.0.1:5432:5432` (loopback only).
+- Compose `CORS_ORIGINS` default tightened from `*` to explicit local dev
+  origins; comment documents that prod must override (backend already fails
+  fast on `ENV=prod` + `*`).
 
 ### 3. Test coverage gaps — 
 

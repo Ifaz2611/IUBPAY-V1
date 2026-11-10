@@ -5,13 +5,33 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      dev-tools:
+        dependency-type: development
 
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(docker)"
 
   - package-ecosystem: pub
     directory: /frontend
     schedule:
       interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(flutter)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(ci)"

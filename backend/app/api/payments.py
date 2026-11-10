@@ -2,11 +2,21 @@ import hmac
 import time
 from collections import defaultdict
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+    status,
+)
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.dependencies import require_role
+from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.order import Order
 from app.models.payment import Payment
@@ -145,20 +155,77 @@ def failure_reason_for(code: int) -> str:
     return reasons.get(code, "MOCK_PROVIDER_ERROR")
 
 
+_bearer = HTTPBearer(auto_error=False)
+
+
+def _authorize_order_stream_access(db: Session, user: User, order: Order) -> None:
+    """Stream is restricted to the owning student, the vendor's staff, or an admin."""
+    if user.role == Role.ADMIN:
+        return
+    if user.role == Role.STUDENT:
+        if order.student_id != user.id:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your order")
+        return
+    if user.role == Role.VENDOR:
+        if user.vendor_id is None or order.vendor_id != user.vendor_id:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your vendor order")
+        return
+    raise HTTPException(status.HTTP_403_FORBIDDEN, "Not permitted")
+
+
 @router.get("/{order_id}/stream")
-async def order_stream(order_id: str):
-    """SSE endpoint for real-time order tracking. Fallback to polling if SSE unsupported."""
+async def order_stream(
+    order_id: str,
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+    token: str | None = Query(default=None, include_in_schema=False),
+    db: Session = Depends(get_db),
+):
+    """SSE endpoint for real-time order tracking. Requires authentication.
+
+    JWT is read from the Authorization header (standard for this API) and also
+    accepted via `?token=` query param for EventSource clients that cannot set
+    custom headers. Fallback to polling if SSE unsupported."""
     import asyncio as _asyncio
     import json as _json
 
     from fastapi.responses import StreamingResponse
     from sqlalchemy.orm import Session as _Session
+    from sqlalchemy.orm import sessionmaker as _sessionmaker
 
-    from app.db.session import SessionLocal
+    # The generator outlives the request-scoped session, so open fresh sessions
+    # bound to the same engine (respects the test override / any custom bind).
+    session_factory = _sessionmaker(bind=db.get_bind(), autoflush=False, autocommit=False)
+
+    # --- authentication -----------------------------------------------------
+    token = (
+        credentials.credentials
+        if credentials is not None
+        else token  # ?token= fallback for EventSource clients
+    )
+    if not token:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
+    try:
+        payload = decode_access_token(token)
+    except Exception as err:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED, "Invalid or expired token"
+        ) from err
+
+    # Resolve the user from a short-lived session; the streaming generator opens
+    # its own sessions per tick, so we do not depend on the request-scoped one.
+    user = db.get(User, payload.get("sub"))
+    if user is None or user.status != "ACTIVE":
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User no longer exists")
+
+    # Validate the order exists and the user may see it before streaming.
+    order = db.get(Order, order_id)
+    if order is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Order not found")
+    _authorize_order_stream_access(db, user, order)
 
     async def event_gen():
         for _ in range(120):  # up to 10 minutes
-            db: _Session = SessionLocal()
+            db: _Session = session_factory()
             try:
                 order = db.get(Order, order_id)
                 if order is None:

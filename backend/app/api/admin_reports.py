@@ -7,7 +7,7 @@ from app.core.dependencies import require_role
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.report import DailyReportRow, ReportSummary
-from app.services.report_service import daily, summary, transactions_csv
+from app.services.report_service import daily, stream_transactions_csv, summary
 from app.utils.enums import Role
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -76,10 +76,11 @@ def export_csv(
     db: Session = Depends(get_db),
     _: User = Depends(require_role(Role.ADMIN)),
 ):
-    content = transactions_csv(db)
+    """Streamed CSV export — bounded memory: rows are fetched in chunks and
+    written to the wire one at a time, never materialised fully server-side."""
     filename = "iub_cafeteria_transactions.csv"
     return StreamingResponse(
-        iter([content]),
+        stream_transactions_csv(db),
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )

@@ -6,8 +6,12 @@ import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../../shared/api/api_client.dart';
-import 'admin_screens.dart'
-    show adminSummaryProvider, dailyReportProvider, adminUsersProvider;
+import '../providers/admin_providers.dart'
+    show
+        adminSummaryProvider,
+        dailyReportProvider,
+        adminUsersPageProvider,
+        kAdminUsersPageSize;
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -145,86 +149,189 @@ class ReportsScreen extends ConsumerWidget {
       );
 }
 
-class UserManagementScreen extends ConsumerWidget {
+class UserManagementScreen extends ConsumerStatefulWidget {
   const UserManagementScreen({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final users = ref.watch(adminUsersProvider);
+  ConsumerState<UserManagementScreen> createState() =>
+      _UserManagementScreenState();
+}
+
+class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
+  int _offset = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    const pageSize = kAdminUsersPageSize;
+    final offset = _offset;
+    final page = ref.watch(adminUsersPageProvider(offset));
+    final hasPrev = offset > 0;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppTopBar(
           title: 'Users',
           subtitle: 'Directory',
           onBack: () => context.go('/admin')),
-      body: users.when(
+      body: page.when(
         loading: () => const UserListSkeleton(),
         error: (e, _) => ErrorView(
-            error: e, onRetry: () => ref.invalidate(adminUsersProvider)),
-        data: (list) => list.isEmpty
-            ? const EmptyView(message: 'No users.')
-            : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: list.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (_, i) {
-                  final u = list[i];
-                  final isActive = u['status'] == 'ACTIVE';
-                  return AppCard(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(children: [
-                      Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.surfaceMuted,
-                              border: Border.all(color: AppColors.border)),
-                          child: Center(
-                              child: Text(
-                                  (u['role'] as String)[0].toUpperCase(),
-                                  style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 12)))),
-                      const SizedBox(width: 12),
-                      Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                            Text(u['name'],
-                                style: TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13)),
-                            Text('${u['email']} • ${u['role']}',
-                                style: TextStyle(
-                                    color: AppColors.textTertiary,
-                                    fontSize: 11))
-                          ])),
-                      Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                              color: isActive
-                                  ? AppColors.successBg
-                                  : AppColors.errorBg,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                  color: isActive
-                                      ? AppColors.successBorder
-                                      : AppColors.errorBorder)),
-                          child: Text(u['status'],
-                              style: TextStyle(
-                                  color: isActive
-                                      ? AppColors.success
-                                      : AppColors.error,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700))),
-                    ]),
-                  );
-                },
+            error: e,
+            onRetry: () => ref.invalidate(adminUsersPageProvider(offset))),
+        data: (data) {
+          final list = List<dynamic>.from(data['items'] as List? ?? []);
+          final total = (data['total'] as num?)?.toInt() ?? list.length;
+          final hasNext = offset + list.length < total;
+          final rangeStart = total == 0 ? 0 : offset + 1;
+          final rangeEnd = offset + list.length;
+          void goPrev() => setState(() =>
+              _offset = (offset - pageSize).clamp(0, offset));
+          void goNext() => setState(() => _offset = offset + pageSize);
+
+          if (list.isEmpty) {
+            return Column(children: [
+              const Expanded(
+                  child: Center(child: EmptyView(message: 'No users.'))),
+              _UsersPager(
+                total: total,
+                rangeStart: rangeStart,
+                rangeEnd: rangeEnd,
+                hasPrev: hasPrev,
+                hasNext: hasNext,
+                onPrev: goPrev,
+                onNext: goNext,
               ),
+            ]);
+          }
+
+          return Column(children: [
+            Expanded(
+              child: RefreshIndicator(
+                color: AppColors.brand,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                onRefresh: () async =>
+                    ref.invalidate(adminUsersPageProvider(offset)),
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (_, i) => _UserCard(user: list[i]),
+                ),
+              ),
+            ),
+            _UsersPager(
+              total: total,
+              rangeStart: rangeStart,
+              rangeEnd: rangeEnd,
+              hasPrev: hasPrev,
+              hasNext: hasNext,
+              onPrev: goPrev,
+              onNext: goNext,
+            ),
+          ]);
+        },
       ),
+    );
+  }
+}
+
+class _UserCard extends StatelessWidget {
+  final Map<String, dynamic> user;
+  const _UserCard({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final u = user;
+    final isActive = u['status'] == 'ACTIVE';
+    return AppCard(
+      padding: const EdgeInsets.all(12),
+      child: Row(children: [
+        Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.surfaceMuted,
+                border: Border.all(color: AppColors.border)),
+            child: Center(
+                child: Text((u['role'] as String)[0].toUpperCase(),
+                    style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12)))),
+        const SizedBox(width: 12),
+        Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(u['name'],
+              style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13)),
+          Text('${u['email']} • ${u['role']}',
+              style: TextStyle(color: AppColors.textTertiary, fontSize: 11))
+        ])),
+        Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+                color: isActive ? AppColors.successBg : AppColors.errorBg,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                    color:
+                        isActive ? AppColors.successBorder : AppColors.errorBorder)),
+            child: Text(u['status'],
+                style: TextStyle(
+                    color: isActive ? AppColors.success : AppColors.error,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700))),
+      ]),
+    );
+  }
+}
+
+class _UsersPager extends StatelessWidget {
+  final int total;
+  final int rangeStart;
+  final int rangeEnd;
+  final bool hasPrev;
+  final bool hasNext;
+  final VoidCallback onPrev;
+  final VoidCallback onNext;
+
+  const _UsersPager({
+    required this.total,
+    required this.rangeStart,
+    required this.rangeEnd,
+    required this.hasPrev,
+    required this.hasNext,
+    required this.onPrev,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (total == 0) return const SizedBox.shrink();
+    return Container(
+      decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: Border(top: BorderSide(color: AppColors.border))),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(children: [
+        Text('$rangeStart\u2013$rangeEnd of $total',
+            style: TextStyle(
+                color: AppColors.textTertiary,
+                fontSize: 11,
+                fontWeight: FontWeight.w500)),
+        const Spacer(),
+        IconButton(
+          tooltip: 'Previous page',
+          icon: const Icon(Icons.chevron_left_rounded, size: 20),
+          onPressed: hasPrev ? onPrev : null,
+        ),
+        IconButton(
+          tooltip: 'Next page',
+          icon: const Icon(Icons.chevron_right_rounded, size: 20),
+          onPressed: hasNext ? onNext : null,
+        ),
+      ]),
     );
   }
 }

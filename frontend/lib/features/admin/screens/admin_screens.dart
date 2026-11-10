@@ -32,6 +32,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     ref.invalidate(dailyReportProvider);
     ref.invalidate(transactionsProvider);
     ref.invalidate(adminVendorsProvider);
+    ref.invalidate(adminUsersPageProvider);
+    ref.invalidate(adminUsersTotalProvider);
     ref.invalidate(adminUsersProvider);
     // wait a frame for providers to refetch
     await Future.delayed(const Duration(milliseconds: 600));
@@ -288,9 +290,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                                 ?.where((v) => v['status'] != 'APPROVED')
                                 .length ??
                             0;
-                        final totalUsers = usersAsync.value?.length ??
-                            s['registered_students'] ??
-                            0;
+                        final totalUsers =
+                            ref.watch(adminUsersTotalProvider).value ?? 0;
                         return _KpiGrid(
                           s: s,
                           pendingVendors: pendingVendors,

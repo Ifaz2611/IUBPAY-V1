@@ -2,7 +2,6 @@
 AuditLog row inside the same DB transaction as the state change."""
 
 import asyncio
-import time
 from datetime import UTC
 
 from fastapi import HTTPException, status
@@ -188,12 +187,9 @@ def create_and_process_refund(
     return refund
 
 
-def simulate_provider_latency(seconds: int) -> None:
-    """Imitate network latency of a real payment provider (capped)."""
-    if seconds > 0:
-        time.sleep(min(seconds, 5))
-
-
 async def simulate_provider_latency_async(seconds: int) -> None:
+    """Imitate network latency of a real payment provider (capped).
+
+    Async-only: never blocks the event loop (P1 - async execution)."""
     if seconds > 0:
         await asyncio.sleep(min(seconds, 5))

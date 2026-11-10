@@ -97,20 +97,25 @@ Remaining:
   (`order_service.py:16-40`).
 - Datetimes standardized on UTC.
 
-### 4. Query performance & PII — 
+### 4. Query performance & PII — done
 
 Done:
 
 - `daily()` report aggregates in SQL (`GROUP BY` on date) with a Python
   fallback for SQLite (`report_service.py:75-149`).
+- `GET /api/admin/users` pagination wired through the frontend:
+  `adminUsersPageProvider` (family on offset, `limit`/`offset` params) +
+  `adminUsersTotalProvider`; `UserManagementScreen` has prev/next paging with
+  an "x–y of N" footer; the dashboard KPI uses the real `total` instead of the
+  page length (`admin_providers.dart`, `admin_report_screens.dart`).
+- `transactions_csv` is bounded: replaced by `stream_transactions_csv()`,
+  which streams row-by-row via `StreamingResponse` using `yield_per` chunked
+  fetches — the full payment history is never materialised in memory
+  (`report_service.py`, `admin_reports.py`).
 
-Remaining:
-
-- [ ] `GET /api/admin/users` supports `limit`/`offset`, but
-      `features/admin/providers/admin_providers.dart:33` fetches without
-      pagination params — wire `limit`/`offset` through the provider/UI.
-- [ ] Confirm `transactions_csv` export is bounded (it currently loads all
-      payments into memory).
+Tests: `backend/tests/test_admin_pagination_export.py` (pagination envelope,
+page disjointness, backward-compat unpaginated list, CSV stream shape +
+endpoint streaming).
 
 ### 5. Frontend state & resource management — done
 

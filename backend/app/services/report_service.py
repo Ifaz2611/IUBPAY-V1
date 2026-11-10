@@ -188,37 +188,51 @@ def vendor_sales(db: Session, vendor_id: str, since: date | None = None) -> dict
     return {"vendor_id": vendor_id, "total_sales_taka": int(total), "paid_orders": int(cnt)}
 
 
-def transactions_csv(db: Session) -> str:
-    rows = db.execute(
+CSV_COLUMNS = [
+    "payment_id",
+    "created_at",
+    "provider",
+    "provider_transaction_id",
+    "status",
+    "amount_taka",
+    "failure_reason",
+    "order_number",
+    "vendor_name",
+    "student_email",
+    "order_status",
+]
+
+
+def _csv_encode_row(values: list) -> str:
+    """Encode one CSV row (properly quoted) and return it with a newline."""
+    buf = io.StringIO()
+    csv.writer(buf).writerow(values)
+    return buf.getvalue()
+
+
+def stream_transactions_csv(db: Session, chunk_size: int = 500):
+    """Yield the transactions CSV one row at a time.
+
+    Rows are fetched in chunks (``yield_per``) so the full payment history is
+    never materialised in memory — bounded memory regardless of table size
+    (P1 #4: bounded export).
+    """
+    q = (
         select(Payment, Order, User, Vendor)
         .join(Order, Payment.order_id == Order.id)
         .join(User, Order.student_id == User.id)
         .join(Vendor, Order.vendor_id == Vendor.id)
         .order_by(Payment.created_at.desc())
-    ).all()
-
-    buf = io.StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(
-        [
-            "payment_id",
-            "created_at",
-            "provider",
-            "provider_transaction_id",
-            "status",
-            "amount_taka",
-            "failure_reason",
-            "order_number",
-            "vendor_name",
-            "student_email",
-            "order_status",
-        ]
     )
-    for p, o, u, v in rows:
-        writer.writerow(
+
+    yield _csv_encode_row(CSV_COLUMNS)  # header
+
+    result = db.execute(q, execution_options={"yield_per": chunk_size})
+    for p, o, u, v in result:
+        yield _csv_encode_row(
             [
                 p.id,
-                p.created_at,
+                p.created_at.isoformat() if p.created_at else "",
                 p.provider,
                 p.provider_transaction_id,
                 p.status.value if hasattr(p.status, "value") else p.status,
@@ -230,4 +244,4 @@ def transactions_csv(db: Session) -> str:
                 o.status.value if hasattr(o.status, "value") else o.status,
             ]
         )
-    return buf.getvalue()
+    result.close()
